@@ -65,8 +65,7 @@ as possible.
 **Links:** `github <https://github.com/sdpython/pandas_streaming/>`_,
 `documentation <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_,
 :ref:`l-README`,
-:ref:`blog <ap-main-0>`,
-:ref:`l-issues-todolist`
+:ref:`blog <ap-main-0>`
 
 +----------------------+---------------------+---------------------+--------------------+------------------------+------------------------------------------------+
 | :ref:`l-modules`     |  :ref:`l-functions` | :ref:`l-classes`    | :ref:`l-methods`   | :ref:`l-staticmethods` | :ref:`l-properties`                            |
