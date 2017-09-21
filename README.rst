@@ -8,7 +8,7 @@ README
     :target: https://travis-ci.org/sdpython/pandas_streaming
     :alt: Build status
 
-.. image:: https://ci.appveyor.com/api/projects/status/sia7wxgjv8e1fi5a?svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/4te066r8ne1ymmhy?svg=true
     :target: https://ci.appveyor.com/project/sdpython/pandas_streaming
     :alt: Build Status Windows
 
@@ -46,6 +46,8 @@ README
     :alt: Notebook Coverage
 
 *pandas_streaming* processes big files with `pandas <http://pandas.pydata.org/>`_.
+
+*not ready*
 
 **Links:**
 

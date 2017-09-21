@@ -203,7 +203,7 @@ if is_local():
         layout=["html"],
         add_htmlhelp=sys.platform.startswith("win"),
         coverage_options=dict(omit=["*exclude*.py"]),
-        fLOG=logging_function, covtoken=("5091a257-f079-417e-af3b-dc425ddda031", "'_UT_36_std' in outfile"))
+        fLOG=logging_function, covtoken=("14c7930a-a5c0-405d-a22f-3f9c6feaf0bc", "'_UT_36_std' in outfile"))
     if not r and not ({"bdist_msi", "sdist",
                        "bdist_wheel", "publish", "publish_doc", "register",
                        "upload_docs", "bdist_wininst", "build_ext"} & set(sys.argv)):
@@ -237,6 +237,6 @@ if not r:
         package_dir=package_dir,
         package_data=package_data,
         #data_files              = data_files,
-        #install_requires                = [  'numpy', 'ipython'],
+        install_requires=['numpy', 'pandas'],
         #include_package_data    = True,
     )

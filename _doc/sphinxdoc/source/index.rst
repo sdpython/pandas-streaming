@@ -9,7 +9,7 @@ pandas_streaming
     :target: https://travis-ci.org/sdpython/pandas_streaming
     :alt: Build status
 
-.. image:: https://ci.appveyor.com/api/projects/status/sia7wxgjv8e1fi5a?svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/4te066r8ne1ymmhy?svg=true
     :target: https://ci.appveyor.com/project/sdpython/pandas_streaming
     :alt: Build Status Windows
 
@@ -46,11 +46,15 @@ pandas_streaming
     :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
     :alt: Notebook Coverage
 
-Process big files with :epkg:`pandas`.
+*pandas_streaming* aims at processing big files with :epkg:`pandas`.
+The dataset is not fully loaded into memory and the distribution is not
+really needed. The goal is to implement as many streaming operations
+as possible.
 
 .. toctree::
     :maxdepth: 1
 
+    tutorial/index
     api/index
     i_index
     i_ex

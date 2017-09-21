@@ -4,4 +4,6 @@ API
 
 .. toctree::
 
-    io
+    rdata
+    rdf
+    rexc
