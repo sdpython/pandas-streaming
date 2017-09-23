@@ -12,10 +12,23 @@ from ..exc import StreamingInefficientException
 class StreamingDataFrame:
     """
     Defines a streaming dataframe.
+    The goal is to reduce the memory footprint.
+    The class takes a function which creates an iterator
+    on dataframe. We assume this function can be called multiple time.
+    As a matter of fact, the function is called every time
+    the class needs to walk through the stream with the following
+    loop:
+
+    ::
+
+        for df in self:  # self is a StreamingDataFrame
+            # ...
 
     The constructor cannot receive an iterator otherwise
     this class would be able to walk through the data
-    only once. Instead, it takes a function which generates
+    only once. The main reason is it is impossible to
+    pickle (or dill) an iterator: it cannot be replicated.
+    Instead, the class takes a function which generates
     an iterator on :epkg:`pandas:DataFrame`.
     Most of the functions returns either :epkg:`pandas:DataFrame`
     or a @see cl StreamingDataFrame. In the second case,
@@ -24,9 +37,7 @@ class StreamingDataFrame:
 
     def __init__(self, iter_creation):
         """
-        Wraps a iterator on dataframe.
-
-        @param      iter_creation   code which creates an iterator.
+        @param      iter_creation   function which creates an iterator.
         """
         self.iter_creation = iter_creation
 
