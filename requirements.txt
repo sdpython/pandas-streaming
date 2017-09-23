@@ -31,6 +31,7 @@ pyquickhelper>1.5.2211
 python-jenkins
 PyYAML
 scikit-learn
+scipy
 semantic_version
 setuptools
 Sphinx
