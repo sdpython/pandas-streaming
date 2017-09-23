@@ -71,3 +71,9 @@ custom_preamble = """\n
 imgmath_latex_preamble += custom_preamble
 latex_elements['preamble'] += custom_preamble
 mathdef_link_only = True
+
+epkg_dictionary.update({
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/',
+               ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.html', 1),
+               ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.{1}.html', 2)),
+})

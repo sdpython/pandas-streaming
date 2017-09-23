@@ -268,3 +268,4 @@ _unittests/run_unittests.py.out
 _doc/sphinxdoc/source/phdoc_static/style_notebook_snippet.css
 dist
 _doc/sphinxdoc/source/pandas_streaming
+_doc/sphinxdoc/source/nbcov.png
