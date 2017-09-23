@@ -115,7 +115,7 @@ class StreamingDataFrame:
         if path_or_buf is None:
             st = StringIO()
             close = False
-        elif isinstance(path_or_buf):
+        elif isinstance(path_or_buf, str):
             st = open(path_or_buf, "w", encoding=kwargs.get('encoding'))
             close = True
 

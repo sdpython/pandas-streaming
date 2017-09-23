@@ -6,6 +6,7 @@
 import sys
 import os
 import unittest
+import pandas
 
 
 try:
@@ -39,9 +40,10 @@ except ImportError:
     import src
 
 from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import ExtTestCase
+from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 from src.pandas_streaming.data import dummy_streaming_dataframe
 from src.pandas_streaming.exc import StreamingInefficientException
+from src.pandas_streaming.df import StreamingDataFrame
 
 
 class TestStreamingDataFrame(ExtTestCase):
@@ -71,6 +73,16 @@ class TestStreamingDataFrame(ExtTestCase):
         st = sdf.to_csv()
         self.assertStartsWith(",cint,cstr\n0,0,s0", st)
 
+    def test_iterrows(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100)
+        rows = list(sdf.iterrows())
+        self.assertEqual(sdf.shape[0], len(rows))
+
     def test_head(self):
         fLOG(
             __file__,
@@ -82,6 +94,48 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(st.shape, (5, 2))
         st = sdf.head(n=20)
         self.assertEqual(st.shape, (20, 2))
+
+    def test_tail(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100)
+        st = sdf.tail()
+        self.assertEqual(st.shape, (5, 2))
+        st = sdf.tail(n=20)
+        self.assertEqual(st.shape, (10, 2))
+
+    def test_read_csv(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        temp = get_temp_folder(__file__, "temp_read_dsv")
+        df = pandas.DataFrame(data=dict(a=[5, 6], b=["er", "r"]))
+        name = os.path.join(temp, "df.csv")
+        name2 = os.path.join(temp, "df2.csv")
+        name3 = os.path.join(temp, "df3.csv")
+        df.to_csv(name, index=False)
+        df.to_csv(name2, index=True)
+        sdf = StreamingDataFrame.read_csv(name)
+        text = sdf.to_csv(index=False)
+        sdf2 = StreamingDataFrame.read_csv(name2, index_col=0)
+        text2 = sdf2.to_csv(index=True)
+        sdf2.to_csv(name3, index=True)
+        with open(name, "r") as f:
+            exp = f.read()
+        with open(name2, "r") as f:
+            exp2 = f.read()
+        with open(name3, "r") as f:
+            text3 = f.read()
+        self.assertEqual(text, exp)
+        sdf2 = StreamingDataFrame.read_df(df)
+        self.assertEqualDataFrame(sdf.to_dataframe(), sdf2.to_dataframe())
+        self.assertEqual(text2, exp2)
+        self.assertEqual(text3, exp2)
 
     def test_where(self):
         fLOG(
@@ -117,6 +171,7 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = dummy_streaming_dataframe(100)
         res = sdf.sample(frac=0.1)
         self.assertLesser(res.shape[0], 30)
+        self.assertRaise(lambda: sdf.sample(n=5), ValueError)
 
     def test_apply(self):
         fLOG(
