@@ -188,6 +188,45 @@ class TestStreamingDataFrame(ExtTestCase):
         text = sdf.to_csv()
         self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r", text)
 
+    def test_train_test_split(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100)
+        tr, te = sdf.train_test_split(index=False)
+        trsdf = StreamingDataFrame.read_str(tr)
+        tesdf = StreamingDataFrame.read_str(te)
+        trdf = trsdf.to_dataframe()
+        tedf = tesdf.to_dataframe()
+        df_exp = sdf.to_dataframe()
+        df_val = pandas.concat([trdf, tedf])
+        self.assertEqual(df_exp.shape, df_val.shape)
+        df_val = df_val.sort_values("cint").reset_index(drop=True)
+        self.assertEqualDataFrame(df_val, df_exp)
+
+    def test_train_test_split_file(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        temp = get_temp_folder(__file__, "temp_train_test_split_file")
+        names = [os.path.join(temp, "train.txt"),
+                 os.path.join(temp, "test.txt")]
+        sdf = dummy_streaming_dataframe(100)
+        tr, te = sdf.train_test_split(names, index=False)
+        trsdf = StreamingDataFrame.read_csv(names[0])
+        tesdf = StreamingDataFrame.read_csv(names[1])
+        trdf = trsdf.to_dataframe()
+        tedf = tesdf.to_dataframe()
+        df_exp = sdf.to_dataframe()
+        df_val = pandas.concat([trdf, tedf])
+        self.assertEqual(df_exp.shape, df_val.shape)
+        df_val = df_val.sort_values("cint").reset_index(drop=True)
+        self.assertEqualDataFrame(df_val, df_exp)
+
 
 if __name__ == "__main__":
     unittest.main()
