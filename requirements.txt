@@ -27,7 +27,7 @@ pycodestyle>=2.0.0
 pycryptodomex
 pydocstyle
 pyflakes
-pyquickhelper>=1.5.2211
+pyquickhelper>1.5.2211
 python-jenkins
 PyYAML
 semantic_version
