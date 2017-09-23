@@ -70,7 +70,7 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = dummy_streaming_dataframe(100)
         st = sdf.to_csv()
         self.assertStartsWith(",cint,cstr\n0,0,s0", st)
-        
+
     def test_head(self):
         fLOG(
             __file__,
@@ -103,7 +103,7 @@ class TestStreamingDataFrame(ExtTestCase):
             __file__,
             self._testMethodName,
             OutputPrint=__name__ == "__main__")
-            
+
         sdf = dummy_streaming_dataframe(100)
         df = sdf.to_dataframe()
         self.assertEqual(df.shape, (100, 2))
@@ -132,7 +132,7 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertNotEmpty(list(sdf))
         text = sdf.to_csv()
         self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r", text)
-        
+
 
 if __name__ == "__main__":
     unittest.main()

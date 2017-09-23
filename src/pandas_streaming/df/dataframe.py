@@ -90,7 +90,7 @@ class StreamingDataFrame:
             nc = max(it.shape[1], nc)
             nl += it.shape[0]
         return nl, nc
-        
+
     @property
     def columns(self):
         """
@@ -114,28 +114,28 @@ class StreamingDataFrame:
         """
         if path_or_buf is None:
             st = StringIO()
-            close = False            
+            close = False
         elif isinstance(path_or_buf):
             st = open(path_or_buf, "w", encoding=kwargs.get('encoding'))
             close = True
-            
+
         for df in self:
             df.to_csv(st, **kwargs)
             kwargs['header'] = False
-        
+
         if close:
             st.close()
         if isinstance(st, StringIO):
             return st.getvalue()
         else:
             return path_or_buf
-            
+
     def to_dataframe(self):
         """
         Converts everything into a single dataframe.
         """
         return pandas.concat(self, axis=0)
-        
+
     def iterrows(self):
         """
         See :epkg:`pandas:DataFrame:iterrows`.
@@ -159,18 +159,18 @@ class StreamingDataFrame:
             return st[0]
         else:
             return pandas.concat(st, axis=0)
-        
+
     def tail(self, n=5):
         """
         Returns the last rows as a DataFrame.
         The size of chunks must be greater than ``n`` to
         get ``n`` lines. This method is not efficient
         because the whole dataset must be walked through.
-        """        
+        """
         for df in self:
-            h = df.tail(n=n)        
+            h = df.tail(n=n)
         return h
-        
+
     def where(self, *args, **kwargs):
         """
         Applies :epkg:`pandas:DataFrame:where`.
@@ -178,7 +178,7 @@ class StreamingDataFrame:
         This function returns a @see cl StreamingDataFrame.
         """
         kwargs['inplace'] = False
-        return StreamingDataFrame(lambda: map(lambda df:df.where(*args, **kwargs), self))
+        return StreamingDataFrame(lambda: map(lambda df: df.where(*args, **kwargs), self))
 
     def sample(self, **kwargs):
         """
@@ -189,20 +189,18 @@ class StreamingDataFrame:
         """
         if 'n' in kwargs:
             raise ValueError('Only frac is implemented.')
-        return StreamingDataFrame(lambda: map(lambda df:df.sample(**kwargs), self))
-        
+        return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self))
+
     def apply(self, *args, **kwargs):
         """
         Applies :epkg:`pandas:DataFrame:apply`.
         This function returns a @see cl StreamingDataFrame.
         """
-        return StreamingDataFrame(lambda: map(lambda df:df.apply(*args, **kwargs), self))
+        return StreamingDataFrame(lambda: map(lambda df: df.apply(*args, **kwargs), self))
 
     def applymap(self, *args, **kwargs):
         """
         Applies :epkg:`pandas:DataFrame:applymap`.
         This function returns a @see cl StreamingDataFrame.
         """
-        return StreamingDataFrame(lambda: map(lambda df:df.applymap(*args, **kwargs), self))
-
-                
+        return StreamingDataFrame(lambda: map(lambda df: df.applymap(*args, **kwargs), self))
