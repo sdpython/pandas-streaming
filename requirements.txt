@@ -30,6 +30,7 @@ pyflakes
 pyquickhelper>1.5.2211
 python-jenkins
 PyYAML
+scikit-learn
 semantic_version
 setuptools
 Sphinx
