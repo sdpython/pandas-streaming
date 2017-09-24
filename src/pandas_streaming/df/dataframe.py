@@ -258,6 +258,9 @@ class StreamingDataFrame:
         the same iterator again as random draws would be different.
         We need to store the results into files or buffers.
         """
+        if kwargs.get("stratify") is not None:
+            raise NotImplementedError(
+                "No implementation yet for the stratified version.")
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=ImportWarning)
             from sklearn.model_selection import train_test_split
