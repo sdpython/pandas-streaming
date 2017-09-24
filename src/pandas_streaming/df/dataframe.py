@@ -410,7 +410,7 @@ class StreamingDataFrame:
                 from pandas import DataFrame
                 from pandas_streaming.df import StreamingDataFrame
 
-                df = pandas.DataFrame(dict(A=[3, 4, 3], B=[5,6, 7]))
+                df = DataFrame(dict(A=[3, 4, 3], B=[5,6, 7]))
                 sdf = StreamingDataFrame.read_df(df)
 
                 # The following:
