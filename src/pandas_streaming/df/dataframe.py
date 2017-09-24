@@ -79,7 +79,7 @@ class StreamingDataFrame:
         @return                 iterator on @see cl StreamingDataFrame
         """
         if chunk_size is None:
-            chunk_size = max(1, len(df) // 10)
+            chunk_size = df.shape[0]
 
         def local_iterator():
             for i in range(0, df.shape[0], chunk_size):
@@ -322,12 +322,13 @@ class StreamingDataFrame:
         a double loop, loop on *self*, loop on *right*.
         """
         if isinstance(right, pandas.DataFrame):
-            return self.merge(StreamingDataFrame.read_df(right, chunk_size=right.shape[0]))
+            return self.merge(StreamingDataFrame.read_df(right, chunk_size=right.shape[0]), **kwargs)
 
-        def iterator_merge(df1, df2, **kwargs):
-            for df1 in self:
-                for df2 in right:
-                    yield df1.merge(df2, **kwargs)
+        def iterator_merge(sdf1, sdf2, **kw):
+            for df1 in sdf1:
+                for df2 in sdf2:
+                    df = df1.merge(df2, **kw)
+                    yield df
 
         return StreamingDataFrame(lambda: iterator_merge(self, right, **kwargs))
 
@@ -342,15 +343,15 @@ class StreamingDataFrame:
         @return             @see cl StreamingDataFrame
         """
 
-        def iterator_concat(self, others):
+        def iterator_concat(this, lothers):
             columns = None
             dtypes = None
-            for df in self:
+            for df in this:
                 if columns is None:
                     columns = df.columns
                     dtypes = df.dtypes
                 yield df
-            for obj in others:
+            for obj in lothers:
                 check = True
                 for i, df in enumerate(obj):
                     if check:
@@ -374,7 +375,7 @@ class StreamingDataFrame:
             else:
                 return obj
 
-        others = map(change_type, others)
+        others = list(map(change_type, others))
         return StreamingDataFrame(lambda: iterator_concat(self, others))
 
     def groupby(self, by=None, lambda_agg=None, in_memory=True, **kwargs) -> pandas.DataFrame:
@@ -406,7 +407,7 @@ class StreamingDataFrame:
             .. runpython::
                 :showcode:
 
-                from pandas import DataDrame
+                from pandas import DataFrame
                 from pandas_streaming.df import StreamingDataFrame
 
                 df = pandas.DataFrame(dict(A=[3, 4, 3], B=[5,6, 7]))

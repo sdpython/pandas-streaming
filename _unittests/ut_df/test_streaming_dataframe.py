@@ -73,6 +73,8 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = dummy_streaming_dataframe(100)
         st = sdf.to_csv()
         self.assertStartsWith(",cint,cstr\n0,0,s0", st)
+        st = sdf.to_csv()
+        self.assertStartsWith(",cint,cstr\n0,0,s0", st)
 
     def test_iterrows(self):
         fLOG(
@@ -81,6 +83,8 @@ class TestStreamingDataFrame(ExtTestCase):
             OutputPrint=__name__ == "__main__")
 
         sdf = dummy_streaming_dataframe(100)
+        rows = list(sdf.iterrows())
+        self.assertEqual(sdf.shape[0], len(rows))
         rows = list(sdf.iterrows())
         self.assertEqual(sdf.shape[0], len(rows))
 
@@ -93,6 +97,8 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = dummy_streaming_dataframe(100)
         st = sdf.head()
         self.assertEqual(st.shape, (5, 2))
+        st = sdf.head(n=20)
+        self.assertEqual(st.shape, (20, 2))
         st = sdf.head(n=20)
         self.assertEqual(st.shape, (20, 2))
 
@@ -152,6 +158,9 @@ class TestStreamingDataFrame(ExtTestCase):
         res = sdf.where(lambda row: row["cint"] == 1)
         st = res.to_csv()
         self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1", st)
+        res = sdf.where(lambda row: row["cint"] == 1)
+        st = res.to_csv()
+        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1", st)
 
     def test_dataframe(self):
         fLOG(
@@ -170,6 +179,9 @@ class TestStreamingDataFrame(ExtTestCase):
             OutputPrint=__name__ == "__main__")
 
         sdf = dummy_streaming_dataframe(100)
+        res = sdf.sample(frac=0.1)
+        self.assertLesser(res.shape[0], 30)
+        self.assertRaise(lambda: sdf.sample(n=5), ValueError)
         res = sdf.sample(frac=0.1)
         self.assertLesser(res.shape[0], 30)
         self.assertRaise(lambda: sdf.sample(n=5), ValueError)
@@ -272,9 +284,12 @@ class TestStreamingDataFrame(ExtTestCase):
         hows = "inner left right outer".split()
         for how in hows:
             compares(sdf20, sdf20, how)
+            compares(sdf20, sdf20, how)
         for how in hows:
             compares(sdf20, sdf30, how)
+            compares(sdf20, sdf30, how)
         for how in hows:
+            compares(sdf30, sdf20, how)
             compares(sdf30, sdf20, how)
         sdf20.merge(sdf20.to_dataframe(), on="cint", indicator=True)
 
@@ -293,6 +308,8 @@ class TestStreamingDataFrame(ExtTestCase):
         m1 = sdf20.concat(sdf30)
         self.assertEqualDataFrame(m1.to_dataframe(), df)
         m1 = sdf20.concat(df30)
+        self.assertEqualDataFrame(m1.to_dataframe(), df)
+        m1 = sdf20.concat(map(lambda x: x, [df30]))
         self.assertEqualDataFrame(m1.to_dataframe(), df)
         m1 = sdf20.concat(map(lambda x: x, [df30]))
         self.assertEqualDataFrame(m1.to_dataframe(), df)
@@ -334,6 +351,25 @@ class TestStreamingDataFrame(ExtTestCase):
         gr2 = df.groupby("A").sum()
         self.assertEqualDataFrame(gr, gr2)
 
+    def test_merge_2(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        df = pandas.DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
+        df2 = pandas.concat([df, df])
+        sdf = StreamingDataFrame.read_df(df)
+        sdf2 = sdf.concat(sdf)
+        self.assertEqualDataFrame(df2, sdf2.to_dataframe())
+        self.assertEqualDataFrame(df2, sdf2.to_dataframe())
+        m = pandas.DataFrame(dict(Y=["a", "b"], Z=[10, 20]))
+        jm = df2.merge(m, left_on="Y", right_on="Y", how="outer")
+        sjm = sdf2.merge(m, left_on="Y", right_on="Y", how="outer")
+        self.assertEqualDataFrame(jm.sort_values(["X", "Y"]).reset_index(drop=True),
+                                  sjm.to_dataframe().sort_values(["X", "Y"]).reset_index(drop=True))
+
 
 if __name__ == "__main__":
     unittest.main()
+    # TestStreamingDataFrame().test_merge_2()
