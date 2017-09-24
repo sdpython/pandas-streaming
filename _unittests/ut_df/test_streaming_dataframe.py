@@ -227,6 +227,29 @@ class TestStreamingDataFrame(ExtTestCase):
         df_val = df_val.sort_values("cint").reset_index(drop=True)
         self.assertEqualDataFrame(df_val, df_exp)
 
+    def test_train_test_split_file_pattern(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        temp = get_temp_folder(__file__, "temp_train_test_split_file_pattern")
+        sdf = dummy_streaming_dataframe(100)
+        names = os.path.join(temp, "spl_{0}.txt")
+        self.assertRaise(lambda: sdf.train_test_split(
+            names, index=False), ValueError)
+        names = os.path.join(temp, "spl_{}.txt")
+        tr, te = sdf.train_test_split(names, index=False)
+        trsdf = StreamingDataFrame.read_csv(tr)
+        tesdf = StreamingDataFrame.read_csv(te)
+        trdf = trsdf.to_dataframe()
+        tedf = tesdf.to_dataframe()
+        df_exp = sdf.to_dataframe()
+        df_val = pandas.concat([trdf, tedf])
+        self.assertEqual(df_exp.shape, df_val.shape)
+        df_val = df_val.sort_values("cint").reset_index(drop=True)
+        self.assertEqualDataFrame(df_val, df_exp)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -76,4 +76,7 @@ epkg_dictionary.update({
     'pandas': ('http://pandas.pydata.org/pandas-docs/stable/',
                ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.html', 1),
                ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.{1}.html', 2)),
+    'sklearn': ('http://scikit-learn.org/stable/',
+                ('http://scikit-learn.org/stable/modules/generated/{0}.html', 1),
+                ('http://scikit-learn.org/stable/modules/generated/{0}.{1}.html', 2)),
 })
