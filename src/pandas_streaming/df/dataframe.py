@@ -42,7 +42,7 @@ class StreamingDataFrame:
         self.iter_creation = iter_creation
 
     @staticmethod
-    def read_csv(*args, **kwargs):
+    def read_csv(*args, **kwargs) -> 'StreamingDataFrame':
         """
         Reads a dataframe as an iterator on DataFrame.
         The signature is the same as :epkg:`pandas:read_csv`.
@@ -55,7 +55,7 @@ class StreamingDataFrame:
         return StreamingDataFrame(lambda: pandas.read_csv(*args, **kwargs))
 
     @staticmethod
-    def read_str(text, **kwargs):
+    def read_str(text, **kwargs) -> 'StreamingDataFrame':
         """
         Reads a dataframe as an iterator on DataFrame.
         The signature is the same as :epkg:`pandas:read_csv`.
@@ -69,7 +69,7 @@ class StreamingDataFrame:
         return StreamingDataFrame(lambda: pandas.read_csv(buffer, **kwargs))
 
     @staticmethod
-    def read_df(df, chunk_size=None):
+    def read_df(df, chunk_size=None) -> 'StreamingDataFrame':
         """
         Splits a dataframe into small chunks mostly for
         unit testing purposes.
@@ -133,7 +133,7 @@ class StreamingDataFrame:
         for it in self:
             return it.dtypes
 
-    def to_csv(self, path_or_buf=None, **kwargs):
+    def to_csv(self, path_or_buf=None, **kwargs) -> 'StreamingDataFrame':
         """
         Saves the dataframe into string.
         See :epkg:`pandas:DataFrame.to_csv`.
@@ -159,7 +159,7 @@ class StreamingDataFrame:
         else:
             return path_or_buf
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> pandas.DataFrame:
         """
         Converts everything into a single dataframe.
         """
@@ -173,7 +173,7 @@ class StreamingDataFrame:
             for it in df.iterrows():
                 yield it
 
-    def head(self, n=5):
+    def head(self, n=5) -> pandas.DataFrame:
         """
         Returns the first rows as a DataFrame.
         """
@@ -189,7 +189,7 @@ class StreamingDataFrame:
         else:
             return pandas.concat(st, axis=0)
 
-    def tail(self, n=5):
+    def tail(self, n=5) -> pandas.DataFrame:
         """
         Returns the last rows as a DataFrame.
         The size of chunks must be greater than ``n`` to
@@ -200,7 +200,7 @@ class StreamingDataFrame:
             h = df.tail(n=n)
         return h
 
-    def where(self, *args, **kwargs):
+    def where(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:where`.
         *inplace* must be False.
@@ -209,7 +209,7 @@ class StreamingDataFrame:
         kwargs['inplace'] = False
         return StreamingDataFrame(lambda: map(lambda df: df.where(*args, **kwargs), self))
 
-    def sample(self, **kwargs):
+    def sample(self, **kwargs) -> 'StreamingDataFrame':
         """
         See :epkg:`pandas:DataFrame:sample`.
         Only *frac* is available, otherwise choose
@@ -220,14 +220,14 @@ class StreamingDataFrame:
             raise ValueError('Only frac is implemented.')
         return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self))
 
-    def apply(self, *args, **kwargs):
+    def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:apply`.
         This function returns a @see cl StreamingDataFrame.
         """
         return StreamingDataFrame(lambda: map(lambda df: df.apply(*args, **kwargs), self))
 
-    def applymap(self, *args, **kwargs):
+    def applymap(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:applymap`.
         This function returns a @see cl StreamingDataFrame.
@@ -313,3 +313,123 @@ class StreamingDataFrame:
             if c:
                 b.close()
         return [st.getvalue() if isinstance(st, StringIO) else p for st, p in zip(bufs, path_or_buf)]
+
+    def merge(self, right, **kwargs) -> 'StreamingDataFrame':
+        """
+        Merges two @see cl StreamingDataFrame and returns @see cl StreamingDataFrame.
+        *right* can be either a @see cl StreamingDataFrame or simply
+        a :epkg:`pandas:DataFrame`. It calls :epkg:`pandas:DataFrame:merge` in
+        a double loop, loop on *self*, loop on *right*.
+        """
+        if isinstance(right, pandas.DataFrame):
+            return self.merge(StreamingDataFrame.read_df(right, chunk_size=right.shape[0]))
+
+        def iterator_merge(df1, df2, **kwargs):
+            for df1 in self:
+                for df2 in right:
+                    yield df1.merge(df2, **kwargs)
+
+        return StreamingDataFrame(lambda: iterator_merge(self, right, **kwargs))
+
+    def concat(self, others) -> 'StreamingDataFrame':
+        """
+        Concatenates dataframes. The function ensures all :epkg:`pandas:DataFrame`
+        or @see cl StreamingDataFrame share the same columns (name and type).
+        Otherwise, the function fails as it cannot guess the schema without
+        walking through all dataframes.
+
+        @param  others      list, enumeration, :epkg:`pandas:DataFrame`
+        @return             @see cl StreamingDataFrame
+        """
+
+        def iterator_concat(self, others):
+            columns = None
+            dtypes = None
+            for df in self:
+                if columns is None:
+                    columns = df.columns
+                    dtypes = df.dtypes
+                yield df
+            for obj in others:
+                check = True
+                for i, df in enumerate(obj):
+                    if check:
+                        if list(columns) != list(df.columns):
+                            raise ValueError(
+                                "Frame others[{0}] do not have the same column names or the same order.".format(i))
+                        if list(dtypes) != list(df.dtypes):
+                            raise ValueError(
+                                "Frame others[{0}] do not have the same column types.".format(i))
+                        check = False
+                    yield df
+
+        if isinstance(others, pandas.DataFrame):
+            others = [others]
+        elif isinstance(others, StreamingDataFrame):
+            others = [others]
+
+        def change_type(obj):
+            if isinstance(obj, pandas.DataFrame):
+                return StreamingDataFrame.read_df(obj, obj.shape[0])
+            else:
+                return obj
+
+        others = map(change_type, others)
+        return StreamingDataFrame(lambda: iterator_concat(self, others))
+
+    def groupby(self, by=None, lambda_agg=None, in_memory=True, **kwargs) -> pandas.DataFrame:
+        """
+        Implements the streaming :epkg:`pandas:DataFrame:groupby`.
+        We assume the result holds in memory. The out-of-memory is
+        not implemented yet.
+
+        @param      in_memory   in-memory algorithm
+        @param      lambda_agg  aggregation function, *sum* by default
+        @return                 :epkg:`pandas:DataFrame`
+
+        As the input @see cl StreamingDataFrame does not necessarily hold
+        in memory, the aggregation must be done at every iteration.
+        There are two levels of aggregation: one to reduce every iterated
+        dataframe, another one to combine all the reduced dataframes.
+        This second one is always a **sum**.
+        As a consequence, this function should not compute any *mean* or *count*,
+        only *sum* because we do not know the size of each iterated
+        dataframe. To compute an average, sum and weights must be
+        aggregated.
+
+        .. exref::
+            :title: StreamingDataFrame and groupby
+
+            Here is an example which shows how to write a simple *groupby*
+            with :epkg:`pandas` and @see cl StreamingDataFrame.
+
+            .. runpython::
+                :showcode:
+
+                from pandas import DataDrame
+                from pandas_streaming.df import StreamingDataFrame
+
+                df = pandas.DataFrame(dict(A=[3, 4, 3], B=[5,6, 7]))
+                sdf = StreamingDataFrame.read_df(df)
+
+                # The following:
+                print(sdf.groupby("A", lambda gr: gr.sum()))
+
+                # Is equivalent to:
+                print(df.groupby("A").sum())
+        """
+        if not in_memory:
+            raise NotImplementedError(
+                "Out-of-memory group by is not implemented.")
+        if lambda_agg is None:
+            def lambda_agg_(gr):
+                return gr.sum()
+            lambda_agg = lambda_agg_
+        ckw = kwargs.copy()
+        ckw["as_index"] = False
+        agg = []
+        for df in self:
+            gr = df.groupby(by=by, **ckw)
+            agg.append(lambda_agg(gr))
+        conc = pandas.concat(agg)
+        return conc.groupby(by=by, **kwargs).sum()

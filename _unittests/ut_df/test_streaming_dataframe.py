@@ -7,6 +7,7 @@ import sys
 import os
 import unittest
 import pandas
+import numpy
 
 
 try:
@@ -249,6 +250,89 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(df_exp.shape, df_val.shape)
         df_val = df_val.sort_values("cint").reset_index(drop=True)
         self.assertEqualDataFrame(df_val, df_exp)
+
+    def test_merge(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        def compares(a, b, how):
+            m = a.merge(b, on="cint", indicator=True)
+            dm = m.to_dataframe()
+            da = a.to_dataframe()
+            db = b.to_dataframe()
+            exp = da.merge(db, on="cint", indicator=True)
+            self.assertEqualDataFrame(dm.reset_index(drop=True),
+                                      exp.reset_index(drop=True))
+
+        sdf20 = dummy_streaming_dataframe(20)
+        sdf30 = dummy_streaming_dataframe(30)
+        # itself
+        hows = "inner left right outer".split()
+        for how in hows:
+            compares(sdf20, sdf20, how)
+        for how in hows:
+            compares(sdf20, sdf30, how)
+        for how in hows:
+            compares(sdf30, sdf20, how)
+        sdf20.merge(sdf20.to_dataframe(), on="cint", indicator=True)
+
+    def test_concat(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf20 = dummy_streaming_dataframe(20)
+        sdf30 = dummy_streaming_dataframe(30)
+        df20 = sdf20.to_dataframe()
+        df30 = sdf30.to_dataframe()
+        df = pandas.concat([df20, df30])
+
+        m1 = sdf20.concat(sdf30)
+        self.assertEqualDataFrame(m1.to_dataframe(), df)
+        m1 = sdf20.concat(df30)
+        self.assertEqualDataFrame(m1.to_dataframe(), df)
+        m1 = sdf20.concat(map(lambda x: x, [df30]))
+        self.assertEqualDataFrame(m1.to_dataframe(), df)
+
+        df30["g"] = 4
+        self.assertRaise(lambda: sdf20.concat(df30).to_dataframe(
+        ), ValueError, "Frame others[0] do not have the same column names")
+        df20["cint"] = df20["cint"].astype(float)
+        self.assertRaise(lambda: sdf20.concat(df20).to_dataframe(
+        ), ValueError, "Frame others[0] do not have the same column types")
+
+    def test_groupby(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        df20 = dummy_streaming_dataframe(20).to_dataframe()
+        df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
+        sdf20 = StreamingDataFrame.read_df(df20, chunk_size=5)
+        gr = sdf20.groupby("key", lambda gr: gr.sum())
+        gr2 = df20.groupby("key").sum()
+        self.assertEqualDataFrame(gr, gr2)
+        self.assertRaise(lambda: sdf20.groupby(
+            "key", in_memory=False), NotImplementedError)
+
+        gr2 = df20.groupby("key").agg([numpy.sum, lambda c:sum(c)])
+        gr = sdf20.groupby("key", lambda gr: gr.agg(
+            [numpy.sum, lambda c:sum(c)]))
+        self.assertEqualDataFrame(gr, gr2)
+
+        gr = sdf20.groupby("key", lambda gr: gr.count())
+        gr2 = df20.groupby("key").count()
+        self.assertEqualDataFrame(gr, gr2)
+
+        df = pandas.DataFrame(dict(A=[3, 4, 3], B=[5, 6, 7]))
+        sdf = StreamingDataFrame.read_df(df)
+        gr = sdf.groupby("A")
+        gr2 = df.groupby("A").sum()
+        self.assertEqualDataFrame(gr, gr2)
 
 
 if __name__ == "__main__":
