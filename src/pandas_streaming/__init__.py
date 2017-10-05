@@ -1,7 +1,10 @@
 #-*- coding: utf-8 -*-
 """
 @file
-@brief Main file for module *pandas_streaming*.
+@brief Module *pandas_streaming*.
+Process large datasets with :epkg:`pandas` by
+reimplementing streeaming versions of
+:epkg:`pandas` functionalites.
 """
 
 __version__ = "0.1"
