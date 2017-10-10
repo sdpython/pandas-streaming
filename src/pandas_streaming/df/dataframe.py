@@ -5,7 +5,7 @@
 """
 import pandas
 from io import StringIO
-from .dataframe_sklearn import sklearn_train_test_split
+from .dataframe_split import sklearn_train_test_split
 from ..exc import StreamingInefficientException
 
 
@@ -60,8 +60,9 @@ class StreamingDataFrame:
         @return                 outputs of the exports functions
 
         """
-        return sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
-                                        names=None, **kwargs)
+        return sklearn_train_test_split(self, path_or_buf=path_or_buf,
+                                        export_method=export_method,
+                                        names=names, **kwargs)
 
     @staticmethod
     def read_csv(*args, **kwargs) -> 'StreamingDataFrame':
