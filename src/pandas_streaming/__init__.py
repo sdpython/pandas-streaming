@@ -2,7 +2,7 @@
 """
 @file
 @brief Module *pandas_streaming*.
-Process large datasets with :epkg:`pandas` by
+Processes large datasets with :epkg:`pandas` by
 reimplementing streeaming versions of
 :epkg:`pandas` functionalites.
 """

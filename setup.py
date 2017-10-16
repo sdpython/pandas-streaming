@@ -18,7 +18,7 @@ history = "HISTORY.rst"
 requirements = None
 
 KEYWORDS = project_var_name + ', Xavier Dupré'
-DESCRIPTION = """Module with C functions. No precise purpose yet."""
+DESCRIPTION = """Streaming operations with pandas."""
 
 
 CLASSIFIERS = [
@@ -38,9 +38,7 @@ CLASSIFIERS = [
 
 packages = find_packages('src', exclude='src')
 package_dir = {k: "src/" + k.replace(".", "/") for k in packages}
-package_data = {
-    project_var_name + ".js": ["*.js", "*.css"],
-}
+package_data = {}
 
 ############
 # functions
