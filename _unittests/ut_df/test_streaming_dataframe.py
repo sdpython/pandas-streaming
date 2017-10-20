@@ -208,7 +208,7 @@ class TestStreamingDataFrame(ExtTestCase):
             OutputPrint=__name__ == "__main__")
 
         sdf = dummy_streaming_dataframe(100)
-        tr, te = sdf.train_test_split(index=False)
+        tr, te = sdf.train_test_split(index=False, streaming=False)
         trsdf = StreamingDataFrame.read_str(tr)
         tesdf = StreamingDataFrame.read_str(te)
         trdf = trsdf.to_dataframe()
@@ -218,6 +218,59 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(df_exp.shape, df_val.shape)
         df_val = df_val.sort_values("cint").reset_index(drop=True)
         self.assertEqualDataFrame(df_val, df_exp)
+
+    def test_train_test_split_streaming(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100, asfloat=True)
+        trsdf, tesdf = sdf.train_test_split(
+            streaming=True, unique_rows=True, partitions=[0.3, 0.7])
+        trdf = trsdf.to_dataframe()
+        tedf = tesdf.to_dataframe()
+        df_exp = sdf.to_dataframe()
+        df_val = pandas.concat([trdf, tedf])
+        self.assertEqual(df_exp.shape, df_val.shape)
+        df_val = df_val.sort_values("cfloat").reset_index(drop=True)
+        self.assertEqualDataFrame(df_val, df_exp)
+        trdf = trsdf.to_dataframe()
+        tedf = tesdf.to_dataframe()
+        df_val = pandas.concat([trdf, tedf])
+        self.assertEqual(df_exp.shape, df_val.shape)
+        df_val = df_val.sort_values("cfloat").reset_index(drop=True)
+        self.assertEqualDataFrame(df_val, df_exp)
+
+    def test_train_test_split_streaming_strat(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100, asfloat=True,
+                                        tify=["t1" if i % 3 else "t0" for i in range(0, 100)])
+        trsdf, tesdf = sdf.train_test_split(
+            streaming=True, unique_rows=True, stratify="tify")
+        trdf = trsdf.to_dataframe()
+        tedf = tesdf.to_dataframe()
+        df_exp = sdf.to_dataframe()
+        df_val = pandas.concat([trdf, tedf])
+        self.assertEqual(df_exp.shape, df_val.shape)
+        df_val = df_val.sort_values("cfloat").reset_index(drop=True)
+        self.assertEqualDataFrame(df_val, df_exp)
+        trdf = trsdf.to_dataframe()
+        tedf = tesdf.to_dataframe()
+        df_val = pandas.concat([trdf, tedf])
+        self.assertEqual(df_exp.shape, df_val.shape)
+        df_val = df_val.sort_values("cfloat").reset_index(drop=True)
+        self.assertEqualDataFrame(df_val, df_exp)
+        trgr = trdf.groupby("tify").count()
+        trgr["part"] = 0
+        tegr = tedf.groupby("tify").count()
+        tegr["part"] = 1
+        gr = pandas.concat([trgr, tegr])
+        self.assertGreater(gr['cfloat'].min(), 4)
 
     def test_train_test_split_file(self):
         fLOG(
@@ -229,7 +282,7 @@ class TestStreamingDataFrame(ExtTestCase):
         names = [os.path.join(temp, "train.txt"),
                  os.path.join(temp, "test.txt")]
         sdf = dummy_streaming_dataframe(100)
-        tr, te = sdf.train_test_split(names, index=False)
+        tr, te = sdf.train_test_split(names, index=False, streaming=False)
         trsdf = StreamingDataFrame.read_csv(names[0])
         tesdf = StreamingDataFrame.read_csv(names[1])
         trdf = trsdf.to_dataframe()
@@ -250,9 +303,9 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = dummy_streaming_dataframe(100)
         names = os.path.join(temp, "spl_{0}.txt")
         self.assertRaise(lambda: sdf.train_test_split(
-            names, index=False), ValueError)
+            names, index=False, streaming=False), ValueError)
         names = os.path.join(temp, "spl_{}.txt")
-        tr, te = sdf.train_test_split(names, index=False)
+        tr, te = sdf.train_test_split(names, index=False, streaming=False)
         trsdf = StreamingDataFrame.read_csv(tr)
         tesdf = StreamingDataFrame.read_csv(te)
         trdf = trsdf.to_dataframe()

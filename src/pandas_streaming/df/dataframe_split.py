@@ -3,8 +3,11 @@
 @file
 @brief Implements different methods to split a dataframe.
 """
-import warnings
+import hashlib
 import pandas
+import pickle
+import random
+import warnings
 from io import StringIO
 
 
@@ -91,3 +94,162 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
         if c:
             b.close()
     return [st.getvalue() if isinstance(st, StringIO) else p for st, p in zip(bufs, path_or_buf)]
+
+
+def sklearn_train_test_split_streaming(self, test_size=0.75, train_size=None,
+                                       stratify=None,
+                                       hash_size=9, unique_rows=False):
+    """
+    Randomly splits a dataframe into smaller pieces.
+    The function returns streams of file names.
+    The function relies on :epkg:`sklearn:model_selection:train_test_split`.
+    It handles the stratified version of it.
+
+    @param  test_size       ratio for the test partition (if *train_size* is not specified)
+    @param  train_size      ratio for the train partition
+    @param  stratify        column holding the stratification
+    @param  hash_size       size of the hash to cache information about partition
+    @param  unique_rows     ensures that rows are unique
+    @return                 Two @see cl StreamingDataFrame, one
+                            for train, one for test.
+
+    The function returns two iterators or two
+    @see cl StreamingDataFrame. It
+    tries to do everything without writing anything on disk
+    but it requires to store the repartition somehow.
+    This function hashes every row and maps the hash with a part
+    (train or test). This cache must hold in memory otherwise the
+    function fails. The two returned iterators must not be used
+    for the first time in the same time. The first time is used to
+    build the cache. The function changes the order of rows if
+    the parameter *stratify* is not null.
+    """
+    p = (1 - test_size) if test_size else None
+    if train_size is not None:
+        p = train_size
+    n = 2 * max(1 / p, 1 / (1 - p))  # changement
+
+    static_schema = []
+
+    def iterator_rows():
+        counts = {}
+        memory = {}
+        pos_col = None
+        for df in self:
+            if pos_col is None:
+                static_schema.append(list(df.columns))
+                static_schema.append(list(df.dtypes))
+                static_schema.append(df.shape[0])
+                if stratify is not None:
+                    pos_col = list(df.columns).index(stratify)
+                else:
+                    pos_col = -1
+
+            for obs in df.itertuples(index=False, name=None):
+                strat = 0 if stratify is None else obs[pos_col]
+                if strat not in memory:
+                    memory[strat] = []
+                memory[strat].append(obs)
+
+                for k in memory:
+                    v = memory[k]
+                    if len(v) >= n + random.randint(0, 10):  # changement
+                        vr = list(range(len(v)))
+                        # on permute aléatoirement
+                        random.shuffle(vr)
+                        if (0, k) in counts:
+                            tt = counts[1, k] + counts[0, k]
+                            delta = - int(counts[0, k] - tt * p + 0.5)
+                        else:
+                            delta = 0
+                        i = int(len(v) * p + 0.5)
+                        i += delta
+                        i = max(0, min(len(v), i))
+                        one = set(vr[:i])
+                        for d, obs in enumerate(v):
+                            yield obs, 0 if d in one else 1
+                        if (0, k) not in counts:
+                            counts[0, k] = i
+                            counts[1, k] = len(v) - i
+                        else:
+                            counts[0, k] += i
+                            counts[1, k] += len(v) - i
+                        # on efface de la mémoire les informations produites
+                        memory[k].clear()
+
+        # Lorsqu'on a fini, il faut tout de même répartir les
+        # observations stockées.
+        for k in memory:
+            v = memory[k]
+            vr = list(range(len(v)))
+            # on permute aléatoirement
+            random.shuffle(vr)
+            if (0, k) in counts:
+                tt = counts[1, k] + counts[0, k]
+                delta = - int(counts[0, k] - tt * p + 0.5)
+            else:
+                delta = 0
+            i = int(len(v) * p + 0.5)
+            i += delta
+            i = max(0, min(len(v), i))
+            one = set(vr[:i])
+            for d, obs in enumerate(v):
+                yield obs, 0 if d in one else 1
+            if (0, k) not in counts:
+                counts[0, k] = i
+                counts[1, k] = len(v) - i
+            else:
+                counts[0, k] += i
+                counts[1, k] += len(v) - i
+
+    def h11(w):
+        b = pickle.dumps(w)
+        return hashlib.md5(b).hexdigest()[:hash_size]
+
+    # We store the repartition in a cache.
+    cache = {}
+
+    def iterator_internal(part_requested):
+        iy = 0
+        accumul = []
+        if len(cache) == 0:
+            for obs, part in iterator_rows():
+                h = h11(obs)
+                if unique_rows and h in cache:
+                    raise ValueError(
+                        "A row or at least its hash is already cached. Increase hash_size or check for duplicates ('{0}')\n{1}.".format(h, obs))
+                cache[h] = part
+                if part == part_requested:
+                    accumul.append(obs)
+                    if len(accumul) >= static_schema[2]:
+                        dfo = pandas.DataFrame(
+                            accumul, columns=static_schema[0])
+                        self.ensure_dtype(dfo, static_schema[1])
+                        iy += dfo.shape[0]
+                        accumul.clear()
+                        yield dfo
+        else:
+            for df in self:
+                for obs in df.itertuples(index=False, name=None):
+                    h = h11(obs)
+                    part = cache.get(h)
+                    if part is None:
+                        raise ValueError(
+                            "Second iteration. A row was never met in the first one\n{0}".format(obs))
+                    if part == part_requested:
+                        accumul.append(obs)
+                        if len(accumul) >= static_schema[2]:
+                            dfo = pandas.DataFrame(
+                                accumul, columns=static_schema[0])
+                            self.ensure_dtype(dfo, static_schema[1])
+                            iy += dfo.shape[0]
+                            accumul.clear()
+                            yield dfo
+        if len(accumul) > 0:
+            dfo = pandas.DataFrame(accumul, columns=static_schema[0])
+            self.ensure_dtype(dfo, static_schema[1])
+            iy += dfo.shape[0]
+            yield dfo
+
+    return (self.__class__(lambda: iterator_internal(0)),
+            self.__class__(lambda: iterator_internal(1)))

@@ -5,7 +5,7 @@
 """
 import pandas
 from io import StringIO
-from .dataframe_split import sklearn_train_test_split
+from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
 from ..exc import StreamingInefficientException
 
 
@@ -42,27 +42,48 @@ class StreamingDataFrame:
         self.iter_creation = iter_creation
 
     def train_test_split(self, path_or_buf=None, export_method="to_csv",
-                         names=None, **kwargs):
+                         names=None, streaming=True, partitions=None,
+                         **kwargs):
         """
         Randomly splits a dataframe into smaller pieces.
         The function returns streams of file names.
         It chooses one of the options from module
         :mod:`dataframe_split <pandas_streaming.df.dataframe_split>`.
 
-        @param  partitions      splitting partitions
         @param  path_or_bug     a string, a list of strings or buffers, if it is a
-                                string, it must contain ``{}`` like ``partition{}.txt``
+                                string, it must contain ``{}`` like ``partition{}.txt``,
+                                if None, the function returns strings.
         @param  export_method   method used to store the partitions, by default
-                                :epkg:`pandas:DataFrame:to_csv`
+                                :epkg:`pandas:DataFrame:to_csv`, additional parameters
+                                will be given to that function
         @param  names           partitions names, by default ``('train', 'test')``
         @param  kwargs          parameters for the export function and
                                 :epkg:`sklearn:model_selection:train_test_split`.
-        @return                 outputs of the exports functions
+        @param  streaming       the function switches to a
+                                streaming version of the algorithm.
+        @param  partitions      splitting partitions
+        @param  kwargs          additional parameters
+        @return                 outputs of the exports functions or two
+                                @see cl StreamingDataFrame if path_or_buf is None.
 
+        The streaming version of this algorithm is implemented by function
+        @see fn sklearn_train_test_split_streaming. Its documentation
+        indicates the limitation of the streaming version and gives some
+        insights about the additional parameters.
         """
-        return sklearn_train_test_split(self, path_or_buf=path_or_buf,
-                                        export_method=export_method,
-                                        names=names, **kwargs)
+        if streaming:
+            if partitions is not None:
+                if len(partitions) != 2:
+                    raise NotImplementedError(
+                        "Only train and test split is allowed, *partitions* must be of length 2.")
+                kwargs = kwargs.copy()
+                kwargs['train_size'] = partitions[0]
+                kwargs['test_size'] = partitions[1]
+            return sklearn_train_test_split_streaming(self, **kwargs)
+        else:
+            return sklearn_train_test_split(self, path_or_buf=path_or_buf,
+                                            export_method=export_method,
+                                            names=names, **kwargs)
 
     @staticmethod
     def read_csv(*args, **kwargs) -> 'StreamingDataFrame':
@@ -377,3 +398,21 @@ class StreamingDataFrame:
             agg.append(lambda_agg(gr))
         conc = pandas.concat(agg)
         return conc.groupby(by=by, **kwargs).sum()
+
+    def ensure_dtype(self, df, dtypes):
+        """
+        Ensures the dataframe *df* has types indicated in dtypes.
+        Changes it if not.
+
+        @param      df      dataframe
+        @param      dtypes  list of types
+        @return             updated?
+        """
+        ch = False
+        cols = df.columns
+        for i, (has, exp) in enumerate(zip(df.dtypes, dtypes)):
+            if has != exp:
+                name = cols[i]
+                df[name] = df[name].astype(exp)
+                ch = True
+        return ch
