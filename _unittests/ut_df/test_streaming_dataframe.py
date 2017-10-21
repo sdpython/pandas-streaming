@@ -227,7 +227,7 @@ class TestStreamingDataFrame(ExtTestCase):
 
         sdf = dummy_streaming_dataframe(100, asfloat=True)
         trsdf, tesdf = sdf.train_test_split(
-            streaming=True, unique_rows=True, partitions=[0.3, 0.7])
+            streaming=True, unique_rows=True, partitions=[0.7, 0.3])
         trdf = trsdf.to_dataframe()
         tedf = tesdf.to_dataframe()
         df_exp = sdf.to_dataframe()
@@ -235,12 +235,41 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(df_exp.shape, df_val.shape)
         df_val = df_val.sort_values("cfloat").reset_index(drop=True)
         self.assertEqualDataFrame(df_val, df_exp)
-        trdf = trsdf.to_dataframe()
-        tedf = tesdf.to_dataframe()
-        df_val = pandas.concat([trdf, tedf])
+        trdf2 = trsdf.to_dataframe()
+        tedf2 = tesdf.to_dataframe()
+        df_val = pandas.concat([trdf2, tedf2])
         self.assertEqual(df_exp.shape, df_val.shape)
         df_val = df_val.sort_values("cfloat").reset_index(drop=True)
         self.assertEqualDataFrame(df_val, df_exp)
+        self.assertEqual(trdf.shape, trdf2.shape)
+        self.assertEqual(tedf.shape, tedf2.shape)
+        self.assertGreater(trdf.shape[0], tedf.shape[0])
+        self.assertGreater(trdf2.shape[0], tedf2.shape[0])
+
+    def test_train_test_split_streaming_tiny(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+        df = pandas.DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
+
+        sdf2 = StreamingDataFrame.read_df(pandas.concat([df, df]))
+        sdftr, sdfte = sdf2.train_test_split(test_size=0.5)
+        df1 = sdfte.head()
+        df2 = sdfte.head()
+        self.assertEqualDataFrame(df1, df2)
+        df1 = sdftr.head()
+        df2 = sdftr.head()
+        self.assertEqualDataFrame(df1, df2)
+        sdf = StreamingDataFrame.read_df(df)
+        sdf2 = sdf.concat(sdf)
+        sdftr, sdfte = sdf2.train_test_split(test_size=0.5)
+        df1 = sdfte.head()
+        df2 = sdfte.head()
+        self.assertEqualDataFrame(df1, df2)
+        df1 = sdftr.head()
+        df2 = sdftr.head()
+        self.assertEqualDataFrame(df1, df2)
 
     def test_train_test_split_streaming_strat(self):
         fLOG(
@@ -425,4 +454,4 @@ class TestStreamingDataFrame(ExtTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-    # TestStreamingDataFrame().test_merge_2()
+    # TestStreamingDataFrame().test_train_test_split_streaming_tiny()

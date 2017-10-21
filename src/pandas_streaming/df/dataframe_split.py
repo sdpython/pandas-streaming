@@ -96,7 +96,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
     return [st.getvalue() if isinstance(st, StringIO) else p for st, p in zip(bufs, path_or_buf)]
 
 
-def sklearn_train_test_split_streaming(self, test_size=0.75, train_size=None,
+def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                                        stratify=None,
                                        hash_size=9, unique_rows=False):
     """
@@ -122,7 +122,10 @@ def sklearn_train_test_split_streaming(self, test_size=0.75, train_size=None,
     function fails. The two returned iterators must not be used
     for the first time in the same time. The first time is used to
     build the cache. The function changes the order of rows if
-    the parameter *stratify* is not null.
+    the parameter *stratify* is not null. The cache has a side effect:
+    every exact same row will be put in the same partition.
+    If that is not what you want, you should add an index column
+    or a random one.
     """
     p = (1 - test_size) if test_size else None
     if train_size is not None:
@@ -218,7 +221,10 @@ def sklearn_train_test_split_streaming(self, test_size=0.75, train_size=None,
                 if unique_rows and h in cache:
                     raise ValueError(
                         "A row or at least its hash is already cached. Increase hash_size or check for duplicates ('{0}')\n{1}.".format(h, obs))
-                cache[h] = part
+                if h not in cache:
+                    cache[h] = part
+                else:
+                    part = cache[h]
                 if part == part_requested:
                     accumul.append(obs)
                     if len(accumul) >= static_schema[2]:

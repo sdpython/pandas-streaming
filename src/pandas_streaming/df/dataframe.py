@@ -209,6 +209,12 @@ class StreamingDataFrame:
         """
         return pandas.concat(self, axis=0)
 
+    def to_df(self) -> pandas.DataFrame:
+        """
+        Converts everything into a single dataframe.
+        """
+        return self.to_dataframe()
+
     def iterrows(self):
         """
         See :epkg:`pandas:DataFrame:iterrows`.
@@ -230,6 +236,8 @@ class StreamingDataFrame:
             n -= h.shape[0]
         if len(st) == 1:
             return st[0]
+        elif len(st) == 0:
+            return None
         else:
             return pandas.concat(st, axis=0)
 
