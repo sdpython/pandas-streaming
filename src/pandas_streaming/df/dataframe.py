@@ -9,6 +9,13 @@ from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_
 from ..exc import StreamingInefficientException
 
 
+class StreamingDataFrameSchemaError(Exception):
+    """
+    Reveals an issue with inconsistant schemas.
+    """
+    pass
+
+
 class StreamingDataFrame:
     """
     Defines a streaming dataframe.
@@ -35,11 +42,19 @@ class StreamingDataFrame:
     methods can be chained.
     """
 
-    def __init__(self, iter_creation):
+    def __init__(self, iter_creation, check_schema=True):
         """
-        @param      iter_creation   function which creates an iterator.
+        @param      iter_creation   function which creates an iterator
+        @param      check_schema    checks that the schema is the same for every dataframe
         """
         self.iter_creation = iter_creation
+        self.check_schema = check_schema
+
+    def get_kwargs(self):
+        """
+        Returns the parameters used to call the constructor.
+        """
+        return dict(check_schema=self.check_schema)
 
     def train_test_split(self, path_or_buf=None, export_method="to_csv",
                          names=None, streaming=True, partitions=None,
@@ -86,6 +101,18 @@ class StreamingDataFrame:
                                             names=names, **kwargs)
 
     @staticmethod
+    def _process_kwargs(kwargs):
+        """
+        Filters out parameters for the constructor of this class.
+        """
+        kw = {}
+        for k in {'check_schema'}:
+            if k in kwargs:
+                kw[k] = kwargs[k]
+                del kwargs[k]
+        return kw
+
+    @staticmethod
     def read_csv(*args, **kwargs) -> 'StreamingDataFrame':
         """
         Reads a dataframe as an iterator on DataFrame.
@@ -95,8 +122,9 @@ class StreamingDataFrame:
         """
         if not kwargs.get('iterator', True):
             raise ValueError("If specified, iterator must be True.")
+        kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
         kwargs['iterator'] = True
-        return StreamingDataFrame(lambda: pandas.read_csv(*args, **kwargs))
+        return StreamingDataFrame(lambda: pandas.read_csv(*args, **kwargs), **kwargs_create)
 
     @staticmethod
     def read_str(text, **kwargs) -> 'StreamingDataFrame':
@@ -108,28 +136,30 @@ class StreamingDataFrame:
         """
         if not kwargs.get('iterator', True):
             raise ValueError("If specified, iterator must be True.")
+        kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
         kwargs['iterator'] = True
         buffer = StringIO(text)
-        return StreamingDataFrame(lambda: pandas.read_csv(buffer, **kwargs))
+        return StreamingDataFrame(lambda: pandas.read_csv(buffer, **kwargs), **kwargs_create)
 
     @staticmethod
-    def read_df(df, chunk_size=None) -> 'StreamingDataFrame':
+    def read_df(df, chunksize=None, check_schema=True) -> 'StreamingDataFrame':
         """
         Splits a dataframe into small chunks mostly for
         unit testing purposes.
 
-        @param      df          :epkg:`pandas:DataFrame`
-        @param      chunk_size  number rows per chunks (// 10 by default)
-        @return                 iterator on @see cl StreamingDataFrame
+        @param      df              :epkg:`pandas:DataFrame`
+        @param      chunksize       number rows per chunks (// 10 by default)
+        @param      check_schema    check schema between two iterations
+        @return                     iterator on @see cl StreamingDataFrame
         """
-        if chunk_size is None:
-            chunk_size = df.shape[0]
+        if chunksize is None:
+            chunksize = df.shape[0]
 
         def local_iterator():
-            for i in range(0, df.shape[0], chunk_size):
-                end = min(df.shape[0], i + chunk_size)
+            for i in range(0, df.shape[0], chunksize):
+                end = min(df.shape[0], i + chunksize)
                 yield df[i:end].copy()
-        return StreamingDataFrame(local_iterator)
+        return StreamingDataFrame(local_iterator, check_schema=check_schema)
 
     def __iter__(self):
         """
@@ -137,9 +167,24 @@ class StreamingDataFrame:
         Each windows is a :epkg:`pandas:DataFrame`.
         The method stores a copy of the initial iterator
         and restores it after the end of the iterations.
+        If *check_schema* was enabled when calling the constructor,
+        the method checks that every dataframe follows the same schema
+        as the first chunck.
         """
         iter = self.iter_creation()
+        sch = None
+        rows = 0
         for it in iter:
+            if sch is None:
+                sch = (list(it.columns), list(it.dtypes))
+            elif self.check_schema:
+                if list(it.columns) != sch[0]:
+                    raise StreamingDataFrameSchemaError(
+                        'Column names are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'.format(rows, sch[0], list(it.columns)))
+                if list(it.dtypes) != sch[1]:
+                    raise StreamingDataFrameSchemaError(
+                        'Column types are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'.format(rows, sch[1], list(it.dtypes)))
+            rows += it.shape[0]
             yield it
 
     def sort_values(self, *args, **kwargs):
@@ -259,7 +304,7 @@ class StreamingDataFrame:
         This function returns a @see cl StreamingDataFrame.
         """
         kwargs['inplace'] = False
-        return StreamingDataFrame(lambda: map(lambda df: df.where(*args, **kwargs), self))
+        return StreamingDataFrame(lambda: map(lambda df: df.where(*args, **kwargs), self), **self.get_kwargs())
 
     def sample(self, **kwargs) -> 'StreamingDataFrame':
         """
@@ -270,21 +315,21 @@ class StreamingDataFrame:
         """
         if 'n' in kwargs:
             raise ValueError('Only frac is implemented.')
-        return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self))
+        return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self), **self.get_kwargs())
 
     def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:apply`.
         This function returns a @see cl StreamingDataFrame.
         """
-        return StreamingDataFrame(lambda: map(lambda df: df.apply(*args, **kwargs), self))
+        return StreamingDataFrame(lambda: map(lambda df: df.apply(*args, **kwargs), self), **self.get_kwargs())
 
     def applymap(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:applymap`.
         This function returns a @see cl StreamingDataFrame.
         """
-        return StreamingDataFrame(lambda: map(lambda df: df.applymap(*args, **kwargs), self))
+        return StreamingDataFrame(lambda: map(lambda df: df.applymap(*args, **kwargs), self), **self.get_kwargs())
 
     def merge(self, right, **kwargs) -> 'StreamingDataFrame':
         """
@@ -294,7 +339,7 @@ class StreamingDataFrame:
         a double loop, loop on *self*, loop on *right*.
         """
         if isinstance(right, pandas.DataFrame):
-            return self.merge(StreamingDataFrame.read_df(right, chunk_size=right.shape[0]), **kwargs)
+            return self.merge(StreamingDataFrame.read_df(right, chunksize=right.shape[0]), **kwargs)
 
         def iterator_merge(sdf1, sdf2, **kw):
             for df1 in sdf1:
@@ -302,7 +347,7 @@ class StreamingDataFrame:
                     df = df1.merge(df2, **kw)
                     yield df
 
-        return StreamingDataFrame(lambda: iterator_merge(self, right, **kwargs))
+        return StreamingDataFrame(lambda: iterator_merge(self, right, **kwargs), **self.get_kwargs())
 
     def concat(self, others) -> 'StreamingDataFrame':
         """
@@ -348,7 +393,7 @@ class StreamingDataFrame:
                 return obj
 
         others = list(map(change_type, others))
-        return StreamingDataFrame(lambda: iterator_concat(self, others))
+        return StreamingDataFrame(lambda: iterator_concat(self, others), **self.get_kwargs())
 
     def groupby(self, by=None, lambda_agg=None, in_memory=True, **kwargs) -> pandas.DataFrame:
         """

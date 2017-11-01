@@ -27,3 +27,38 @@ when it does not fit into memory.
     sdf.train_test_split("dataset_split_{}.txt", sep="\t")
 
     >>> ['dataset_split_train.txt', 'dataset_split_test.txt']
+
+.. contents::
+    :local:
+
+Check the schema consistency of a large file
+++++++++++++++++++++++++++++++++++++++++++++
+
+Large files usually comes from an export of a database and this
+for some reason, this export failed for a couple of lines.
+It can be character *end of line* not removed from a comment,
+a separator also present in the data. When that happens, :epkg:`pandas`
+takes the least strict type as the column type. Sometimes, we prefer to get a
+an idea of where we could find the error.
+
+.. runpython::
+    :showcode:
+
+    import pandas
+    df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"), dict(cf=1, cint=1, cstr="1"),
+                           dict(cf=2, cint="s2", cstr="2"), dict(cf=3, cint=3, cstr="3")])
+    name = "temp_df.csv"
+    df.to_csv(name, index=False)
+
+    from pandas_streaming.df import StreamingDataFrame
+    try:
+        sdf = StreamingDataFrame.read_csv(name, chunksize=2)
+        for df in sdf:
+            print(df.dtypes)
+    except Exception as e:
+        print(e)
+
+The method :py:meth:`__iter__ <pandas_streaming.df.dataframe.StreamingDataFrame.__iter__>`
+checks that the schema does not change between two iterations.
+It can be disabled by adding *check_schema=False* when
+the constructor is called.

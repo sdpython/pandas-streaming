@@ -45,6 +45,7 @@ from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 from src.pandas_streaming.data import dummy_streaming_dataframe
 from src.pandas_streaming.exc import StreamingInefficientException
 from src.pandas_streaming.df import StreamingDataFrame
+from src.pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
 
 
 class TestStreamingDataFrame(ExtTestCase):
@@ -196,9 +197,9 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertNotEmpty(list(sdf))
         sdf = sdf.applymap(str)
         self.assertNotEmpty(list(sdf))
-        sdf = sdf.apply(lambda row: row["cint"] + "r", axis=1)
+        sdf = sdf.apply(lambda row: row[["cint"]] + "r", axis=1)
         self.assertNotEmpty(list(sdf))
-        text = sdf.to_csv()
+        text = sdf.to_csv(header=False)
         self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r", text)
 
     def test_train_test_split(self):
@@ -257,19 +258,23 @@ class TestStreamingDataFrame(ExtTestCase):
         sdftr, sdfte = sdf2.train_test_split(test_size=0.5)
         df1 = sdfte.head()
         df2 = sdfte.head()
-        self.assertEqualDataFrame(df1, df2)
+        if df1 is not None or df2 is not None:
+            self.assertEqualDataFrame(df1, df2)
         df1 = sdftr.head()
         df2 = sdftr.head()
-        self.assertEqualDataFrame(df1, df2)
+        if df1 is not None or df2 is not None:
+            self.assertEqualDataFrame(df1, df2)
         sdf = StreamingDataFrame.read_df(df)
         sdf2 = sdf.concat(sdf)
         sdftr, sdfte = sdf2.train_test_split(test_size=0.5)
         df1 = sdfte.head()
         df2 = sdfte.head()
-        self.assertEqualDataFrame(df1, df2)
+        if df1 is not None or df2 is not None:
+            self.assertEqualDataFrame(df1, df2)
         df1 = sdftr.head()
         df2 = sdftr.head()
-        self.assertEqualDataFrame(df1, df2)
+        if df1 is not None or df2 is not None:
+            self.assertEqualDataFrame(df1, df2)
 
     def test_train_test_split_streaming_strat(self):
         fLOG(
@@ -411,7 +416,7 @@ class TestStreamingDataFrame(ExtTestCase):
 
         df20 = dummy_streaming_dataframe(20).to_dataframe()
         df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
-        sdf20 = StreamingDataFrame.read_df(df20, chunk_size=5)
+        sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
         gr = sdf20.groupby("key", lambda gr: gr.sum())
         gr2 = df20.groupby("key").sum()
         self.assertEqualDataFrame(gr, gr2)
@@ -450,6 +455,25 @@ class TestStreamingDataFrame(ExtTestCase):
         sjm = sdf2.merge(m, left_on="Y", right_on="Y", how="outer")
         self.assertEqualDataFrame(jm.sort_values(["X", "Y"]).reset_index(drop=True),
                                   sjm.to_dataframe().sort_values(["X", "Y"]).reset_index(drop=True))
+
+    def test_schema_consistant(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"), dict(cf=1, cint=1, cstr="1"),
+                               dict(cf=2, cint="s2", cstr="2"), dict(cf=3, cint=3, cstr="3")])
+        temp = get_temp_folder(__file__, "temp_schema_consistant")
+        name = os.path.join(temp, "df.csv")
+        df.to_csv(name, index=False)
+        self.assertEqual(df.shape, (4, 3))
+        sdf = StreamingDataFrame.read_csv(name, chunksize=2)
+        self.assertRaise(lambda: list(sdf), StreamingDataFrameSchemaError)
+        sdf = StreamingDataFrame.read_csv(
+            name, chunksize=2, check_schema=False)
+        pieces = list(sdf)
+        self.assertEqual(len(pieces), 2)
 
 
 if __name__ == "__main__":

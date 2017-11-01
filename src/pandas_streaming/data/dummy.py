@@ -7,13 +7,13 @@ from pandas import DataFrame
 from ..df import StreamingDataFrame
 
 
-def dummy_streaming_dataframe(n, chunk_size=10, asfloat=False, **cols):
+def dummy_streaming_dataframe(n, chunksize=10, asfloat=False, **cols):
     """
     Returns a dummy streaming dataframe
     mostly for unit test purposes.
 
     @param      n           number of rows
-    @param      chunk_size  chunk size
+    @param      chunksize   chunk size
     @param      asfloat     use random float and not random int
     @param      cols        additional columns
     @return                 a @see cl StreamingDataFrame
@@ -26,4 +26,4 @@ def dummy_streaming_dataframe(n, chunk_size=10, asfloat=False, **cols):
                        "s{0}".format(i) for i in range(0, n)]))
     for k, v in cols.items():
         df[k] = v
-    return StreamingDataFrame.read_df(df, chunk_size=chunk_size)
+    return StreamingDataFrame.read_df(df, chunksize=chunksize)
