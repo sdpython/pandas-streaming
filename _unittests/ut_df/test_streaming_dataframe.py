@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 """
-@brief      test log(time=3s)
+@brief      test log(time=4s)
 """
 
 import sys
@@ -64,6 +64,18 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(shape, (100, 2))
         self.assertRaise(lambda: sdf.sort_values(
             "r"), StreamingInefficientException)
+
+    def test_init(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100)
+        df1 = sdf.to_df()
+        sdf2 = StreamingDataFrame(sdf)
+        df2 = sdf2.to_df()
+        self.assertEqualDataFrame(df1, df2)
 
     def test_to_csv(self):
         fLOG(
@@ -186,6 +198,39 @@ class TestStreamingDataFrame(ExtTestCase):
         res = sdf.sample(frac=0.1)
         self.assertLesser(res.shape[0], 30)
         self.assertRaise(lambda: sdf.sample(n=5), ValueError)
+
+    def test_sample_cache(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100)
+        res = sdf.sample(frac=0.1, cache=True)
+        df1 = res.to_df()
+        df2 = res.to_df()
+        self.assertEqualDataFrame(df1, df2)
+        self.assertTrue(res.is_stable(n=df1.shape[0], do_check=True))
+        self.assertTrue(res.is_stable(n=df1.shape[0], do_check=False))
+        res = sdf.sample(frac=0.1, cache=False)
+        self.assertFalse(res.is_stable(n=df1.shape[0], do_check=False))
+
+    def test_sample_reservoir_cache(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100)
+        res = sdf.sample(n=10, cache=True, reservoir=True)
+        df1 = res.to_df()
+        df2 = res.to_df()
+        self.assertEqualDataFrame(df1, df2)
+        self.assertEqual(df1.shape, (10, res.shape[1]))
+        self.assertRaise(lambda: sdf.sample(n=10, cache=False, reservoir=True),
+                         ValueError)
+        self.assertRaise(lambda: sdf.sample(frac=0.1, cache=True, reservoir=True),
+                         ValueError)
 
     def test_apply(self):
         fLOG(

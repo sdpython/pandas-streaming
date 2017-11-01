@@ -4,7 +4,9 @@
 @brief Defines a streaming dataframe.
 """
 import pandas
+import numpy.random as random
 from io import StringIO
+from pandas.testing import assert_frame_equal
 from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
 from ..exc import StreamingInefficientException
 
@@ -34,21 +36,64 @@ class StreamingDataFrame:
     The constructor cannot receive an iterator otherwise
     this class would be able to walk through the data
     only once. The main reason is it is impossible to
-    pickle (or dill) an iterator: it cannot be replicated.
+    :epkg:`*py:pickle` (or :epkg:`dill`)
+    an iterator: it cannot be replicated.
     Instead, the class takes a function which generates
     an iterator on :epkg:`pandas:DataFrame`.
-    Most of the functions returns either :epkg:`pandas:DataFrame`
-    or a @see cl StreamingDataFrame. In the second case,
+    Most of the methods returns either a :epkg:`pandas:DataFrame`
+    either a @see cl StreamingDataFrame. In the second case,
     methods can be chained.
+
+    By default, the object checks that the schema remains
+    the same between two chunks. This can be disabled
+    by setting *check_schema=False* in the constructor.
+
+    The user should expect the data to remain stable.
+    Every loop should produce the same data. However,
+    in some situations, it is more efficient not to keep
+    that constraints. Draw a random @see me sample
+    is one of these cases.
     """
 
-    def __init__(self, iter_creation, check_schema=True):
+    def __init__(self, iter_creation, check_schema=True, stable=True):
         """
-        @param      iter_creation   function which creates an iterator
+        @param      iter_creation   function which creates an iterator or an instance of
+                                    @see cl StreamingDataFrame
         @param      check_schema    checks that the schema is the same for every dataframe
+        @param      stable          indicates if the dataframe remains the same whenever
+                                    it is walked through
         """
-        self.iter_creation = iter_creation
+        if isinstance(iter_creation, StreamingDataFrame):
+            self.iter_creation = iter_creation.iter_creation
+            self.stable = iter_creation.stable
+        else:
+            self.iter_creation = iter_creation
+            self.stable = stable
         self.check_schema = check_schema
+
+    def is_stable(self, do_check=False, n=10):
+        """
+        Tells if the dataframe is supposed to be stable.
+
+        @param      do_check    do not trust the value sent to the constructor
+        @param      n           number of rows used to check the stability,
+                                None for all rows
+        @return                 boolean
+
+        *do_check=True* means the methods checks the first
+        *n* rows remains the same for two iterations.
+        """
+        if do_check:
+            for i, (a, b) in enumerate(zip(self, self)):
+                if n is not None and i >= n:
+                    break
+                try:
+                    assert_frame_equal(a, b)
+                except AssertionError:
+                    return False
+            return True
+        else:
+            return self.stable
 
     def get_kwargs(self):
         """
@@ -306,16 +351,76 @@ class StreamingDataFrame:
         kwargs['inplace'] = False
         return StreamingDataFrame(lambda: map(lambda df: df.where(*args, **kwargs), self), **self.get_kwargs())
 
-    def sample(self, **kwargs) -> 'StreamingDataFrame':
+    def sample(self, reservoir=False, cache=False, **kwargs) -> 'StreamingDataFrame':
         """
         See :epkg:`pandas:DataFrame:sample`.
         Only *frac* is available, otherwise choose
         @see me reservoir_sampling.
         This function returns a @see cl StreamingDataFrame.
+
+        @param      reservoir   use `reservoir sampling <https://en.wikipedia.org/wiki/Reservoir_sampling>`_
+        @param      cache       cache the sample
+
+        If *cache* is True, the sample is cached (assuming it holds in memory).
+        The second time an iterator walks through the
         """
-        if 'n' in kwargs:
-            raise ValueError('Only frac is implemented.')
-        return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self), **self.get_kwargs())
+        if reservoir or 'n' in kwargs:
+            if 'frac' in kwargs:
+                raise ValueError(
+                    'frac cannot be specified for reservoir sampling.')
+            return self._reservoir_sampling(cache=cache, n=kwargs['n'], random_state=kwargs.get('random_state'))
+        else:
+            if cache:
+                sdf = self.sample(cache=False, **kwargs)
+                df = sdf.to_df()
+                return StreamingDataFrame.read_df(df, chunksize=df.shape[0])
+            else:
+                return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self), **self.get_kwargs(), stable=False)
+
+    def _reservoir_sampling(self, cache=True, n=1000, seed=None, random_state=None) -> 'StreamingDataFrame':
+        """
+        Uses the `reservoir sampling <https://en.wikipedia.org/wiki/Reservoir_sampling>`_
+        algorithm to draw a random sample with exactly *n* samples.
+
+        @param      cache           cache the sample
+        @param      n               number of observations to keep
+        @param      random_state    sets the random_state
+        @return                     @see cl StreamingDataFrame
+
+        .. warning::
+            The sample is split by chunks of size 1000.
+            This parameter is not yet exposed.
+        """
+        if not cache:
+            raise ValueError(
+                "cache=False is not available for reservoir sampling.")
+        indices = []
+        seen = 0
+        for i, df in enumerate(self):
+            for ir, row in enumerate(df.iterrows()):
+                seen += 1
+                if len(indices) < n:
+                    indices.append((i, ir))
+                else:
+                    x = random.random()
+                    if x * n < (seen - n):
+                        k = random.randint(0, len(indices) - 1)
+                        indices[k] = (i, ir)
+        indices = set(indices)
+
+        def reservoir_iterate(sdf, indices, chunksize):
+            buffer = []
+            for i, df in enumerate(self):
+                for ir, row in enumerate(df.iterrows()):
+                    if (i, ir) in indices:
+                        buffer.append(row)
+                        if len(buffer) >= chunksize:
+                            yield pandas.DataFrame(buffer)
+                            buffer.clear()
+            if len(buffer) > 0:
+                yield pandas.DataFrame(buffer)
+
+        return StreamingDataFrame(lambda: reservoir_iterate(sdf=self, indices=indices, chunksize=1000))
 
     def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
