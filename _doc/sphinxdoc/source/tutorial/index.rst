@@ -85,7 +85,7 @@ to create an iterator then used to walk through the data.
         # process this chunk of data
         print(df)
 
-    print("Second time:")
+    print("\nSecond time:\n")
 
     for df in sdf:
         # process this chunk of data a second time
@@ -106,7 +106,8 @@ drawn each time. The following method indicates which kinds of sample
 the :class:`StreamingDataFrame <pandas_streaming.df.dataframe.StreamingDataFrame>`
 is producing.
 
-.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame.is_table
+.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame
+    :members: is_table
 
 Check the schema consistency of a large file
 ++++++++++++++++++++++++++++++++++++++++++++
@@ -133,7 +134,7 @@ an idea of where we could find the error.
         for df in sdf:
             print(df.dtypes)
     except Exception as e:
-        print(e)
+        print("ERROR:", e)
 
 The method :py:meth:`__iter__ <pandas_streaming.df.dataframe.StreamingDataFrame.__iter__>`
 checks that the schema does not change between two iterations.
