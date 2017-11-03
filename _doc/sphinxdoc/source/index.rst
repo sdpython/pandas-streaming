@@ -56,11 +56,11 @@ as possible.
 
     tutorial/index
     api/index
-    i_index
     i_ex
     all_notebooks
     blog/blogindex
     index_modules
+    i_index
 
 **Links:** `github <https://github.com/sdpython/pandas_streaming/>`_,
 `documentation <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_,

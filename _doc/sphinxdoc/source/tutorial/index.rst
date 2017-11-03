@@ -31,6 +31,8 @@ when it does not fit into memory.
 .. contents::
     :local:
 
+.. _l-objective:
+
 Objectives and Competitors
 ++++++++++++++++++++++++++
 
