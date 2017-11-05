@@ -520,6 +520,21 @@ class TestStreamingDataFrame(ExtTestCase):
         pieces = list(sdf)
         self.assertEqual(len(pieces), 2)
 
+    def test_getitem(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        sdf = dummy_streaming_dataframe(100)
+        sdf2 = sdf[["cint"]]
+        self.assertEqual(sdf2.shape, (100, 1))
+        df1 = sdf.to_df()
+        df2 = sdf2.to_df()
+        self.assertEqualDataFrame(df1[["cint"]], df2)
+        self.assertRaise(lambda: sdf["cint"], NotImplementedError)
+        self.assertRaise(lambda: sdf[:, "cint"], NotImplementedError)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -46,10 +46,10 @@ pandas_streaming
     :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
     :alt: Notebook Coverage
 
-*pandas_streaming* aims at processing big files with :epkg:`pandas`.
-The dataset is not fully loaded into memory and the distribution is not
-really needed. The goal is to implement as many streaming operations
-as possible.
+*pandas_streaming* aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
+too big to hold in memory, too small to be parallelized with a significant gain.
+The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API
+and implements other functionalities for machine learning.
 
 .. toctree::
     :maxdepth: 1

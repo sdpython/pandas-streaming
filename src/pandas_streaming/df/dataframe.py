@@ -574,3 +574,20 @@ class StreamingDataFrame:
                 df[name] = df[name].astype(exp)
                 ch = True
         return ch
+
+    def __getitem__(self, *args):
+        """
+        Implements some of the functionalities :epkg:`pandas`
+        offers for the operator ``[]``.
+        """
+        if len(args) != 1:
+            raise NotImplementedError("Only a list of columns is supported.")
+        cols = args[0]
+        if not isinstance(cols, list):
+            raise NotImplementedError("Only a list of columns is supported.")
+
+        def iterate_cols(sdf):
+            for df in sdf:
+                yield df[cols]
+
+        return StreamingDataFrame(lambda: iterate_cols(self), **self.get_kwargs())

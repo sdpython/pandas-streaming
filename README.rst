@@ -45,9 +45,37 @@ README
     :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
     :alt: Notebook Coverage
 
-*pandas_streaming* processes big files with `pandas <http://pandas.pydata.org/>`_.
+*pandas_streaming* aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
+too big to hold in memory, too small to be parallelized with a significant gain.
+The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API
+and implements other functionalities for machine learning.
 
-*not ready*
+::
+
+    from pandas_streaming.df import StreamingDataFrame
+    sdf = StreamingDataFrame.read_csv("filename", sep="\t", encoding="utf-8")
+
+    for df in sdf:
+        # process this chunk of data
+        # df is a dataframe
+        print(df)
+
+The module can also stream an existing dataframe.
+
+::
+
+    import pandas
+    df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"),
+                           dict(cf=1, cint=1, cstr="1"),
+                           dict(cf=3, cint=3, cstr="3")])
+
+    from pandas_streaming.df import StreamingDataFrame
+    sdf = StreamingDataFrame.read_df(df)
+
+    for df in sdf:
+        # process this chunk of data
+        # df is a dataframe
+        print(df)
 
 **Links:**
 
