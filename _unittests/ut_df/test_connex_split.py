@@ -7,7 +7,6 @@ import sys
 import os
 import unittest
 import pandas
-import numpy
 
 
 try:
@@ -41,7 +40,7 @@ except ImportError:
     import src
 
 from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import ExtTestCase, get_temp_folder
+from pyquickhelper.pycode import ExtTestCase
 from src.pandas_streaming.df import dataframe_shuffle, train_test_split_weights, train_test_connex_split
 
 
