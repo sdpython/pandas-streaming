@@ -19,6 +19,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
     The function relies on :epkg:`sklearn:model_selection:train_test_split`.
     It does not handle stratified version of it.
 
+    @param  self            @see cl StreamingDataFrame
     @param  partitions      splitting partitions
     @param  path_or_bug     a string, a list of strings or buffers, if it is a
                             string, it must contain ``{}`` like ``partition{}.txt``
@@ -105,6 +106,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
     The function relies on :epkg:`sklearn:model_selection:train_test_split`.
     It handles the stratified version of it.
 
+    @param  self            @see cl StreamingDataFrame
     @param  test_size       ratio for the test partition (if *train_size* is not specified)
     @param  train_size      ratio for the train partition
     @param  stratify        column holding the stratification
