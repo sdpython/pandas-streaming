@@ -139,6 +139,33 @@ class TestConnexSplit(ExtTestCase):
                 raise Exception(
                     'Non empty intersection {0} & {1}\n{2}\n{3}'.format(s1, s2, train, test))
 
+    def test_split_connex2(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        df = pandas.DataFrame([dict(user="UA", prod="PAA", card="C1"),
+                               dict(user="UA", prod="PB", card="C1"),
+                               dict(user="UB", prod="PC", card="C2"),
+                               dict(user="UB", prod="PD", card="C2"),
+                               dict(user="UC", prod="PAA", card="C3"),
+                               dict(user="UC", prod="PF", card="C4"),
+                               dict(user="UD", prod="PG", card="C5"),
+                               ])
+
+        train, test = train_test_connex_split(df, test_size=0.5,
+                                              groups=['user', 'prod', 'card'],
+                                              fail_imbalanced=0.4, fLOG=fLOG)
+
+        self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
+        for col in ['user', 'prod', 'card']:
+            s1 = set(train[col])
+            s2 = set(test[col])
+            if s1 & s2:
+                raise Exception(
+                    'Non empty intersection {0} & {1}\n{2}\n{3}'.format(s1, s2, train, test))
+
 
 if __name__ == "__main__":
     unittest.main()

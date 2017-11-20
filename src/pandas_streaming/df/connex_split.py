@@ -142,27 +142,37 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     The list of ids must hold in memory.
     There is no streaming implementation for the ids.
 
-    .. runpython::
-        :showcode:
+    .. exref::
+        :title: Split a dataframe, keep ids in separate partitions
 
-        from pandas import DataFrame
-        from pandas_streaming.df import train_test_connex_split
+        In some data science problems, rows are not independant
+        and share common value, most of the time ids. In some
+        specific case, multiple ids from different columns are
+        connected and must appear in the same partition.
+        Testing that each id column is evenly split and do not
+        appear in both sets in not enough. Connected components
+        are needed.
 
-        df = DataFrame([dict(user="UA", prod="PA", card="C1"),
-                        dict(user="UA", prod="PB", card="C1"),
-                        dict(user="UB", prod="PC", card="C2"),
-                        dict(user="UB", prod="PD", card="C2"),
-                        dict(user="UC", prod="PE", card="C3"),
-                        dict(user="UC", prod="PF", card="C4"),
-                        dict(user="UD", prod="PG", card="C5"),
-                        ])
+        .. runpython::
+            :showcode:
 
-        train, test = train_test_connex_split(df, test_size=0.5,
-                                              groups=['user', 'prod', 'card'],
-                                              fail_imbalanced=0.4, fLOG=fLOG)
-        print(train)
-        print(test)
+            from pandas import DataFrame
+            from pandas_streaming.df import train_test_connex_split
 
+            df = DataFrame([dict(user="UA", prod="PAA", card="C1"),
+                            dict(user="UA", prod="PB", card="C1"),
+                            dict(user="UB", prod="PC", card="C2"),
+                            dict(user="UB", prod="PD", card="C2"),
+                            dict(user="UC", prod="PAA", card="C3"),
+                            dict(user="UC", prod="PF", card="C4"),
+                            dict(user="UD", prod="PG", card="C5"),
+                            ])
+
+            train, test = train_test_connex_split(df, test_size=0.5,
+                                                  groups=['user', 'prod', 'card'],
+                                                  fail_imbalanced=0.4)
+            print(train)
+            print(test)
     """
     if groups is None or len(groups) == 0:
         raise ValueError("groups is empty. Use regular train_test_split.")
@@ -196,12 +206,14 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
             new_c = c
             for val in zip(groups, row):
                 if val in connex:
-                    new_c = min(c, connex[val])
+                    new_c = min(new_c, connex[val])
             if new_c != c:
                 modif += 1
                 elements[i] = new_c
             for val in zip(groups, row):
-                connex[val] = new_c
+                if val not in connex or connex[val] != new_c:
+                    connex[val] = new_c
+                    modif += 1
 
     if fLOG:
         fLOG(
