@@ -141,6 +141,28 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
     The list of ids must hold in memory.
     There is no streaming implementation for the ids.
+
+    .. runpython::
+        :showcode:
+
+        from pandas import DataFrame
+        from pandas_streaming.df import train_test_connex_split
+
+        df = DataFrame([dict(user="UA", prod="PA", card="C1"),
+                        dict(user="UA", prod="PB", card="C1"),
+                        dict(user="UB", prod="PC", card="C2"),
+                        dict(user="UB", prod="PD", card="C2"),
+                        dict(user="UC", prod="PE", card="C3"),
+                        dict(user="UC", prod="PF", card="C4"),
+                        dict(user="UD", prod="PG", card="C5"),
+                        ])
+
+        train, test = train_test_connex_split(df, test_size=0.5,
+                                              groups=['user', 'prod', 'card'],
+                                              fail_imbalanced=0.4, fLOG=fLOG)
+        print(train)
+        print(test)
+
     """
     if groups is None or len(groups) == 0:
         raise ValueError("groups is empty. Use regular train_test_split.")
