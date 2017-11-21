@@ -47,7 +47,7 @@ from src.pandas_streaming.df import train_test_connex_split
 
 class TestConnexSplitBig(ExtTestCase):
 
-    def _test_conex_big(self):
+    def test_connex_big(self):
         fLOG(
             __file__,
             self._testMethodName,
@@ -69,7 +69,7 @@ class TestConnexSplitBig(ExtTestCase):
         self.assertEqual(nbc, 5376)
         self.assertEqual(maxi, 14181)
 
-    def test_conex_big_approx(self):
+    def test_connex_big_approx(self):
         fLOG(
             __file__,
             self._testMethodName,
