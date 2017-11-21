@@ -109,6 +109,8 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
         t = coltype[c]
         if t == int:
             df[c] = df[c].apply(hash_intl)
+        elif t == numpy.int64:
+            df[c] = df[c].apply(lambda x: numpy.int64(hash_intl(x)))
         elif t == float:
             df[c] = df[c].apply(hash_floatl)
         elif t == object:
