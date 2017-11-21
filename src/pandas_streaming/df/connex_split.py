@@ -183,7 +183,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
             train, test = train_test_connex_split(df, test_size=0.5,
                                                   groups=['user', 'prod', 'card'],
-                                                  fail_imbalanced=0.4)
+                                                  fail_imbalanced=0.6)
             print(train)
             print(test)
 
@@ -209,7 +209,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
         train, test, cnx = train_test_connex_split(df, test_size=0.5,
                                               groups=['user', 'prod', 'card'],
-                                              fail_imbalanced=0.4, return_cnx=True)
+                                              fail_imbalanced=0.6, return_cnx=True)
 
         print(cnx[0])
         print(cnx[1])
