@@ -23,10 +23,6 @@ pandas_streaming
     :alt: MIT License
     :target: http://opensource.org/licenses/MIT
 
-.. image:: https://landscape.io/github/sdpython/pandas_streaming/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/sdpython/pandas_streaming/master
-   :alt: Code Health
-
 .. image:: https://requires.io/github/sdpython/pandas_streaming/requirements.svg?branch=master
      :target: https://requires.io/github/sdpython/pandas_streaming/requirements/?branch=master
      :alt: Requirements Status
