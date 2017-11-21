@@ -119,7 +119,8 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
 def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             stratify=None, hash_size=9, unique_rows=False,
                             shuffle=True, fail_imbalanced=0.05, keep_balance=None,
-                            stop_if_bigger=None, return_cnx=False, fLOG=None):
+                            stop_if_bigger=None, return_cnx=False,
+                            must_groups=None, fLOG=None):
     """
     This split is for a specific case where data is linked
     in many ways. Let's assume we have three ids as we have
@@ -146,6 +147,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             if their relative sizes are too different, the value should be
                             close to 1
     @param  return_cnx      returns connected components as a third results
+    @param  must_groups     column name for ids which must not be shared by train/test partitions
     @param  fLOG            logging function
     @return                 Two @see cl StreamingDataFrame, one
                             for train, one for test.
@@ -223,6 +225,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
         df = dataframe_shuffle(df)
 
     dfids = df[groups].copy()
+    if must_groups is not None:
+        dfids_must = df[must_groups].copy()
 
     name = "connex"
     while name in dfids.columns:
@@ -236,74 +240,78 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     counts_cnx = {i: {i} for i in elements}
     connex = {}
     avoids_merge = {}
-    modif = 1
-    iter = 0
 
-    while modif > 0 and iter < len(elements):
-        if fLOG and df.shape[0] > 10000:
-            fLOG("[train_test_connex_split] iteration={0}-#nb connect={1} - modif={2}".format(
-                iter, len(set(elements)), modif))
-        modif = 0
-        iter += 1
-        for i, row in enumerate(dfids.itertuples(index=False, name=None)):
-            vals = [val for val in zip(groups, row) if not isinstance(
-                val[1], float) or not numpy.isnan(val[1])]
+    def do_connex_components(dfrows, local_groups, kb, sib):
+        iter = 0
+        modif = 1
 
-            c = elements[i]
-            if i not in counts_cnx[c]:
-                raise RuntimeError("Element not found in its own component: {0}\n{1}".format(
-                    i, list(sorted(counts_cnx[c]))))
+        while modif > 0 and iter < len(elements):
+            if fLOG and df.shape[0] > 10000:
+                fLOG("[train_test_connex_split] iteration={0}-#nb connect={1} - modif={2}".format(
+                    iter, len(set(elements)), modif))
+            modif = 0
+            iter += 1
+            for i, row in enumerate(dfrows.itertuples(index=False, name=None)):
+                vals = [val for val in zip(local_groups, row) if not isinstance(
+                    val[1], float) or not numpy.isnan(val[1])]
 
-            for val in vals:
-                if val not in connex:
-                    connex[val] = c
-                    modif += 1
+                c = elements[i]
 
-            set_c = set(connex[val] for val in vals)
-            set_c.add(c)
-            new_c = min(set_c)
+                for val in vals:
+                    if val not in connex:
+                        connex[val] = c
+                        modif += 1
 
-            add_pair_c = []
-            for c in set_c:
-                if c == new_c or (new_c, c) in avoids_merge:
-                    continue
-                if keep_balance is not None:
-                    maxi = min(len(counts_cnx[new_c]), len(counts_cnx[c]))
-                    if maxi > 5:
-                        diff = len(counts_cnx[new_c]) + \
-                            len(counts_cnx[c]) - maxi
-                        r = diff / float(maxi)
-                        if r > keep_balance:
+                set_c = set(connex[val] for val in vals)
+                set_c.add(c)
+                new_c = min(set_c)
+
+                add_pair_c = []
+                for c in set_c:
+                    if c == new_c or (new_c, c) in avoids_merge:
+                        continue
+                    if kb is not None:
+                        maxi = min(len(counts_cnx[new_c]), len(counts_cnx[c]))
+                        if maxi > 5:
+                            diff = len(counts_cnx[new_c]) + \
+                                len(counts_cnx[c]) - maxi
+                            r = diff / float(maxi)
+                            if r > kb:
+                                if fLOG:
+                                    fLOG('[train_test_connex_split]    balance r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
+                                        r, kb, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                                continue
+
+                    if sib is not None:
+                        r = (len(counts_cnx[new_c]) +
+                             len(counts_cnx[c])) / float(len(elements))
+                        if r > sib:
                             if fLOG:
-                                fLOG('[train_test_connex_split]    balance r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
-                                    r, keep_balance, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                                fLOG('[train_test_connex_split]    no merge r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
+                                    r, sib, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                            avoids_merge[new_c, c] = i
                             continue
 
-                if stop_if_bigger is not None:
-                    r = (len(counts_cnx[new_c]) +
-                         len(counts_cnx[c])) / float(len(elements))
-                    if r > stop_if_bigger:
-                        if fLOG:
-                            fLOG('[train_test_connex_split]    no merge r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
-                                r, stop_if_bigger, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
-                        avoids_merge[new_c, c] = i
-                        continue
+                    add_pair_c.append(c)
 
-                add_pair_c.append(c)
+                if len(add_pair_c) > 0:
+                    for c in add_pair_c:
+                        modif += len(counts_cnx[c])
+                        for i in counts_cnx[c]:
+                            elements[i] = new_c
+                        counts_cnx[new_c] = counts_cnx[new_c].union(
+                            counts_cnx[c])
+                        counts_cnx[c] = set()
 
-            if len(add_pair_c) > 0:
-                for c in add_pair_c:
-                    modif += len(counts_cnx[c])
-                    for i in counts_cnx[c]:
-                        elements[i] = new_c
-                    counts_cnx[new_c] = counts_cnx[new_c].union(counts_cnx[c])
-                    counts_cnx[c] = set()
+                        keys = list(vals)
+                        for val in keys:
+                            if connex[val] == c:
+                                connex[val] = new_c
+                                modif += 1
 
-                    keys = list(vals)
-                    for val in keys:
-                        if connex[val] == c:
-                            connex[val] = new_c
-                            modif += 1
+    if must_groups:
+        do_connex_components(dfids_must, must_groups, None, None)
+    do_connex_components(dfids, groups, keep_balance, stop_if_bigger)
 
     # final
     dfids[name] = elements
