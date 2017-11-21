@@ -274,16 +274,18 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             len(counts_cnx[c]) - maxi
                         r = diff / float(maxi)
                         if r > keep_balance:
-                            fLOG('[train_test_connex_split]    balance r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
-                                r, keep_balance, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                            if fLOG:
+                                fLOG('[train_test_connex_split]    balance r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
+                                    r, keep_balance, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
                             continue
 
                 if stop_if_bigger is not None:
                     r = (len(counts_cnx[new_c]) +
                          len(counts_cnx[c])) / float(len(elements))
                     if r > stop_if_bigger:
-                        fLOG('[train_test_connex_split]    no merge r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
-                            r, stop_if_bigger, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                        if fLOG:
+                            fLOG('[train_test_connex_split]    no merge r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
+                                r, stop_if_bigger, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
                         avoids_merge[new_c, c] = i
                         continue
 
