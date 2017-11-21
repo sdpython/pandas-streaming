@@ -79,4 +79,7 @@ epkg_dictionary.update({
     'sklearn': ('http://scikit-learn.org/stable/',
                 ('http://scikit-learn.org/stable/modules/generated/{0}.html', 1),
                 ('http://scikit-learn.org/stable/modules/generated/{0}.{1}.html', 2)),
+    'Hadoop': 'http://hadoop.apache.org/',
+    'pyarrow': 'https://arrow.apache.org/docs/python/',
+    'pyspark': 'http://spark.apache.org/docs/2.1.1/api/python/index.html',
 })

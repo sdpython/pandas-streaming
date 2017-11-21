@@ -54,8 +54,7 @@ on medium datasets (a couple of gigabytes). The API is not exactly
 the same either. The parser does not behave exactly the same.
 :epkg:`pyspark` seems a bit of overhead, more difficult
 to install and still slow if it is used locally.
-:epkg:`pyarrow <https://arrow.apache.org/docs/python/>`_
-is supposed to be the next :epkg:`pandas` but its
+:epkg:`pyarrow` is supposed to be the next :epkg:`pandas` but its
 scope is larger (it handles streaming dataset from :epkg:`Hadoop`)
 and does not work yet with :epkg:`scikit-learn`.
 I expect this module to be live until

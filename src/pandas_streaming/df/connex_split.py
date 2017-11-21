@@ -6,6 +6,7 @@
 import pandas
 import random
 import numpy
+from collections import Counter
 from sklearn.model_selection import train_test_split
 
 
@@ -117,7 +118,8 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
 
 def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             stratify=None, hash_size=9, unique_rows=False,
-                            shuffle=True, fail_imbalanced=0.05, fLOG=None):
+                            shuffle=True, fail_imbalanced=0.05, keep_balance=None,
+                            stop_if_bigger=None, return_cnx=False, fLOG=None):
     """
     This split is for a specific case where data is linked
     in many ways. Let's assume we have three ids as we have
@@ -135,6 +137,15 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     @param  unique_rows     ensures that rows are unique
     @param  shuffle         shuffles before the split
     @param  fail_imbalanced raises an exception if relative weights difference is higher than this value
+    @param  stop_if_bigger  (float) stops a connected components from being
+                            bigger than this ratio of elements, this should not be used
+                            unless a big components emerges, the algorithm stops merging
+                            but does not guarantee it returns the best cut,
+                            the value should be close to 0
+    @param  keep_balance    (float), if not None, does not merge connected components
+                            if their relative sizes are too different, the value should be
+                            close to 1
+    @param  return_cnx      returns connected components as a third results
     @param  fLOG            logging function
     @return                 Two @see cl StreamingDataFrame, one
                             for train, one for test.
@@ -173,6 +184,33 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                                                   fail_imbalanced=0.4)
             print(train)
             print(test)
+
+    If *return_cnx* is True, the third results contains:
+
+    * connected components for each id
+    * the dataframe with connected components as a new column
+
+    .. runpython::
+        :showcode:
+
+        from pandas import DataFrame
+        from pandas_streaming.df import train_test_connex_split
+
+        df = DataFrame([dict(user="UA", prod="PAA", card="C1"),
+                        dict(user="UA", prod="PB", card="C1"),
+                        dict(user="UB", prod="PC", card="C2"),
+                        dict(user="UB", prod="PD", card="C2"),
+                        dict(user="UC", prod="PAA", card="C3"),
+                        dict(user="UC", prod="PF", card="C4"),
+                        dict(user="UD", prod="PG", card="C5"),
+                        ])
+
+        train, test, cnx = train_test_connex_split(df, test_size=0.5,
+                                              groups=['user', 'prod', 'card'],
+                                              fail_imbalanced=0.4, return_cnx=True)
+
+        print(cnx[0])
+        print(cnx[1])
     """
     if groups is None or len(groups) == 0:
         raise ValueError("groups is empty. Use regular train_test_split.")
@@ -195,29 +233,75 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
     # Connected components.
     elements = list(range(dfids.shape[0]))
+    counts_cnx = {i: {i} for i in elements}
     connex = {}
+    avoids_merge = {}
     modif = 1
     iter = 0
-    while modif > 0:
+
+    while modif > 0 and iter < len(elements):
+        if fLOG and df.shape[0] > 10000:
+            fLOG("[train_test_connex_split] iteration={0}-#nb connect={1} - modif={2}".format(
+                iter, len(set(elements)), modif))
         modif = 0
         iter += 1
         for i, row in enumerate(dfids.itertuples(index=False, name=None)):
+            vals = [val for val in zip(groups, row) if not isinstance(
+                val[1], float) or not numpy.isnan(val[1])]
+
             c = elements[i]
-            new_c = c
-            for val in zip(groups, row):
-                if val in connex:
-                    new_c = min(new_c, connex[val])
-            if new_c != c:
-                modif += 1
-                elements[i] = new_c
-            for val in zip(groups, row):
-                if val not in connex or connex[val] != new_c:
-                    connex[val] = new_c
+            if i not in counts_cnx[c]:
+                raise RuntimeError("Element not found in its own component: {0}\n{1}".format(
+                    i, list(sorted(counts_cnx[c]))))
+
+            for val in vals:
+                if val not in connex:
+                    connex[val] = c
                     modif += 1
 
-    if fLOG:
-        fLOG(
-            "[train_test_connex_split] number of iterations (connex): {0}".format(iter))
+            set_c = set(connex[val] for val in vals)
+            set_c.add(c)
+            new_c = min(set_c)
+
+            add_pair_c = []
+            for c in set_c:
+                if c == new_c or (new_c, c) in avoids_merge:
+                    continue
+                if keep_balance is not None:
+                    maxi = min(len(counts_cnx[new_c]), len(counts_cnx[c]))
+                    if maxi > 5:
+                        diff = len(counts_cnx[new_c]) + \
+                            len(counts_cnx[c]) - maxi
+                        r = diff / float(maxi)
+                        if r > keep_balance:
+                            fLOG('[train_test_connex_split]    balance r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
+                                r, keep_balance, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                            continue
+
+                if stop_if_bigger is not None:
+                    r = (len(counts_cnx[new_c]) +
+                         len(counts_cnx[c])) / float(len(elements))
+                    if r > stop_if_bigger:
+                        fLOG('[train_test_connex_split]    no merge r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
+                            r, stop_if_bigger, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                        avoids_merge[new_c, c] = i
+                        continue
+
+                add_pair_c.append(c)
+
+            if len(add_pair_c) > 0:
+                for c in add_pair_c:
+                    modif += len(counts_cnx[c])
+                    for i in counts_cnx[c]:
+                        elements[i] = new_c
+                    counts_cnx[new_c] = counts_cnx[new_c].union(counts_cnx[c])
+                    counts_cnx[c] = set()
+
+                    keys = list(vals)
+                    for val in keys:
+                        if connex[val] == c:
+                            connex[val] = new_c
+                            modif += 1
 
     # final
     dfids[name] = elements
@@ -225,12 +309,36 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     grsum = dfids[[name, one]].groupby(name, as_index=False).sum()
     if fLOG:
         for g in groups:
-            fLOG("[train_test_connex_split] #nb in '{0}': {1}".format(
+            fLOG("[train_test_connex_split]     #nb in '{0}': {1}".format(
                 g, len(set(dfids[g]))))
         fLOG(
             "[train_test_connex_split] #connex {0}/{1}".format(grsum.shape[0], dfids.shape[0]))
     if grsum.shape[0] <= 1:
         raise ValueError("Every element is in the same connected components.")
+
+    # Statistics: top connected components
+    if fLOG:
+        # Global statistics
+        counts = Counter(elements)
+        cl = [(v, k) for k, v in counts.items()]
+        cum = 0
+        maxc = None
+        fLOG("[train_test_connex_split] number of connected components: {0}".format(
+            len(set(elements))))
+        for i, (v, k) in enumerate(sorted(cl, reverse=True)):
+            if i == 0:
+                maxc = k, v
+            if i >= 10:
+                break
+            cum += v
+            fLOG("[train_test_connex_split]     c={0} #elements={1} cumulated={2}/{3}".format(
+                k, v, cum, len(elements)))
+
+        # Most important component
+        fLOG(
+            '[train_test_connex_split] first row of the biggest component {0}'.format(maxc))
+        tdf = dfids[dfids[name] == maxc[0]]
+        fLOG('[train_test_connex_split] \n{0}'.format(tdf.head(n=10)))
 
     # Splits.
     train, test = train_test_split_weights(grsum, weights=one, test_size=test_size,
@@ -247,4 +355,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
     train_f = double_merge(train)
     test_f = double_merge(test)
-    return train_f, test_f
+    if return_cnx:
+        return train_f, test_f, (connex, dfids)
+    else:
+        return train_f, test_f
