@@ -29,6 +29,8 @@ Data Manipulation
 
 .. autosignature:: pandas_streaming.df.connex_split.dataframe_shuffle
 
+.. autosignature:: pandas_streaming.df.dataframe_helpers.dataframe_unfold
+
 Complex splits
 ++++++++++++++
 

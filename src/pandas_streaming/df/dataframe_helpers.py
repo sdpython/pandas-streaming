@@ -5,6 +5,7 @@
 """
 import hashlib
 import struct
+import pandas
 import numpy
 
 
@@ -120,3 +121,30 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
                 "Conversion of type {0} in column '{1}' is not implemented".format(t, c))
 
     return df
+
+
+def dataframe_unfold(df, col, new_col=None, sep=","):
+    """
+    One column may contain concatenated values.
+    This function splits these values and multiplies the
+    rows for each split values.
+
+    @param      df      dataframe
+    @param      col     column with the concatenated values (strings)
+    @param      new_col new column name, if None, use default value.
+    @param      sep     separator
+    @return             a new dataframe
+    """
+    if new_col is None:
+        col_name = col + "_unfold"
+    rows = []
+    for v in df[col]:
+        if isinstance(v, str):
+            spl = v.split(sep)
+            for vs in spl:
+                rows.append({col: v, col_name: vs})
+        else:
+            rows.append({col: v, col_name: v})
+    dfj = pandas.DataFrame(rows)
+    res = df.merge(dfj, on=col)
+    return res
