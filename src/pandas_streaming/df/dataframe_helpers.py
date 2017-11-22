@@ -138,6 +138,7 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
     .. runpython::
         :showcode:
 
+        import pandas
         from pandas_streaming.df import dataframe_unfold
         df = pandas.DataFrame([dict(a=1, b="e,f"),
                                dict(a=2, b="g"),
