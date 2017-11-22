@@ -134,17 +134,32 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
     @param      new_col new column name, if None, use default value.
     @param      sep     separator
     @return             a new dataframe
+
+    .. runpython::
+        :showcode:
+
+        from pandas_streaming.df import dataframe_unfold
+        df = pandas.DataFrame([dict(a=1, b="e,f"),
+                               dict(a=2, b="g"),
+                               dict(a=3)])
+        df2 = dataframe_unfold(df, "b")
+        print(df2)
     """
     if new_col is None:
         col_name = col + "_unfold"
+    temp_col = '__index__'
+    while temp_col in df.columns:
+        temp_col += "_"
     rows = []
-    for v in df[col]:
+    for i, v in enumerate(df[col]):
         if isinstance(v, str):
             spl = v.split(sep)
             for vs in spl:
-                rows.append({col: v, col_name: vs})
+                rows.append({col: v, col_name: vs, temp_col: i})
         else:
-            rows.append({col: v, col_name: v})
+            rows.append({col: v, col_name: v, temp_col: i})
+    df = df.copy()
+    df[temp_col] = list(range(df.shape[0]))
     dfj = pandas.DataFrame(rows)
-    res = df.merge(dfj, on=col)
-    return res
+    res = df.merge(dfj, on=[col, temp_col])
+    return res.drop(temp_col, axis=1).copy()
