@@ -127,7 +127,7 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
     """
     One column may contain concatenated values.
     This function splits these values and multiplies the
-    rows for each split values.
+    rows for each split value.
 
     @param      df      dataframe
     @param      col     column with the concatenated values (strings)
