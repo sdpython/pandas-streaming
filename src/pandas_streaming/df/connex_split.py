@@ -214,7 +214,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
         print(cnx[0])
         print(cnx[1])
     """
-    if stratify is None:
+    if stratify is not None:
         raise NotImplementedError("Option stratify is not implemented.")
     if groups is None or len(groups) == 0:
         raise ValueError("groups is empty. Use regular train_test_split.")
