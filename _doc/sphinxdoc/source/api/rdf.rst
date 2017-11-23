@@ -39,6 +39,8 @@ if rows are not independant and share some ids. In that case,
 the following functions will try to build two partitions keeping
 ids separate or separate as much as possible.
 
+.. autosignature:: pandas_streaming.df.connex_split.train_test_apart_stratify
+
 .. autosignature:: pandas_streaming.df.connex_split.train_test_connex_split
 
 .. autosignature:: pandas_streaming.df.connex_split.train_test_split_weights

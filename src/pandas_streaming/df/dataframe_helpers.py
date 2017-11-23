@@ -139,15 +139,23 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
         :showcode:
 
         import pandas
+        import numpy
         from pandas_streaming.df import dataframe_unfold
         df = pandas.DataFrame([dict(a=1, b="e,f"),
                                dict(a=2, b="g"),
                                dict(a=3)])
         df2 = dataframe_unfold(df, "b")
         print(df2)
+
+        # To fold:
+        folded = df2.groupby('a').apply(lambda row: ','.join(row['b_unfold'].dropna()) \\
+                                        if len(row['b_unfold'].dropna()) > 0 else numpy.nan)
+        print(folded)
     """
     if new_col is None:
         col_name = col + "_unfold"
+    else:
+        col_name = new_col
     temp_col = '__index__'
     while temp_col in df.columns:
         temp_col += "_"

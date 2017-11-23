@@ -7,6 +7,7 @@ import sys
 import os
 import unittest
 import pandas
+import numpy
 
 
 try:
@@ -62,6 +63,13 @@ class TestDataFrameHelpersSimple(ExtTestCase):
                                 dict(a=2, b="g", b_unfold="g"),
                                 dict(a=3)])
         self.assertEqualDataFrame(df2, exp)
+
+        # fold
+        folded = df2.groupby('a').apply(lambda row: ','.join(
+            row['b_unfold'].dropna()) if len(row['b_unfold'].dropna()) > 0 else numpy.nan)
+        bf = folded.reset_index(drop=False)
+        bf.columns = ['a', 'b']
+        self.assertEqualDataFrame(df, bf)
 
 
 if __name__ == "__main__":

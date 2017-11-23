@@ -214,6 +214,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
         print(cnx[0])
         print(cnx[1])
     """
+    if stratify is None:
+        raise NotImplementedError("Option stratify is not implemented.")
     if groups is None or len(groups) == 0:
         raise ValueError("groups is empty. Use regular train_test_split.")
     if hasattr(df, 'iter_creation'):
@@ -369,3 +371,107 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
         return train_f, test_f, (connex, dfids)
     else:
         return train_f, test_f
+
+
+def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
+                              stratify=None, force=False, fLOG=None):
+    """
+    This split is for a specific case where data is linked
+    in one way. Let's assume we have two ids as we have
+    for online sales: *(product id, category id)*.
+    A product can have multiple categories. We need to have
+    distinct products on train and test but common categories
+    on both sides.
+
+    @param  df              :epkg:`pandas:DataFrame`
+    @param  groups          columns name for the ids
+    @param  test_size       ratio for the test partition (if *train_size* is not specified)
+    @param  train_size      ratio for the train partition
+    @param  stratify        column holding the stratification
+    @param  force           if True, tries to get at least one example on the test side
+                            for each value of the column *stratify*
+    @param  fLOG            logging function
+    @return                 Two @see cl StreamingDataFrame, one
+                            for train, one for test.
+
+    .. index:: multi-label
+
+    The list of ids must hold in memory.
+    There is no streaming implementation for the ids.
+    This split was implemented for a case of a multi-label
+    classification. A category (*stratify*) is not exclusive
+    and an observation can be assigned to multiple
+    categories. In that particular case, the method
+    `train_test_split <http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_
+    can not directly be used.
+
+    .. runpython::
+        :showcode:
+
+        import pandas
+        df = pandas.DataFrame([dict(a=1, b="e"),
+                               dict(a=1, b="f"),
+                               dict(a=2, b="e"),
+                               dict(a=2, b="f"),
+                               ])
+
+        from pandas_streaming.df import train_test_apart_stratify
+        train, test = train_test_apart_stratify(df, group="a", stratify="b", test_size=0.5)
+        print(train)
+        print(test)
+    """
+    if stratify is None:
+        raise ValueError("stratify must be specified.")
+    if group is None:
+        raise ValueError("group must be specified.")
+    if hasattr(df, 'iter_creation'):
+        raise NotImplementedError(
+            'Not implemented yet for StreamingDataFrame.')
+    if isinstance(df, numpy.ndarray):
+        raise NotImplementedError("Not implemented on numpy arrays.")
+
+    p = (1 - test_size) if test_size else None
+    if train_size is not None:
+        p = train_size
+    test_size = 1 - p
+    if min(test_size, p) <= 0:
+        raise ValueError(
+            "test_size={0} or train_size={1} cannot be null".format(test_size, train_size))
+
+    couples = df[[group, stratify]].itertuples(name=None, index=False)
+    hist = Counter(df[stratify])
+    sorted_hist = [(v, k) for k, v in hist.items()]
+    sorted_hist.sort()
+    ids = {c: set() for c in hist}
+
+    for g, s in couples:
+        ids[s].add(g)
+
+    split = {}
+    for v, k in sorted_hist:
+        not_assigned = [c for c in ids[k] if c not in split]
+        if len(not_assigned) == 0:
+            continue
+        assigned = [c for c in ids[k] if c in split]
+        nb_test = sum(split[c] for c in assigned)
+        expected = min(len(ids[k]), int(
+            test_size * len(ids[k]) + 0.5)) - nb_test
+        if force and expected == 0 and nb_test == 0:
+            nb_train = len(assigned) - nb_test
+            if nb_train > 0 or len(not_assigned) > 1:
+                expected = min(1, len(not_assigned))
+        if expected > 0:
+            random.shuffle(not_assigned)
+            for e in not_assigned[:expected]:
+                split[e] = 1
+            for e in not_assigned[expected:]:
+                split[e] = 0
+        else:
+            for c in not_assigned:
+                split[c] = 0
+
+    train_set = set(k for k, v in split.items() if v == 0)
+    test_set = set(k for k, v in split.items() if v == 1)
+    train_df = df[df[group].isin(train_set)]
+    test_df = df[df[group].isin(test_set)]
+    return train_df, test_df
