@@ -7,3 +7,4 @@ API
     rdata
     rdf
     rexc
+    rio
