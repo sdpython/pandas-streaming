@@ -106,7 +106,7 @@ def read_zip(zipfilename, zname="df.csv", **kwargs):
     @param      zipfilename a :epkg:`*py:zipfile:ZipFile` or a filename
     @param      zname       a filename in th zipfile
     @param      kwargs      parameters for :epkg:`pandas:read_csv`
-    @return                 dataframe
+    @return                 :epkg:`pandas:dataframe` or :epkg:`numpy:array`
     """
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
