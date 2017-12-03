@@ -51,7 +51,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         .. runpython::
             :showcode:
 
-            import pandas
+            import numpy
             from pandas_streaming.df import to_zip, read_zip
 
             arr = numpy.array([[0.5, 1.5], [0.4, 1.6]])
