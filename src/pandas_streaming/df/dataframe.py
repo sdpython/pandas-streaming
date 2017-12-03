@@ -110,7 +110,7 @@ class StreamingDataFrame:
         It chooses one of the options from module
         :mod:`dataframe_split <pandas_streaming.df.dataframe_split>`.
 
-        @param  path_or_bug     a string, a list of strings or buffers, if it is a
+        @param  path_or_buf     a string, a list of strings or buffers, if it is a
                                 string, it must contain ``{}`` like ``partition{}.txt``,
                                 if None, the function returns strings.
         @param  export_method   method used to store the partitions, by default
@@ -122,7 +122,6 @@ class StreamingDataFrame:
         @param  streaming       the function switches to a
                                 streaming version of the algorithm.
         @param  partitions      splitting partitions
-        @param  kwargs          additional parameters
         @return                 outputs of the exports functions or two
                                 @see cl StreamingDataFrame if path_or_buf is None.
 
@@ -360,6 +359,7 @@ class StreamingDataFrame:
 
         @param      reservoir   use `reservoir sampling <https://en.wikipedia.org/wiki/Reservoir_sampling>`_
         @param      cache       cache the sample
+        @param      kwargs      additional parameters for :epkg:`pandas:DataFrame:sample`
 
         If *cache* is True, the sample is cached (assuming it holds in memory).
         The second time an iterator walks through the
@@ -377,7 +377,7 @@ class StreamingDataFrame:
             else:
                 return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self), **self.get_kwargs(), stable=False)
 
-    def _reservoir_sampling(self, cache=True, n=1000, seed=None, random_state=None) -> 'StreamingDataFrame':
+    def _reservoir_sampling(self, cache=True, n=1000, random_state=None) -> 'StreamingDataFrame':
         """
         Uses the `reservoir sampling <https://en.wikipedia.org/wiki/Reservoir_sampling>`_
         algorithm to draw a random sample with exactly *n* samples.
@@ -506,8 +506,10 @@ class StreamingDataFrame:
         We assume the result holds in memory. The out-of-memory is
         not implemented yet.
 
+        @param      by          see :epkg:`pandas:DataFrame:groupby`
         @param      in_memory   in-memory algorithm
         @param      lambda_agg  aggregation function, *sum* by default
+        @param      kwargs      additional parameters for :epkg:`pandas:DataFrame:groupby`
         @return                 :epkg:`pandas:DataFrame`
 
         As the input @see cl StreamingDataFrame does not necessarily hold

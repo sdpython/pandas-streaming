@@ -273,3 +273,5 @@ _doc/notebooks/example.test.txt
 _doc/notebooks/example.txt
 _doc/notebooks/example.train.txt
 _unittests/ut_df/buggy_hash.csv
+_doc/sphinxdoc/dfs.zip
+_doc/sphinxdoc/dfsa.zip

@@ -73,6 +73,7 @@ latex_elements['preamble'] += custom_preamble
 mathdef_link_only = True
 
 epkg_dictionary.update({
+    'dask': 'https://dask.pydata.org/en/latest/',
     'pandas': ('http://pandas.pydata.org/pandas-docs/stable/',
                ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.html', 1),
                ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.{1}.html', 2)),

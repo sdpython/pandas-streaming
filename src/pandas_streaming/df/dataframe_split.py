@@ -20,8 +20,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
     It does not handle stratified version of it.
 
     @param  self            @see cl StreamingDataFrame
-    @param  partitions      splitting partitions
-    @param  path_or_bug     a string, a list of strings or buffers, if it is a
+    @param  path_or_buf     a string, a list of strings or buffers, if it is a
                             string, it must contain ``{}`` like ``partition{}.txt``
     @param  export_method   method used to store the partitions, by default
                             :epkg:`pandas:DataFrame:to_csv`

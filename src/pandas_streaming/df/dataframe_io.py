@@ -56,8 +56,8 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
 
             arr = numpy.array([[0.5, 1.5], [0.4, 1.6]])
 
-            name = "dfs.zip"
-            to_zip(df, name, 'arr.npy')
+            name = "dfsa.zip"
+            to_zip(arr, name, 'arr.npy')
             arr2 = read_zip(name, 'arr.npy')
             print(arr2)
     """

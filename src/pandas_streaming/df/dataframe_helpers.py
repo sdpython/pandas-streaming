@@ -79,11 +79,11 @@ def hash_float(c, hash_length):
 def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
     """
     Hashes a set of columns in a dataframe.
-    Keep the same type. Skips missing values.
+    Keeps the same type. Skips missing values.
 
     @param      df          dataframe
     @param      cols        columns to hash or None for alls.
-    @param      hask_length for strings only, length of the hash
+    @param      hash_length for strings only, length of the hash
     @param      inplace     modifies inplace
     @return                 new dataframe
 

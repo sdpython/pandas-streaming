@@ -384,7 +384,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
     on both sides.
 
     @param  df              :epkg:`pandas:DataFrame`
-    @param  groups          columns name for the ids
+    @param  group           columns name for the ids
     @param  test_size       ratio for the test partition (if *train_size* is not specified)
     @param  train_size      ratio for the train partition
     @param  stratify        column holding the stratification
