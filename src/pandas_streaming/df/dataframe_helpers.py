@@ -217,7 +217,7 @@ def dataframe_shuffle(df, random_state=None):
             :showcode:
 
             import pandas
-            from pandas_streaming.df import dataframe_unfold
+            from pandas_streaming.df import dataframe_shuffle
 
             df = pandas.DataFrame([dict(a=1, b="e", c=5.6, ind="a1"),
                                    dict(a=2, b="f", c=5.7, ind="a2"),

@@ -52,8 +52,7 @@ and implements other functionalities for machine learning.
 
     tutorial/index
     api/index
-    i_ex
-    all_notebooks
+    i_examples
     blog/blogindex
     index_modules
     i_index

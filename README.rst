@@ -41,7 +41,8 @@ README
     :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
     :alt: Notebook Coverage
 
-*pandas_streaming* aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
+`pandas_streaming <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_
+aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
 too big to hold in memory, too small to be parallelized with a significant gain.
 The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API
 and implements other functionalities for machine learning.
