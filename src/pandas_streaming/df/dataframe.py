@@ -524,6 +524,7 @@ class StreamingDataFrame:
 
         .. exref::
             :title: StreamingDataFrame and groupby
+            :tag: streaming
 
             Here is an example which shows how to write a simple *groupby*
             with :epkg:`pandas` and @see cl StreamingDataFrame.

@@ -4,10 +4,10 @@
 @brief Implements a connex split between train and test.
 """
 import pandas
-import random
 import numpy
 from collections import Counter
 from sklearn.model_selection import train_test_split
+from .dataframe_helpers import dataframe_shuffle
 
 
 class ImbalancedSplitException(Exception):
@@ -17,31 +17,8 @@ class ImbalancedSplitException(Exception):
     pass
 
 
-def dataframe_shuffle(df, seed=None):
-    """
-    Shuffles a dataframe.
-
-    @param      df      :epkg:`pandas:DataFrame`
-    @param      seed    seed
-    @return             new :epkg:`pandas:DataFrame`
-    """
-    if seed is not None:
-        random.seed(seed)
-    ori_cols = list(df.columns)
-    scols = set(ori_cols)
-
-    no_index = df.reset_index(drop=False)
-    keep_cols = [_ for _ in no_index.columns if _ not in scols]
-    index = list(no_index.index)
-    random.shuffle(index)
-    shuffled = no_index.iloc[index, :]
-    res = shuffled.set_index(keep_cols)[ori_cols]
-    res.index.names = df.index.names
-    return res
-
-
 def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
-                             shuffle=True, fail_imbalanced=0.05):
+                             shuffle=True, fail_imbalanced=0.05, random_state=None):
     """
     Splits a database in train/test given, every row
     can have a different weight.
@@ -52,6 +29,7 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
     @param  train_size      ratio for the train partition
     @param  shuffle         shuffles before the split
     @param  fail_imbalanced raises an exception if relative weights difference is higher than this value
+    @param  random_state    seed for random generators
     @return                 train and test :epkg:`pandas:DataFrame`
 
     If the dataframe is not shuffled first, the function
@@ -65,9 +43,12 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
     if isinstance(df, numpy.ndarray):
         raise NotImplementedError("Not implemented on numpy arrays.")
     if shuffle:
-        df = dataframe_shuffle(df)
+        df = dataframe_shuffle(df, random_state=random_state)
     if weights is None:
-        return train_test_split(df, test_size=test_size, train_size=train_size)
+        if test_size == 0 or train_size == 0:
+            raise ValueError(
+                "test_size={0} or train_size={1} cannot be null (1)".format(test_size, train_size))
+        return train_test_split(df, test_size=test_size, train_size=train_size, random_state=random_state)
 
     if isinstance(weights, pandas.Series):
         weights = list(weights)
@@ -80,11 +61,17 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
     p = (1 - test_size) if test_size else None
     if train_size is not None:
         p = train_size
-    test_size = 1 - p
-    if min(test_size, p) <= 0:
+        test_size = 1 - p
+    if p is None or min(test_size, p) <= 0:
         raise ValueError(
-            "test_size={0} or train_size={1} cannot be null".format(test_size, train_size))
+            "test_size={0} or train_size={1} cannot be null (2)".format(test_size, train_size))
     ratio = test_size / p
+
+    if random_state is None:
+        randint = numpy.random.randint
+    else:
+        state = numpy.random.RandomState(random_state)
+        randint = state.randint
 
     balance = 0
     train_ids = []
@@ -94,7 +81,7 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
     for i in range(0, df.shape[0]):
         w = weights[i]
         if balance == 0:
-            h = random.randint(0, 1)
+            h = randint(0, 1)
             totest = h == 0
         else:
             totest = balance < 0
@@ -120,7 +107,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             stratify=None, hash_size=9, unique_rows=False,
                             shuffle=True, fail_imbalanced=0.05, keep_balance=None,
                             stop_if_bigger=None, return_cnx=False,
-                            must_groups=None, fLOG=None):
+                            must_groups=None, random_state=None, fLOG=None):
     """
     This split is for a specific case where data is linked
     in many ways. Let's assume we have three ids as we have
@@ -148,6 +135,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             close to 1
     @param  return_cnx      returns connected components as a third results
     @param  must_groups     column name for ids which must not be shared by train/test partitions
+    @param  random_state    seed for random generator
     @param  fLOG            logging function
     @return                 Two @see cl StreamingDataFrame, one
                             for train, one for test.
@@ -156,7 +144,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     There is no streaming implementation for the ids.
 
     .. exref::
-        :title: Split a dataframe, keep ids in separate partitions
+        :title: Splits a dataframe, keep ids in separate partitions
+        :tag: dataframe
 
         In some data science problems, rows are not independant
         and share common value, most of the time ids. In some
@@ -224,7 +213,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     if isinstance(df, numpy.ndarray):
         raise NotImplementedError("Not implemented on numpy arrays.")
     if shuffle:
-        df = dataframe_shuffle(df)
+        df = dataframe_shuffle(df, random_state=random_state)
 
     dfids = df[groups].copy()
     if must_groups is not None:
@@ -355,7 +344,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     # Splits.
     train, test = train_test_split_weights(grsum, weights=one, test_size=test_size,
                                            train_size=train_size, shuffle=shuffle,
-                                           fail_imbalanced=fail_imbalanced)
+                                           fail_imbalanced=fail_imbalanced,
+                                           random_state=random_state)
     train.drop(one, inplace=True, axis=1)
     test.drop(one, inplace=True, axis=1)
 
@@ -374,7 +364,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
 
 def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
-                              stratify=None, force=False, fLOG=None):
+                              stratify=None, force=False, random_state=None, fLOG=None):
     """
     This split is for a specific case where data is linked
     in one way. Let's assume we have two ids as we have
@@ -390,6 +380,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
     @param  stratify        column holding the stratification
     @param  force           if True, tries to get at least one example on the test side
                             for each value of the column *stratify*
+    @param  random_state    seed for random generators
     @param  fLOG            logging function
     @return                 Two @see cl StreamingDataFrame, one
                             for train, one for test.
@@ -418,6 +409,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
         from pandas_streaming.df import train_test_apart_stratify
         train, test = train_test_apart_stratify(df, group="a", stratify="b", test_size=0.5)
         print(train)
+        print('-----------')
         print(test)
     """
     if stratify is None:
@@ -434,7 +426,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
     if train_size is not None:
         p = train_size
     test_size = 1 - p
-    if min(test_size, p) <= 0:
+    if p is None or min(test_size, p) <= 0:
         raise ValueError(
             "test_size={0} or train_size={1} cannot be null".format(test_size, train_size))
 
@@ -446,6 +438,12 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
 
     for g, s in couples:
         ids[s].add(g)
+
+    if random_state is None:
+        permutation = numpy.random.permutation
+    else:
+        state = numpy.random.RandomState(random_state)
+        permutation = state.permutation
 
     split = {}
     for v, k in sorted_hist:
@@ -461,7 +459,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
             if nb_train > 0 or len(not_assigned) > 1:
                 expected = min(1, len(not_assigned))
         if expected > 0:
-            random.shuffle(not_assigned)
+            permutation(not_assigned)
             for e in not_assigned[:expected]:
                 split[e] = 1
             for e in not_assigned[expected:]:

@@ -35,7 +35,7 @@ README
 
 .. image:: https://badge.waffle.io/sdpython/pandas_streaming.png?label=ready&title=Ready
     :alt: Waffle
-    :target: https://waffle.io/pandas_streaming/pandas_streaming
+    :target: https://waffle.io/sdpython/pandas_streaming
 
 .. image:: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/_images/nbcov.png
     :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html

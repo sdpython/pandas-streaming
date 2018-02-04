@@ -43,6 +43,7 @@ except ImportError:
 from pyquickhelper.loghelper import fLOG
 from pyquickhelper.pycode import ExtTestCase
 from src.pandas_streaming.df import dataframe_unfold
+from src.pandas_streaming.df.dataframe_helpers import hash_int, hash_str, hash_float
 
 
 class TestDataFrameHelpersSimple(ExtTestCase):
@@ -70,6 +71,26 @@ class TestDataFrameHelpersSimple(ExtTestCase):
         bf = folded.reset_index(drop=False)
         bf.columns = ['a', 'b']
         self.assertEqualDataFrame(df, bf)
+
+    def test_hash_except(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        self.assertRaise(lambda: hash_int(0.1, 3),
+                         ValueError, "numpy.nan expected")
+        r = hash_int(numpy.nan, 3)
+        self.assertTrue(numpy.isnan(r))
+
+        self.assertRaise(lambda: hash_str(0.1, 3),
+                         ValueError, "numpy.nan expected")
+        r = hash_str(numpy.nan, 3)
+        self.assertTrue(numpy.isnan(r))
+
+        self.assertRaise(lambda: hash_float("0.1", 3), TypeError, "isnan")
+        r = hash_float(numpy.nan, 3)
+        self.assertTrue(numpy.isnan(r))
 
 
 if __name__ == "__main__":

@@ -89,6 +89,25 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
 
     This might be useful to anonimized data before
     making it public.
+
+    .. exref::
+        :title: Hashes a set of columns in a dataframe
+        :tag: dataframe
+
+        .. runpython::
+            :showcode:
+
+            import pandas
+            from pandas_streaming.df import dataframe_hash_columns
+            df = pandas.DataFrame([dict(a=1, b="e", c=5.6, ind="a1", ai=1),
+                                   dict(b="f", c=5.7, ind="a2", ai=2),
+                                   dict(a=4, b="g", ind="a3", ai=3),
+                                   dict(a=8, b="h", c=5.9, ai=4),
+                                   dict(a=16, b="i", c=6.2, ind="a5", ai=5)])
+            print(df)
+            print('--------------')
+            df2 = dataframe_hash_columns(df)
+            print(df2)
     """
     if cols is None:
         cols = list(df.columns)
@@ -135,22 +154,30 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
     @param      sep     separator
     @return             a new dataframe
 
-    .. runpython::
-        :showcode:
+    .. exref::
+        :title: Unfolds a column of a dataframe.
+        :tag: dataframe
 
-        import pandas
-        import numpy
-        from pandas_streaming.df import dataframe_unfold
-        df = pandas.DataFrame([dict(a=1, b="e,f"),
-                               dict(a=2, b="g"),
-                               dict(a=3)])
-        df2 = dataframe_unfold(df, "b")
-        print(df2)
+        .. runpython::
+            :showcode:
 
-        # To fold:
-        folded = df2.groupby('a').apply(lambda row: ','.join(row['b_unfold'].dropna()) \\
-                                        if len(row['b_unfold'].dropna()) > 0 else numpy.nan)
-        print(folded)
+            import pandas
+            import numpy
+            from pandas_streaming.df import dataframe_unfold
+
+            df = pandas.DataFrame([dict(a=1, b="e,f"),
+                                   dict(a=2, b="g"),
+                                   dict(a=3)])
+            print(df)
+            df2 = dataframe_unfold(df, "b")
+            print('----------')
+            print(df2)
+
+            # To fold:
+            folded = df2.groupby('a').apply(lambda row: ','.join(row['b_unfold'].dropna()) \\
+                                            if len(row['b_unfold'].dropna()) > 0 else numpy.nan)
+            print('----------')
+            print(folded)
     """
     if new_col is None:
         col_name = col + "_unfold"
@@ -172,3 +199,50 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
     dfj = pandas.DataFrame(rows)
     res = df.merge(dfj, on=[col, temp_col])
     return res.drop(temp_col, axis=1).copy()
+
+
+def dataframe_shuffle(df, random_state=None):
+    """
+    Shuffles a dataframe.
+
+    @param      df              :epkg:`pandas:DataFrame`
+    @param      random_state    seed
+    @return                     new :epkg:`pandas:DataFrame`
+
+    .. exref::
+        :title: Shuffles the rows of a dataframe
+        :tag: dataframe
+
+        .. runpython::
+            :showcode:
+
+            import pandas
+            from pandas_streaming.df import dataframe_unfold
+
+            df = pandas.DataFrame([dict(a=1, b="e", c=5.6, ind="a1"),
+                                   dict(a=2, b="f", c=5.7, ind="a2"),
+                                   dict(a=4, b="g", c=5.8, ind="a3"),
+                                   dict(a=8, b="h", c=5.9, ind="a4"),
+                                   dict(a=16, b="i", c=6.2, ind="a5")])
+            print(df)
+            print('----------')
+
+            shuffled = dataframe_shuffle(df, random_state=0)
+            print(shuffled)
+    """
+    if random_state is not None:
+        state = numpy.random.RandomState(random_state)
+        permutation = state.permutation
+    else:
+        permutation = numpy.random.permutation
+    ori_cols = list(df.columns)
+    scols = set(ori_cols)
+
+    no_index = df.reset_index(drop=False)
+    keep_cols = [_ for _ in no_index.columns if _ not in scols]
+    index = no_index.index
+    index = permutation(index)
+    shuffled = no_index.iloc[index, :]
+    res = shuffled.set_index(keep_cols)[ori_cols]
+    res.index.names = df.index.names
+    return res

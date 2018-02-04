@@ -57,19 +57,42 @@ class TestConnexSplit(ExtTestCase):
                                dict(a=4, b="g", c=5.8, ind="a3"),
                                dict(a=8, b="h", c=5.9, ind="a4"),
                                dict(a=16, b="i", c=6.2, ind="a5")])
-        shuffled = dataframe_shuffle(df, seed=0)
+        shuffled = dataframe_shuffle(df, random_state=0)
         sorted = shuffled.sort_values('a')
         self.assertEqualDataFrame(df, sorted)
 
         df2 = df.set_index('ind')
-        shuffled = dataframe_shuffle(df2, seed=0)
+        shuffled = dataframe_shuffle(df2, random_state=0)
         sorted = shuffled.sort_values('a')
         self.assertEqualDataFrame(df2, sorted)
 
         df2 = df.set_index(['ind', 'c'])
-        shuffled = dataframe_shuffle(df2, seed=0)
+        shuffled = dataframe_shuffle(df2, random_state=0)
         sorted = shuffled.sort_values('a')
         self.assertEqualDataFrame(df2, sorted)
+
+    def test_split_weights_errors(self):
+        fLOG(
+            __file__,
+            self._testMethodName,
+            OutputPrint=__name__ == "__main__")
+
+        df = pandas.DataFrame([dict(a=1, b="e", c=1),
+                               dict(a=2, b="f", c=1),
+                               dict(a=4, b="g", c=1),
+                               dict(a=8, b="h", c=1),
+                               dict(a=12, b="h", c=1),
+                               dict(a=16, b="i", c=1)])
+
+        train, test = train_test_split_weights(df, train_size=0.5, weights='c')
+        self.assertTrue(train is not None)
+        self.assertTrue(test is not None)
+        self.assertRaise(lambda: train_test_split_weights(
+            df, test_size=0.5, weights=[0.5, 0.5]), ValueError, 'Dimension')
+        self.assertRaise(lambda: train_test_split_weights(
+            df, test_size=0), ValueError, 'null')
+        self.assertRaise(lambda: train_test_split_weights(
+            df, test_size=0, weights='c'), ValueError, 'null')
 
     def test_split_weights(self):
         fLOG(
@@ -139,6 +162,12 @@ class TestConnexSplit(ExtTestCase):
                 raise Exception(
                     'Non empty intersection {0} & {1}\n{2}\n{3}'.format(s1, s2, train, test))
 
+        df['connex'] = 'ole'
+        train, test = train_test_connex_split(df, test_size=0.5,
+                                              groups=['user', 'prod', 'card'],
+                                              fail_imbalanced=0.4, fLOG=fLOG)
+        self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
+
     def test_split_connex2(self):
         fLOG(
             __file__,
@@ -154,11 +183,13 @@ class TestConnexSplit(ExtTestCase):
                                dict(user="UD", prod="PG", card="C5"),
                                ])
 
+        train_test_connex_split(df, test_size=0.5, groups=['user', 'prod', 'card'],
+                                fail_imbalanced=0.5, fLOG=fLOG, return_cnx=True)
         train, test, stats = train_test_connex_split(df, test_size=0.5,
                                                      groups=[
                                                          'user', 'prod', 'card'],
                                                      fail_imbalanced=0.5, fLOG=fLOG,
-                                                     return_cnx=True)
+                                                     return_cnx=True, random_state=0)
 
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
         for col in ['user', 'prod', 'card']:
@@ -190,7 +221,7 @@ class TestConnexSplit(ExtTestCase):
                                                      groups=[
                                                          'user', 'prod', 'card'],
                                                      fail_imbalanced=0.4, fLOG=fLOG,
-                                                     return_cnx=True)
+                                                     return_cnx=True, random_state=0)
 
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
         for col in ['user', 'prod', 'card']:

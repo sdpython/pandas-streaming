@@ -97,8 +97,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
 
 
 def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
-                                       stratify=None,
-                                       hash_size=9, unique_rows=False):
+                                       stratify=None, hash_size=9, unique_rows=False):
     """
     Randomly splits a dataframe into smaller pieces.
     The function returns streams of file names.

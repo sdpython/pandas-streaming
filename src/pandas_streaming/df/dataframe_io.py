@@ -23,7 +23,8 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     @return                 zipfilename
 
     .. exref::
-        :title: Saves and read a dataframe in a zip file
+        :title: Saves and reads a dataframe in a zip file
+        :tag: dataframe
 
         This shows an example on how to save and read a
         :epkg:`pandas:dataframe` directly into a zip file.
@@ -43,7 +44,8 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
             print(df2)
 
     .. exref::
-        :title: Saves and read a numpy array in a zip file
+        :title: Saves and reads a numpy array in a zip file
+        :tag: array
 
         This shows an example on how to save and read a
         :epkg:`numpy:ndarray` directly into a zip file.
