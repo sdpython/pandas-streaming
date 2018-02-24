@@ -199,8 +199,8 @@ if not r:
         pyquickhelper = import_pyquickhelper()
         from pyquickhelper.pycode import process_standard_options_for_setup_help
         process_standard_options_for_setup_help(sys.argv)
-	else:
-		pyquickhelper = import_pyquickhelper()
+    else:
+        pyquickhelper = import_pyquickhelper()
     root = os.path.abspath(os.path.dirname(__file__))
     if sys.platform.startswith("win"):
         extra_compile_args = None
