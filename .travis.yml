@@ -1,7 +1,6 @@
 dist: trusty
 sudo: required
 language: python
-
 python:
     - "3.5"
     - "3.6"
@@ -15,4 +14,4 @@ install:
 before_script:
   - python setup.py build_ext --inplace
 script:
-  - python setup.py unittests
+    - python setup.py unittests
