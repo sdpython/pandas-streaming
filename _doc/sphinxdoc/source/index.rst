@@ -34,7 +34,7 @@ pandas_streaming
     :alt: GitHub Issues
     :target: https://github.com/sdpython/pandas_streaming/issues
 
-.. image:: https://badge.waffle.io/sdpython/pandas_streaming.png?label=ready&title=Ready
+.. image:: https://badge.waffle.io/sdpython/pandas_streaming.png?label=to%20do&title=to%20do
     :alt: Waffle
     :target: https://waffle.io/sdpython/pandas_streaming
 
