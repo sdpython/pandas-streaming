@@ -17,7 +17,7 @@ pandas_streaming
     :target: https://circleci.com/gh/sdpython/pandas_streaming/tree/master
 
 .. image:: https://badge.fury.io/py/pandas_streaming.svg
-    :target: http://badge.fury.io/py/pandas_streaming
+    :target: http://badge.fury.io/py/pandas-streaming
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :alt: MIT License
