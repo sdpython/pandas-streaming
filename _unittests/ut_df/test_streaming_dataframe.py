@@ -8,23 +8,7 @@ import os
 import unittest
 import pandas
 import numpy
-
-
-try:
-    import pyquickhelper as skip_
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..",
-                "..",
-                "pyquickhelper",
-                "src")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import pyquickhelper as skip_
+from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 
 
 try:
@@ -40,8 +24,6 @@ except ImportError:
         sys.path.append(path)
     import src
 
-from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 from src.pandas_streaming.data import dummy_streaming_dataframe
 from src.pandas_streaming.exc import StreamingInefficientException
 from src.pandas_streaming.df import StreamingDataFrame
@@ -50,12 +32,11 @@ from src.pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
 
 class TestStreamingDataFrame(ExtTestCase):
 
-    def test_shape(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
+    def test_src(self):
+        "for pylint"
+        self.assertFalse(src is None)
 
+    def test_shape(self):
         sdf = dummy_streaming_dataframe(100)
         dfs = [df for df in sdf]
         self.assertEqual(len(dfs), 10)
@@ -66,11 +47,6 @@ class TestStreamingDataFrame(ExtTestCase):
             "r"), StreamingInefficientException)
 
     def test_init(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         df1 = sdf.to_df()
         sdf2 = StreamingDataFrame(sdf)
@@ -78,11 +54,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(df1, df2)
 
     def test_to_csv(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         st = sdf.to_csv()
         self.assertStartsWith(",cint,cstr\n0,0,s0", st)
@@ -90,11 +61,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertStartsWith(",cint,cstr\n0,0,s0", st)
 
     def test_iterrows(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         rows = list(sdf.iterrows())
         self.assertEqual(sdf.shape[0], len(rows))
@@ -102,11 +68,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(sdf.shape[0], len(rows))
 
     def test_head(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         st = sdf.head()
         self.assertEqual(st.shape, (5, 2))
@@ -116,11 +77,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(st.shape, (20, 2))
 
     def test_tail(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         st = sdf.tail()
         self.assertEqual(st.shape, (5, 2))
@@ -128,11 +84,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(st.shape, (10, 2))
 
     def test_read_csv(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         temp = get_temp_folder(__file__, "temp_read_dsv")
         df = pandas.DataFrame(data=dict(a=[5, 6], b=["er", "r"]))
         name = os.path.join(temp, "df.csv")
@@ -158,11 +109,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(text3, exp2)
 
     def test_where(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         cols = sdf.columns
         self.assertEqual(list(cols), ['cint', 'cstr'])
@@ -176,21 +122,11 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1", st)
 
     def test_dataframe(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         df = sdf.to_dataframe()
         self.assertEqual(df.shape, (100, 2))
 
     def test_sample(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         res = sdf.sample(frac=0.1)
         self.assertLesser(res.shape[0], 30)
@@ -200,11 +136,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertRaise(lambda: sdf.sample(n=5), ValueError)
 
     def test_sample_cache(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         res = sdf.sample(frac=0.1, cache=True)
         df1 = res.to_df()
@@ -216,11 +147,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertFalse(res.is_stable(n=df1.shape[0], do_check=False))
 
     def test_sample_reservoir_cache(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         res = sdf.sample(n=10, cache=True, reservoir=True)
         df1 = res.to_df()
@@ -233,11 +159,6 @@ class TestStreamingDataFrame(ExtTestCase):
                          ValueError)
 
     def test_apply(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         self.assertNotEmpty(list(sdf))
         sdf = sdf.applymap(str)
@@ -248,11 +169,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r", text)
 
     def test_train_test_split(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         tr, te = sdf.train_test_split(index=False, streaming=False)
         trsdf = StreamingDataFrame.read_str(tr)
@@ -266,11 +182,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(df_val, df_exp)
 
     def test_train_test_split_streaming(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100, asfloat=True)
         trsdf, tesdf = sdf.train_test_split(
             streaming=True, unique_rows=True, partitions=[0.7, 0.3])
@@ -293,10 +204,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertGreater(trdf2.shape[0], tedf2.shape[0])
 
     def test_train_test_split_streaming_tiny(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
         df = pandas.DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
 
         sdf2 = StreamingDataFrame.read_df(pandas.concat([df, df]))
@@ -322,11 +229,6 @@ class TestStreamingDataFrame(ExtTestCase):
             self.assertEqualDataFrame(df1, df2)
 
     def test_train_test_split_streaming_strat(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100, asfloat=True,
                                         tify=["t1" if i % 3 else "t0" for i in range(0, 100)])
         trsdf, tesdf = sdf.train_test_split(
@@ -352,16 +254,11 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertGreater(gr['cfloat'].min(), 4)
 
     def test_train_test_split_file(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         temp = get_temp_folder(__file__, "temp_train_test_split_file")
         names = [os.path.join(temp, "train.txt"),
                  os.path.join(temp, "test.txt")]
         sdf = dummy_streaming_dataframe(100)
-        tr, te = sdf.train_test_split(names, index=False, streaming=False)
+        sdf.train_test_split(names, index=False, streaming=False)
         trsdf = StreamingDataFrame.read_csv(names[0])
         tesdf = StreamingDataFrame.read_csv(names[1])
         trdf = trsdf.to_dataframe()
@@ -373,11 +270,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(df_val, df_exp)
 
     def test_train_test_split_file_pattern(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         temp = get_temp_folder(__file__, "temp_train_test_split_file_pattern")
         sdf = dummy_streaming_dataframe(100)
         names = os.path.join(temp, "spl_{0}.txt")
@@ -396,11 +288,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(df_val, df_exp)
 
     def test_merge(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         def compares(a, b, how):
             m = a.merge(b, on="cint", indicator=True)
             dm = m.to_dataframe()
@@ -426,11 +313,6 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf20.merge(sdf20.to_dataframe(), on="cint", indicator=True)
 
     def test_concat(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf20 = dummy_streaming_dataframe(20)
         sdf30 = dummy_streaming_dataframe(30)
         df20 = sdf20.to_dataframe()
@@ -454,11 +336,6 @@ class TestStreamingDataFrame(ExtTestCase):
         ), ValueError, "Frame others[0] do not have the same column types")
 
     def test_groupby(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df20 = dummy_streaming_dataframe(20).to_dataframe()
         df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
         sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
@@ -484,11 +361,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(gr, gr2)
 
     def test_merge_2(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
         df2 = pandas.concat([df, df])
         sdf = StreamingDataFrame.read_df(df)
@@ -502,11 +374,6 @@ class TestStreamingDataFrame(ExtTestCase):
                                   sjm.to_dataframe().sort_values(["X", "Y"]).reset_index(drop=True))
 
     def test_schema_consistant(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"), dict(cf=1, cint=1, cstr="1"),
                                dict(cf=2, cint="s2", cstr="2"), dict(cf=3, cint=3, cstr="3")])
         temp = get_temp_folder(__file__, "temp_schema_consistant")
@@ -521,11 +388,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(len(pieces), 2)
 
     def test_getitem(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         sdf = dummy_streaming_dataframe(100)
         sdf2 = sdf[["cint"]]
         self.assertEqual(sdf2.shape, (100, 1))

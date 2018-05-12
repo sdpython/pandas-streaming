@@ -4,11 +4,11 @@
 @brief Implements different methods to split a dataframe.
 """
 import hashlib
-import pandas
 import pickle
 import random
 import warnings
 from io import StringIO
+import pandas
 
 
 def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
@@ -135,6 +135,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
     static_schema = []
 
     def iterator_rows():
+        "iterates on rows"
         counts = {}
         memory = {}
         pos_col = None
@@ -169,8 +170,8 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                         i += delta
                         i = max(0, min(len(v), i))
                         one = set(vr[:i])
-                        for d, obs in enumerate(v):
-                            yield obs, 0 if d in one else 1
+                        for d, obs_ in enumerate(v):
+                            yield obs_, 0 if d in one else 1
                         if (0, k) not in counts:
                             counts[0, k] = i
                             counts[1, k] = len(v) - i
@@ -206,6 +207,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                 counts[1, k] += len(v) - i
 
     def h11(w):
+        "pickle and hash"
         b = pickle.dumps(w)
         return hashlib.md5(b).hexdigest()[:hash_size]
 
@@ -213,14 +215,16 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
     cache = {}
 
     def iterator_internal(part_requested):
+        "internal iterator on dataframes"
         iy = 0
         accumul = []
         if len(cache) == 0:
             for obs, part in iterator_rows():
                 h = h11(obs)
                 if unique_rows and h in cache:
-                    raise ValueError(
-                        "A row or at least its hash is already cached. Increase hash_size or check for duplicates ('{0}')\n{1}.".format(h, obs))
+                    raise ValueError("A row or at least its hash is already cached. " +
+                                     "Increase hash_size or check for duplicates " +
+                                     "('{0}')\n{1}.".format(h, obs))
                 if h not in cache:
                     cache[h] = part
                 else:

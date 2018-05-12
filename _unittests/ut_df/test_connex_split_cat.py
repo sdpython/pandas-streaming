@@ -8,23 +8,7 @@ import os
 import unittest
 from collections import Counter
 import pandas
-
-
-try:
-    import pyquickhelper as skip_
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..",
-                "..",
-                "pyquickhelper",
-                "src")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import pyquickhelper as skip_
+from pyquickhelper.pycode import ExtTestCase
 
 
 try:
@@ -40,19 +24,16 @@ except ImportError:
         sys.path.append(path)
     import src
 
-from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import ExtTestCase
 from src.pandas_streaming.df import train_test_apart_stratify
 
 
 class TestConnexSplitCat(ExtTestCase):
 
-    def test_cat_strat(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
+    def test_src(self):
+        "for pylint"
+        self.assertFalse(src is None)
 
+    def test_cat_strat(self):
         df = pandas.DataFrame([dict(a=1, b="e"),
                                dict(a=2, b="e"),
                                dict(a=4, b="f"),
@@ -74,11 +55,6 @@ class TestConnexSplitCat(ExtTestCase):
                          ValueError)
 
     def test_cat_strat_multi(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(a=1, b="e"),
                                dict(a=1, b="f"),
                                dict(a=2, b="e"),
@@ -97,11 +73,6 @@ class TestConnexSplitCat(ExtTestCase):
         self.assertTrue(set(train['a']) != set(test['a']))
 
     def test_cat_strat_multi_force(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(a=1, b="e"),
                                dict(a=1, b="f"),
                                dict(a=2, b="e"),

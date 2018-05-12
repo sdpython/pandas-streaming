@@ -26,6 +26,10 @@ from src.pandas_streaming import __version__
 
 class TestVersion (unittest.TestCase):
 
+    def test_src(self):
+        "for pylint"
+        self.assertFalse(src is None)
+
     def test_version(self):
         setup = os.path.join(
             os.path.split(__file__)[0],

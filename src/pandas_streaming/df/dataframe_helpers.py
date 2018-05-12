@@ -116,12 +116,15 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
         df = df.copy()
 
     def hash_intl(c):
+        "hash int"
         return hash_int(c, hash_length)
 
     def hash_strl(c):
+        "hash string"
         return hash_str(c, hash_length)
 
     def hash_floatl(c):
+        "hash float"
         return hash_float(c, hash_length)
 
     coltype = {n: t for n, t in zip(df.columns, df.dtypes)}

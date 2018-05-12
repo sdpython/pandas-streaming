@@ -5,6 +5,8 @@
 import sys
 import os
 import unittest
+from pyquickhelper.loghelper import fLOG
+from pyquickhelper.pycode import get_temp_folder, ExtTestCase
 
 try:
     import src
@@ -19,30 +21,12 @@ except ImportError:
         sys.path.append(path)
     import src
 
-try:
-    import pyquickhelper as skip_
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..",
-                "..",
-                "pyquickhelper",
-                "src")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import pyquickhelper as skip_
-
-from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import get_temp_folder, ExtTestCase
-
-if sys.version_info[0] == 2:
-    from codecs import open
-
 
 class TestReadme(ExtTestCase):
+
+    def test_src(self):
+        "for pylint"
+        self.assertFalse(src is None)
 
     def test_venv_docutils08_readme(self):
         fLOG(
@@ -64,7 +48,6 @@ class TestReadme(ExtTestCase):
             return
 
         from pyquickhelper.pycode import check_readme_syntax
-
         check_readme_syntax(readme, folder=temp, fLOG=fLOG)
 
 

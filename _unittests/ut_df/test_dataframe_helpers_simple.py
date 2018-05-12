@@ -8,23 +8,7 @@ import os
 import unittest
 import pandas
 import numpy
-
-
-try:
-    import pyquickhelper as skip_
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..",
-                "..",
-                "pyquickhelper",
-                "src")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import pyquickhelper as skip_
+from pyquickhelper.pycode import ExtTestCase
 
 
 try:
@@ -40,20 +24,17 @@ except ImportError:
         sys.path.append(path)
     import src
 
-from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import ExtTestCase
 from src.pandas_streaming.df import dataframe_unfold
 from src.pandas_streaming.df.dataframe_helpers import hash_int, hash_str, hash_float
 
 
 class TestDataFrameHelpersSimple(ExtTestCase):
 
-    def test_unfold(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
+    def test_src(self):
+        "for pylint"
+        self.assertFalse(src is None)
 
+    def test_unfold(self):
         df = pandas.DataFrame([dict(a=1, b="e,f"),
                                dict(a=2, b="g"),
                                dict(a=3)])
@@ -73,11 +54,6 @@ class TestDataFrameHelpersSimple(ExtTestCase):
         self.assertEqualDataFrame(df, bf)
 
     def test_hash_except(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         self.assertRaise(lambda: hash_int(0.1, 3),
                          ValueError, "numpy.nan expected")
         r = hash_int(numpy.nan, 3)

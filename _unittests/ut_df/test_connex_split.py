@@ -7,23 +7,8 @@ import sys
 import os
 import unittest
 import pandas
-
-
-try:
-    import pyquickhelper as skip_
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..",
-                "..",
-                "pyquickhelper",
-                "src")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import pyquickhelper as skip_
+from pyquickhelper.loghelper import fLOG
+from pyquickhelper.pycode import ExtTestCase
 
 
 try:
@@ -39,44 +24,36 @@ except ImportError:
         sys.path.append(path)
     import src
 
-from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import ExtTestCase
 from src.pandas_streaming.df import dataframe_shuffle, train_test_split_weights, train_test_connex_split
 
 
 class TestConnexSplit(ExtTestCase):
 
-    def test_shuffle(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
+    def test_src(self):
+        "for pylint"
+        self.assertFalse(src is None)
 
+    def test_shuffle(self):
         df = pandas.DataFrame([dict(a=1, b="e", c=5.6, ind="a1"),
                                dict(a=2, b="f", c=5.7, ind="a2"),
                                dict(a=4, b="g", c=5.8, ind="a3"),
                                dict(a=8, b="h", c=5.9, ind="a4"),
                                dict(a=16, b="i", c=6.2, ind="a5")])
         shuffled = dataframe_shuffle(df, random_state=0)
-        sorted = shuffled.sort_values('a')
-        self.assertEqualDataFrame(df, sorted)
+        sorted_ = shuffled.sort_values('a')
+        self.assertEqualDataFrame(df, sorted_)
 
         df2 = df.set_index('ind')
         shuffled = dataframe_shuffle(df2, random_state=0)
-        sorted = shuffled.sort_values('a')
-        self.assertEqualDataFrame(df2, sorted)
+        sorted_ = shuffled.sort_values('a')
+        self.assertEqualDataFrame(df2, sorted_)
 
         df2 = df.set_index(['ind', 'c'])
         shuffled = dataframe_shuffle(df2, random_state=0)
-        sorted = shuffled.sort_values('a')
-        self.assertEqualDataFrame(df2, sorted)
+        sorted_ = shuffled.sort_values('a')
+        self.assertEqualDataFrame(df2, sorted_)
 
     def test_split_weights_errors(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(a=1, b="e", c=1),
                                dict(a=2, b="f", c=1),
                                dict(a=4, b="g", c=1),
@@ -95,11 +72,6 @@ class TestConnexSplit(ExtTestCase):
             df, test_size=0, weights='c'), ValueError, 'null')
 
     def test_split_weights(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(a=1, b="e", c=1),
                                dict(a=2, b="f", c=1),
                                dict(a=4, b="g", c=1),

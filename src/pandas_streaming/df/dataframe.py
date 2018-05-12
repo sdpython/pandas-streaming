@@ -3,9 +3,9 @@
 @file
 @brief Defines a streaming dataframe.
 """
-import pandas
-import numpy.random as random
 from io import StringIO
+import numpy.random as random
+import pandas
 from pandas.testing import assert_frame_equal
 from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
 from ..exc import StreamingInefficientException
@@ -200,6 +200,7 @@ class StreamingDataFrame:
             chunksize = df.shape[0]
 
         def local_iterator():
+            "local iterator"
             for i in range(0, df.shape[0], chunksize):
                 end = min(df.shape[0], i + chunksize)
                 yield df[i:end].copy()
@@ -215,19 +216,19 @@ class StreamingDataFrame:
         the method checks that every dataframe follows the same schema
         as the first chunck.
         """
-        iter = self.iter_creation()
+        iters = self.iter_creation()
         sch = None
         rows = 0
-        for it in iter:
+        for it in iters:
             if sch is None:
                 sch = (list(it.columns), list(it.dtypes))
             elif self.check_schema:
                 if list(it.columns) != sch[0]:
-                    raise StreamingDataFrameSchemaError(
-                        'Column names are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'.format(rows, sch[0], list(it.columns)))
+                    raise StreamingDataFrameSchemaError(('Column names are different after row {0}\nFirst   chunk: {1}' +
+                                                         '\nCurrent chunk: {2}').format(rows, sch[0], list(it.columns)))
                 if list(it.dtypes) != sch[1]:
-                    raise StreamingDataFrameSchemaError(
-                        'Column types are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'.format(rows, sch[1], list(it.dtypes)))
+                    raise StreamingDataFrameSchemaError(('Column types are different after row {0}\n' +
+                                                         'First   chunk: {1}\nCurrent chunk: {2}').format(rows, sch[1], list(it.dtypes)))
             rows += it.shape[0]
             yield it
 
@@ -397,7 +398,7 @@ class StreamingDataFrame:
         indices = []
         seen = 0
         for i, df in enumerate(self):
-            for ir, row in enumerate(df.iterrows()):
+            for ir, _ in enumerate(df.iterrows()):
                 seen += 1
                 if len(indices) < n:
                     indices.append((i, ir))
@@ -409,6 +410,7 @@ class StreamingDataFrame:
         indices = set(indices)
 
         def reservoir_iterate(sdf, indices, chunksize):
+            "iterator"
             buffer = []
             for i, df in enumerate(self):
                 for ir, row in enumerate(df.iterrows()):
@@ -447,6 +449,7 @@ class StreamingDataFrame:
             return self.merge(StreamingDataFrame.read_df(right, chunksize=right.shape[0]), **kwargs)
 
         def iterator_merge(sdf1, sdf2, **kw):
+            "iterate on dataframes"
             for df1 in sdf1:
                 for df2 in sdf2:
                     df = df1.merge(df2, **kw)
@@ -466,6 +469,7 @@ class StreamingDataFrame:
         """
 
         def iterator_concat(this, lothers):
+            "iterator on dataframes"
             columns = None
             dtypes = None
             for df in this:
@@ -492,6 +496,7 @@ class StreamingDataFrame:
             others = [others]
 
         def change_type(obj):
+            "change column type"
             if isinstance(obj, pandas.DataFrame):
                 return StreamingDataFrame.read_df(obj, obj.shape[0])
             else:
@@ -549,6 +554,7 @@ class StreamingDataFrame:
                 "Out-of-memory group by is not implemented.")
         if lambda_agg is None:
             def lambda_agg_(gr):
+                "sum"
                 return gr.sum()
             lambda_agg = lambda_agg_
         ckw = kwargs.copy()
@@ -590,6 +596,7 @@ class StreamingDataFrame:
             raise NotImplementedError("Only a list of columns is supported.")
 
         def iterate_cols(sdf):
+            "iterate on columns"
             for df in sdf:
                 yield df[cols]
 

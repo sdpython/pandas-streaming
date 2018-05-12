@@ -6,27 +6,11 @@
 import sys
 import os
 import unittest
-import pandas
 import io
 import zipfile
 import numpy
-
-
-try:
-    import pyquickhelper as skip_
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..",
-                "..",
-                "pyquickhelper",
-                "src")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import pyquickhelper as skip_
+import pandas
+from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 
 
 try:
@@ -42,19 +26,16 @@ except ImportError:
         sys.path.append(path)
     import src
 
-from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 from src.pandas_streaming.df import to_zip, read_zip
 
 
 class TestDataFrameIO(ExtTestCase):
 
-    def test_zip_dataframe(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
+    def test_src(self):
+        "for pylint"
+        self.assertFalse(src is None)
 
+    def test_zip_dataframe(self):
         df = pandas.DataFrame([dict(a=1, b="eé", c=5.6, ind="a1", ai=1),
                                dict(b="f", c=5.7, ind="a2", ai=2),
                                dict(a=4, b="g", ind="a3", ai=3),
@@ -79,11 +60,6 @@ class TestDataFrameIO(ExtTestCase):
         self.assertEqualDataFrame(df, df3)
 
     def test_zip_numpy(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = numpy.zeros((3, 4))
         df[2, 3] = 1
 

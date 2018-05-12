@@ -3,9 +3,9 @@
 @file
 @brief Implements a connex split between train and test.
 """
+from collections import Counter
 import pandas
 import numpy
-from collections import Counter
 from sklearn.model_selection import train_test_split
 from .dataframe_helpers import dataframe_shuffle
 
@@ -233,15 +233,16 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     avoids_merge = {}
 
     def do_connex_components(dfrows, local_groups, kb, sib):
-        iter = 0
+        "run connected components algorithms"
+        itern = 0
         modif = 1
 
-        while modif > 0 and iter < len(elements):
+        while modif > 0 and itern < len(elements):
             if fLOG and df.shape[0] > 10000:
                 fLOG("[train_test_connex_split] iteration={0}-#nb connect={1} - modif={2}".format(
                     iter, len(set(elements)), modif))
             modif = 0
-            iter += 1
+            itern += 1
             for i, row in enumerate(dfrows.itertuples(index=False, name=None)):
                 vals = [val for val in zip(local_groups, row) if not isinstance(
                     val[1], float) or not numpy.isnan(val[1])]
@@ -288,8 +289,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                 if len(add_pair_c) > 0:
                     for c in add_pair_c:
                         modif += len(counts_cnx[c])
-                        for i in counts_cnx[c]:
-                            elements[i] = new_c
+                        for ii in counts_cnx[c]:
+                            elements[ii] = new_c
                         counts_cnx[new_c] = counts_cnx[new_c].union(
                             counts_cnx[c])
                         counts_cnx[c] = set()
@@ -351,6 +352,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
     # We compute the final dataframe.
     def double_merge(d):
+        "merge twice"
         merge1 = dfids.merge(d, left_on=name, right_on=name)
         merge2 = df.merge(merge1, left_on=groups, right_on=groups)
         return merge2
@@ -446,7 +448,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
         permutation = state.permutation
 
     split = {}
-    for v, k in sorted_hist:
+    for _, k in sorted_hist:
         not_assigned = [c for c in ids[k] if c not in split]
         if len(not_assigned) == 0:
             continue
