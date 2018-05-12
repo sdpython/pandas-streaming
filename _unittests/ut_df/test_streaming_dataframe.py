@@ -345,6 +345,8 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertRaise(lambda: sdf20.groupby(
             "key", in_memory=False), NotImplementedError)
 
+        # Do not replace lambda c:sum(c) by sum or...
+        # pandas.core.base.SpecificationError: Function names must be unique, found multiple named sum
         gr2 = df20.groupby("key").agg([numpy.sum, lambda c:sum(c)])
         gr = sdf20.groupby("key", lambda gr: gr.agg(
             [numpy.sum, lambda c:sum(c)]))

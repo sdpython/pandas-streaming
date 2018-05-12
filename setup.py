@@ -127,8 +127,6 @@ if "upload" in sys.argv and not subversion and not ask_help():
 ##############
 
 if os.path.exists(readme):
-    if sys.version_info[0] == 2:
-        from codecs import open
     with open(readme, "r", encoding='utf-8-sig') as f:
         long_description = f.read()
 else:
