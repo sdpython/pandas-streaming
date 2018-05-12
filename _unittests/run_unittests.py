@@ -3,10 +3,6 @@
 @brief run all unit tests
 """
 
-import os
-import sys
-
-
 def main():
     """
     Runs the unit tests.
