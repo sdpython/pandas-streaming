@@ -31,6 +31,8 @@ Data Manipulation
 
 .. autosignature:: pandas_streaming.df.dataframe_helpers.dataframe_unfold
 
+.. autosignature:: pandas_streaming.df.dataframe_helpers.pandas_groupby_nan
+
 Complex splits
 ++++++++++++++
 
