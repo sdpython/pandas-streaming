@@ -344,7 +344,7 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             :showcode:
 
             from pandas import DataFrame
-            from pyensae.ml_helper import pandas_groupby_nan
+            from pandas_streaming.df import pandas_groupby_nan
 
             data = [dict(a=2, ind="a", n=1), dict(a=2, ind="a"), dict(a=3, ind="b"), dict(a=30)]
             df = DataFrame(data)
