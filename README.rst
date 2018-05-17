@@ -41,6 +41,9 @@ README
     :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
     :alt: Notebook Coverage
 
+.. image:: https://api.codacy.com/project/badge/Grade/f53b7f4d6a0447aa9ce0c4ad5df659ef
+    :target: https://www.codacy.com/app/sdpython/pandas_streaming?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sdpython/pandas_streaming&amp;utm_campaign=Badge_Grade
+
 `pandas_streaming <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_
 aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
 too big to hold in memory, too small to be parallelized with a significant gain.
