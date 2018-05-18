@@ -61,6 +61,9 @@ mathdef_link_only = True
 
 epkg_dictionary.update({
     'dask': 'https://dask.pydata.org/en/latest/',
+    'dataframe': 'https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html',
+    'Dataframe': 'https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html',
+    'dataframes': 'https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html',
     'pandas': ('http://pandas.pydata.org/pandas-docs/stable/',
                ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.html', 1),
                ('http://pandas.pydata.org/pandas-docs/stable/generated/pandas.{0}.{1}.html', 2)),

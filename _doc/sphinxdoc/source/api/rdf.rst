@@ -21,6 +21,14 @@ framework does.
 
 The module implements additional and useful functions
 not necessarily for the streaming version of the dataframes.
+Many methods have been rewritten to support
+streaming. Among them, IO methods:
+
+.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame.read_csv
+
+.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame.read_df
+
+.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame.read_json
 
 Data Manipulation
 +++++++++++++++++

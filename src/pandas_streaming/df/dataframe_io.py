@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @file
-@brief Saves a dataframe into a zip files.
+@brief Saves and reads a :epkg:`dataframe` into a :epkg:`zip` file.
 """
 import io
 import os
@@ -12,10 +12,10 @@ import numpy
 
 def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     """
-    Saves a dataframe into a zip file.
+    Saves a :epkg:`Dataframe` into a :epkg:`zip` file.
     It can be read by @see fn to_zip.
 
-    @param      df          dataframe or numpy array
+    @param      df          :epkg:`dataframe` or :epkg:`numpy:array`
     @param      zipfilename a :epkg:`*py:zipfile:ZipFile` or a filename
     @param      zname       a filename in th zipfile
     @param      kwargs      parameters for :epkg:`pandas:to_csv` or
@@ -102,7 +102,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
 
 def read_zip(zipfilename, zname="df.csv", **kwargs):
     """
-    Reads a dataframe from a zip file.
+    Reads a :epkg:`dataframe` from a :epkg:`zip` file.
     It can be saved by @see fn read_zip.
 
     @param      zipfilename a :epkg:`*py:zipfile:ZipFile` or a filename

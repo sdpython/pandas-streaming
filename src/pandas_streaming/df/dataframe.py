@@ -7,8 +7,10 @@ from io import StringIO
 import numpy.random as random
 import pandas
 from pandas.testing import assert_frame_equal
-from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
+from pandas.io.json import json_normalize
 from ..exc import StreamingInefficientException
+from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
+from .dataframe_io_helpers import enumerate_json_items, JsonIterator2Stream
 
 
 class StreamingDataFrameSchemaError(Exception):
@@ -23,10 +25,10 @@ class StreamingDataFrame:
     Defines a streaming dataframe.
     The goal is to reduce the memory footprint.
     The class takes a function which creates an iterator
-    on dataframe. We assume this function can be called multiple time.
-    As a matter of fact, the function is called every time
-    the class needs to walk through the stream with the following
-    loop:
+    on :epkg:`dataframe`. We assume this function can
+    be called multiple time. As a matter of fact, the
+    function is called every time the class needs to walk
+    through the stream with the following loop:
 
     ::
 
@@ -39,8 +41,8 @@ class StreamingDataFrame:
     :epkg:`*py:pickle` (or :epkg:`dill`)
     an iterator: it cannot be replicated.
     Instead, the class takes a function which generates
-    an iterator on :epkg:`pandas:DataFrame`.
-    Most of the methods returns either a :epkg:`pandas:DataFrame`
+    an iterator on :epkg:`DataFrame`.
+    Most of the methods returns either a :epkg:`DataFrame`
     either a @see cl StreamingDataFrame. In the second case,
     methods can be chained.
 
@@ -59,8 +61,8 @@ class StreamingDataFrame:
         """
         @param      iter_creation   function which creates an iterator or an instance of
                                     @see cl StreamingDataFrame
-        @param      check_schema    checks that the schema is the same for every dataframe
-        @param      stable          indicates if the dataframe remains the same whenever
+        @param      check_schema    checks that the schema is the same for every :epkg:`dataframe`
+        @param      stable          indicates if the :epkg:`dataframe` remains the same whenever
                                     it is walked through
         """
         if isinstance(iter_creation, StreamingDataFrame):
@@ -73,7 +75,7 @@ class StreamingDataFrame:
 
     def is_stable(self, do_check=False, n=10):
         """
-        Tells if the dataframe is supposed to be stable.
+        Tells if the :epkg:`dataframe` is supposed to be stable.
 
         @param      do_check    do not trust the value sent to the constructor
         @param      n           number of rows used to check the stability,
@@ -105,7 +107,7 @@ class StreamingDataFrame:
                          names=None, streaming=True, partitions=None,
                          **kwargs):
         """
-        Randomly splits a dataframe into smaller pieces.
+        Randomly splits a :epkg:`dataframe` into smaller pieces.
         The function returns streams of file names.
         It chooses one of the options from module
         :mod:`dataframe_split <pandas_streaming.df.dataframe_split>`.
@@ -157,9 +159,65 @@ class StreamingDataFrame:
         return kw
 
     @staticmethod
+    def read_json(*args, chunksize=100000, **kwargs) -> 'StreamingDataFrame':
+        """
+        Reads a :epkg:`json` file or buffer as an iterator
+        on :epkg:`DataFrame`. The signature is the same as
+        :epkg:`pandas:read_json`. The important parameter is
+        *chunksize* which defines the number
+        of rows to parse in a single bloc
+        and it must be defined to return an iterator.
+        If *line* is True, the function falls back into
+        :epkg:`pandas:read_json`, otherwise it used
+        @see fn enumerate_json_items.
+        Examples::
+
+        .. runpython::
+            :showcode:
+
+            from pandas_streaming.df import StreamingDataFrame
+
+            data = '''{"a": 1, "b": 2}
+                      {"a": 3, "b": 4}'''
+            it = StreamingDataFrame.read_json(StringIO(data), lines=True)
+            dfs = list(it)
+            print(dfs)
+
+        .. runpython::
+            :showcode:
+
+            from io import StringIO
+            from pandas_streaming.df import StreamingDataFrame
+
+            data = '''[{"a": 1,
+                        "b": 2}
+                       {"a": 3,
+                        "b": 4}]'''
+
+            it = StreamingDataFrame.read_json(StringIO(data))
+            dfs = list(it)
+            print(dfs)
+        """
+        if not isinstance(chunksize, int) or chunksize <= 0:
+            raise ValueError('chunksize must be a positive integer')
+        kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
+        if isinstance(args[0], (list, dict)):
+            return StreamingDataFrame.read_df(json_normalize(args[0]), **kwargs_create)
+        elif kwargs.get('lines', False):
+            return StreamingDataFrame(lambda: pandas.read_json(*args, chunksize=chunksize, **kwargs), **kwargs_create)
+        else:
+            st = JsonIterator2Stream(enumerate_json_items(
+                args[0], encoding=kwargs.get('encoding', None)))
+            args = args[1:]
+            if 'lines' in kwargs:
+                del kwargs['lines']
+            return StreamingDataFrame(lambda: pandas.read_json(st, *args, chunksize=chunksize, lines=True, **kwargs), **kwargs_create)
+
+    @staticmethod
     def read_csv(*args, **kwargs) -> 'StreamingDataFrame':
         """
-        Reads a dataframe as an iterator on DataFrame.
+        Reads a :epkg:`csv` file or buffer
+        as an iterator on :epkg:`DataFrame`.
         The signature is the same as :epkg:`pandas:read_csv`.
         The important parameter is *chunksize* which defines the number
         of rows to parse in a single bloc.
@@ -173,7 +231,7 @@ class StreamingDataFrame:
     @staticmethod
     def read_str(text, **kwargs) -> 'StreamingDataFrame':
         """
-        Reads a dataframe as an iterator on DataFrame.
+        Reads a :epkg:`dataframe` as an iterator on :epkg:`DataFrame`.
         The signature is the same as :epkg:`pandas:read_csv`.
         The important parameter is *chunksize* which defines the number
         of rows to parse in a single bloc.
@@ -188,7 +246,7 @@ class StreamingDataFrame:
     @staticmethod
     def read_df(df, chunksize=None, check_schema=True) -> 'StreamingDataFrame':
         """
-        Splits a dataframe into small chunks mostly for
+        Splits a :epkg:`dataframe` into small chunks mostly for
         unit testing purposes.
 
         @param      df              :epkg:`pandas:DataFrame`
@@ -213,8 +271,8 @@ class StreamingDataFrame:
         The method stores a copy of the initial iterator
         and restores it after the end of the iterations.
         If *check_schema* was enabled when calling the constructor,
-        the method checks that every dataframe follows the same schema
-        as the first chunck.
+        the method checks that every :epkg:`dataframe`
+        follows the same schema as the first chunck.
         """
         iters = self.iter_creation()
         sch = None
@@ -269,7 +327,7 @@ class StreamingDataFrame:
 
     def to_csv(self, path_or_buf=None, **kwargs) -> 'StreamingDataFrame':
         """
-        Saves the dataframe into string.
+        Saves the :epkg:`dataframe` into string.
         See :epkg:`pandas:DataFrame.to_csv`.
         """
         if path_or_buf is None:
@@ -295,13 +353,13 @@ class StreamingDataFrame:
 
     def to_dataframe(self) -> pandas.DataFrame:
         """
-        Converts everything into a single dataframe.
+        Converts everything into a single :epkg:`dataframe`.
         """
         return pandas.concat(self, axis=0)
 
     def to_df(self) -> pandas.DataFrame:
         """
-        Converts everything into a single dataframe.
+        Converts everything into a single :epkg:`dataframe`.
         """
         return self.to_dataframe()
 
@@ -459,10 +517,10 @@ class StreamingDataFrame:
 
     def concat(self, others) -> 'StreamingDataFrame':
         """
-        Concatenates dataframes. The function ensures all :epkg:`pandas:DataFrame`
+        Concatenates :epkg:`dataframes`. The function ensures all :epkg:`pandas:DataFrame`
         or @see cl StreamingDataFrame share the same columns (name and type).
         Otherwise, the function fails as it cannot guess the schema without
-        walking through all dataframes.
+        walking through all :epkg:`dataframes`.
 
         @param  others      list, enumeration, :epkg:`pandas:DataFrame`
         @return             @see cl StreamingDataFrame
@@ -520,11 +578,11 @@ class StreamingDataFrame:
         As the input @see cl StreamingDataFrame does not necessarily hold
         in memory, the aggregation must be done at every iteration.
         There are two levels of aggregation: one to reduce every iterated
-        dataframe, another one to combine all the reduced dataframes.
+        :epkg:`dataframe`, another one to combine all the reduced :epkg:`dataframes`.
         This second one is always a **sum**.
         As a consequence, this function should not compute any *mean* or *count*,
         only *sum* because we do not know the size of each iterated
-        dataframe. To compute an average, sum and weights must be
+        :epkg:`dataframe`. To compute an average, sum and weights must be
         aggregated.
 
         .. exref::
@@ -568,7 +626,7 @@ class StreamingDataFrame:
 
     def ensure_dtype(self, df, dtypes):
         """
-        Ensures the dataframe *df* has types indicated in dtypes.
+        Ensures the :epkg:`dataframe` *df* has types indicated in dtypes.
         Changes it if not.
 
         @param      df      dataframe

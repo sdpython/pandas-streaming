@@ -1,8 +1,10 @@
 coverage
+ijson
 jyquickhelper
 pandocfilters
 pyquickhelper>=1.8
 scikit-learn
 scipy
 sphinxjp.themes.sphinxjp
+ujson
 wheel
