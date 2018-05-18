@@ -178,7 +178,7 @@ class JsonIterator2Stream:
         .. runpython::
             :showcode:
 
-            from pandas_streaming.df.dataframe_io_helpers import enumerate_json_items
+            from pandas_streaming.df.dataframe_io_helpers import enumerate_json_items, JsonIterator2Stream
 
             text_json = '''
                 [
