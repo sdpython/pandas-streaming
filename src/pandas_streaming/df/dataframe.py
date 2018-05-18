@@ -190,7 +190,7 @@ class StreamingDataFrame:
             from pandas_streaming.df import StreamingDataFrame
 
             data = '''[{"a": 1,
-                        "b": 2}
+                        "b": 2},
                        {"a": 3,
                         "b": 4}]'''
 
