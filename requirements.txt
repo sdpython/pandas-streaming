@@ -3,6 +3,7 @@ ijson
 jyquickhelper
 pandas>=0.22
 pandocfilters
+Pillow
 pyquickhelper>=1.8
 scikit-learn
 scipy
