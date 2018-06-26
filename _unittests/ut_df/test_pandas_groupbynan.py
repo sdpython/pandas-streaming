@@ -11,6 +11,7 @@ import os
 import unittest
 import pandas
 import numpy
+from scipy.sparse.linalg import lsqr as sparse_lsqr
 from pyquickhelper.pycode import ExtTestCase
 
 
@@ -33,6 +34,7 @@ from src.pandas_streaming.df import pandas_groupby_nan, numpy_types
 class TestPandasHelper(ExtTestCase):
 
     def test_pandas_groupbynan(self):
+        self.assertTrue(sparse_lsqr is not None)
         types = [(int, -10), (float, -20.2), (str, "e"),
                  (bytes, bytes("a", "ascii"))]
         skip = (numpy.bool_, numpy.complex64, numpy.complex128)
