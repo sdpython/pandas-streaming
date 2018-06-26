@@ -35,6 +35,10 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
     splits do not hold in memory and we cannot run through
     the same iterator again as random draws would be different.
     We need to store the results into files or buffers.
+
+    .. warning::
+        The method *export_method* must write the data in
+        mode *append* and allows stream.
     """
     if kwargs.get("stratify") is not None:
         raise NotImplementedError(
@@ -51,7 +55,11 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
             split_ops[o] = kwargs[o]
             del kwargs[o]
 
-    exportf = getattr(pandas.DataFrame, export_method)
+    exportf_ = getattr(pandas.DataFrame, export_method)
+    if export_method == 'to_csv':
+        exportf = lambda *a, **kw: exportf_(*a, mode='a', **kw)
+    else:
+        exportf = exportf_
 
     if isinstance(path_or_buf, str):
         if "{}" not in path_or_buf:
