@@ -56,7 +56,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
             del kwargs[o]
 
     exportf_ = getattr(pandas.DataFrame, export_method)
-    if export_method == 'to_csv':
+    if export_method == 'to_csv' and 'mode' in kwargs:
         exportf = lambda *a, **kw: exportf_(*a, mode='a', **kw)
     else:
         exportf = exportf_

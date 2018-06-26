@@ -41,6 +41,7 @@ class TestCodeStyle(ExtTestCase):
                          "dataframe_io_helpers.py:133: E1137",
                          "dataframe_io_helpers.py:151: E1137",
                          "dataframe_io_helpers.py:157: E1137",
+                         "dataframe_split.py:60: [E731]",
                          ])
 
     def test_style_test(self):
