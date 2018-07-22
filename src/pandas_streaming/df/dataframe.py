@@ -4,7 +4,7 @@
 @brief Defines a streaming dataframe.
 """
 from io import StringIO
-import numpy.random as random
+import numpy.random as nrandom
 import pandas
 from pandas.testing import assert_frame_equal
 from pandas.io.json import json_normalize
@@ -461,9 +461,9 @@ class StreamingDataFrame:
                 if len(indices) < n:
                     indices.append((i, ir))
                 else:
-                    x = random.random()
+                    x = nrandom.random()
                     if x * n < (seen - n):
-                        k = random.randint(0, len(indices) - 1)
+                        k = nrandom.randint(0, len(indices) - 1)
                         indices[k] = (i, ir)
         indices = set(indices)
 
