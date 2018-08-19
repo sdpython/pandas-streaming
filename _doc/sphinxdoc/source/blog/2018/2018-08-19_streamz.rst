@@ -1,0 +1,10 @@
+
+.. blogpost::
+    :title: Streaming dataframes with streamz
+    :keywords: streamz
+    :date: 2018-08-19
+    :categories: alternatives
+
+    :epkg:`streamz` is the most promising
+    initiative which implements streaming
+    dataframes so far.

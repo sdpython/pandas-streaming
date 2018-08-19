@@ -73,4 +73,5 @@ epkg_dictionary.update({
     'Hadoop': 'http://hadoop.apache.org/',
     'pyarrow': 'https://arrow.apache.org/docs/python/',
     'pyspark': 'http://spark.apache.org/docs/2.1.1/api/python/index.html',
+    'streamz': 'https://streamz.readthedocs.io/en/latest/index.html',
 })
