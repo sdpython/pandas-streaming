@@ -9,8 +9,6 @@ import unittest
 from pyquickhelper.loghelper import fLOG
 from pyquickhelper.pycode import get_temp_folder, ExtTestCase
 from pyquickhelper.ipythonhelper import execute_notebook_list, execute_notebook_list_finalize_ut
-from pyquickhelper.pycode import is_travis_or_appveyor
-from pyquickhelper.ipythonhelper import install_python_kernel_for_unittest
 
 try:
     import src
@@ -40,9 +38,6 @@ class TestRunNotebooksPython(ExtTestCase):
             self._testMethodName,
             OutputPrint=__name__ == "__main__")
 
-        kernel_name = None if is_travis_or_appveyor() else install_python_kernel_for_unittest(
-            "pandas_streaming")
-
         temp = get_temp_folder(__file__, "temp_run_notebooks")
 
         # selection of notebooks
@@ -71,7 +66,7 @@ class TestRunNotebooksPython(ExtTestCase):
 
         # run the notebooks
         res = execute_notebook_list(
-            temp, keepnote, fLOG=fLOG, valid=valid, additional_path=addpaths, kernel_name=kernel_name)
+            temp, keepnote, fLOG=fLOG, valid=valid, additional_path=addpaths)
         execute_notebook_list_finalize_ut(
             res, fLOG=fLOG, dump=src.pandas_streaming)
 
