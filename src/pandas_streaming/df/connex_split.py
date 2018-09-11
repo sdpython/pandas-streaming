@@ -114,7 +114,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     for online sales: *(product id, user id, card id)*.
     As we may need to compute aggregated features,
     we need every id not to be present in both train and
-    test set.
+    test set. The function computes the connected components
+    and breaks each of them in two parts for train and test.
 
     @param  df              :epkg:`pandas:DataFrame`
     @param  groups          columns name for the ids
