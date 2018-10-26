@@ -4,6 +4,7 @@
 @brief Defines a streaming dataframe.
 """
 from io import StringIO
+from inspect import isfunction
 import numpy.random as nrandom
 import pandas
 from pandas.testing import assert_frame_equal
@@ -220,36 +221,45 @@ class StreamingDataFrame:
         as an iterator on :epkg:`DataFrame`.
         The signature is the same as :epkg:`pandas:read_csv`.
         The important parameter is *chunksize* which defines the number
-        of rows to parse in a single bloc.
+        of rows to parse in a single bloc. If not specified,
+        it will be equal to 100000.
         """
         if not kwargs.get('iterator', True):
             raise ValueError("If specified, iterator must be True.")
+        if not kwargs.get('chunksize', 100000):
+            raise ValueError("If specified, chunksize must not be None.")
         kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
         kwargs['iterator'] = True
+        if 'chunksize' not in kwargs:
+            kwargs['chunksize'] = 100000
         return StreamingDataFrame(lambda: pandas.read_csv(*args, **kwargs), **kwargs_create)
 
     @staticmethod
     def read_str(text, **kwargs) -> 'StreamingDataFrame':
         """
-        Reads a :epkg:`dataframe` as an iterator on :epkg:`DataFrame`.
+        Reads a :epkg:`DataFrame` as an iterator on :epkg:`DataFrame`.
         The signature is the same as :epkg:`pandas:read_csv`.
         The important parameter is *chunksize* which defines the number
         of rows to parse in a single bloc.
         """
         if not kwargs.get('iterator', True):
             raise ValueError("If specified, iterator must be True.")
+        if not kwargs.get('chunksize', 100000):
+            raise ValueError("If specified, chunksize must not be None.")
         kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
         kwargs['iterator'] = True
+        if 'chunksize' not in kwargs:
+            kwargs['chunksize'] = 100000
         buffer = StringIO(text)
         return StreamingDataFrame(lambda: pandas.read_csv(buffer, **kwargs), **kwargs_create)
 
     @staticmethod
     def read_df(df, chunksize=None, check_schema=True) -> 'StreamingDataFrame':
         """
-        Splits a :epkg:`dataframe` into small chunks mostly for
+        Splits a :epkg:`DataFrame` into small chunks mostly for
         unit testing purposes.
 
-        @param      df              :epkg:`pandas:DataFrame`
+        @param      df              :epkg:`DataFrame`
         @param      chunksize       number rows per chunks (// 10 by default)
         @param      check_schema    check schema between two iterations
         @return                     iterator on @see cl StreamingDataFrame
@@ -267,11 +277,11 @@ class StreamingDataFrame:
     def __iter__(self):
         """
         Iterator on a large file with a sliding window.
-        Each windows is a :epkg:`pandas:DataFrame`.
+        Each windows is a :epkg:`DataFrame`.
         The method stores a copy of the initial iterator
         and restores it after the end of the iterations.
         If *check_schema* was enabled when calling the constructor,
-        the method checks that every :epkg:`dataframe`
+        the method checks that every :epkg:`DataFrame`
         follows the same schema as the first chunck.
         """
         iters = self.iter_creation()
@@ -327,7 +337,7 @@ class StreamingDataFrame:
 
     def to_csv(self, path_or_buf=None, **kwargs) -> 'StreamingDataFrame':
         """
-        Saves the :epkg:`dataframe` into string.
+        Saves the :epkg:`DataFrame` into string.
         See :epkg:`pandas:DataFrame.to_csv`.
         """
         if path_or_buf is None:
@@ -353,13 +363,13 @@ class StreamingDataFrame:
 
     def to_dataframe(self) -> pandas.DataFrame:
         """
-        Converts everything into a single :epkg:`dataframe`.
+        Converts everything into a single :epkg:`DataFrame`.
         """
         return pandas.concat(self, axis=0)
 
     def to_df(self) -> pandas.DataFrame:
         """
-        Converts everything into a single :epkg:`dataframe`.
+        Converts everything into a single :epkg:`DataFrame`.
         """
         return self.to_dataframe()
 
@@ -373,13 +383,15 @@ class StreamingDataFrame:
 
     def head(self, n=5) -> pandas.DataFrame:
         """
-        Returns the first rows as a DataFrame.
+        Returns the first rows as a :epkg:`DataFrame`.
         """
         st = []
+        total = 0
         for df in self:
             h = df.head(n=n)
+            total += h.shape[0]
             st.append(h)
-            if h.shape[0] >= n:
+            if total >= n:
                 break
             n -= h.shape[0]
         if len(st) == 1:
@@ -391,7 +403,7 @@ class StreamingDataFrame:
 
     def tail(self, n=5) -> pandas.DataFrame:
         """
-        Returns the last rows as a DataFrame.
+        Returns the last rows as a :epkg:`DataFrame`.
         The size of chunks must be greater than ``n`` to
         get ``n`` lines. This method is not efficient
         because the whole dataset must be walked through.
@@ -515,7 +527,7 @@ class StreamingDataFrame:
 
         return StreamingDataFrame(lambda: iterator_merge(self, right, **kwargs), **self.get_kwargs())
 
-    def concat(self, others) -> 'StreamingDataFrame':
+    def concat(self, others, axis=0) -> 'StreamingDataFrame':
         """
         Concatenates :epkg:`dataframes`. The function ensures all :epkg:`pandas:DataFrame`
         or @see cl StreamingDataFrame share the same columns (name and type).
@@ -525,6 +537,29 @@ class StreamingDataFrame:
         @param  others      list, enumeration, :epkg:`pandas:DataFrame`
         @return             @see cl StreamingDataFrame
         """
+        if axis == 1:
+            return self._concath(others)
+        elif axis == 0:
+            return self._concatv(others)
+        else:
+            raise ValueError("axis must be 0 or 1")
+
+    def _concath(self, others):
+        if not isinstance(others, list):
+            others = [others]
+
+        def iterateh(self, others):
+            cols = tuple([self] + others)
+            for dfs in zip(*cols):
+                nrows = [_.shape[0] for _ in dfs]
+                if min(nrows) != max(nrows):
+                    raise RuntimeError(
+                        "StreamingDataFram cannot merge DataFrame with different size or chunksize")
+                yield pandas.concat(list(dfs), axis=1)
+
+        return StreamingDataFrame(lambda: iterateh(self, others), **self.get_kwargs())
+
+    def _concatv(self, others):
 
         def iterator_concat(this, lothers):
             "iterator on dataframes"
@@ -617,12 +652,106 @@ class StreamingDataFrame:
             lambda_agg = lambda_agg_
         ckw = kwargs.copy()
         ckw["as_index"] = False
+
         agg = []
         for df in self:
             gr = df.groupby(by=by, **ckw)
             agg.append(lambda_agg(gr))
         conc = pandas.concat(agg)
         return conc.groupby(by=by, **kwargs).sum()
+
+    def groupby_streaming(self, by=None, lambda_agg=None, in_memory=True,
+                          strategy='cum', **kwargs) -> pandas.DataFrame:
+        """
+        Implements the streaming :epkg:`pandas:DataFrame:groupby`.
+        We assume the result holds in memory. The out-of-memory is
+        not implemented yet.
+
+        @param      by          see :epkg:`pandas:DataFrame:groupby`
+        @param      in_memory   in-memory algorithm
+        @param      lambda_agg  aggregation function, *sum* by default
+        @param      kwargs      additional parameters for :epkg:`pandas:DataFrame:groupby`
+        @param      strategy    ``'cum'``, or ``'streaming'``,
+                                see below
+        @return                 :epkg:`pandas:DataFrame`
+
+        As the input @see cl StreamingDataFrame does not necessarily hold
+        in memory, the aggregation must be done at every iteration.
+        There are two levels of aggregation: one to reduce every iterated
+        :epkg:`dataframe`, another one to combine all the reduced :epkg:`dataframes`.
+        This second one is always a **sum**.
+        As a consequence, this function should not compute any *mean* or *count*,
+        only *sum* because we do not know the size of each iterated
+        :epkg:`dataframe`. To compute an average, sum and weights must be
+        aggregated.
+
+        Parameter *strategy* allows three scenarios.
+        First one if ``strategy is None`` goes through
+        the whole datasets to produce a final :epkg:`DataFrame`.
+        Second if ``strategy=='cum'`` returns a
+        @see cl StreamingDataFrame, each iteration produces
+        the current status of the *group by*. Last case,
+        ``strategy=='streaming'`` produces :epkg:`DataFrame`
+        which must be concatenated into a single :epkg:`DataFrame`
+        and grouped again to get the results.
+
+        .. exref::
+            :title: StreamingDataFrame and groupby
+            :tag: streaming
+
+            Here is an example which shows how to write a simple *groupby*
+            with :epkg:`pandas` and @see cl StreamingDataFrame.
+
+            .. runpython::
+                :showcode:
+
+                from pandas import DataFrame
+                from pandas_streaming.df import StreamingDataFrame
+                from pandas_streaming.data import dummy_streaming_dataframe
+
+                df20 = dummy_streaming_dataframe(20).to_dataframe()
+                df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
+                sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
+                sgr = sdf20.groupby_streaming("key", lambda gr: gr.sum(), strategy='cum', as_index=False)
+                for gr in sgr:
+                    print()
+                    print(gr)
+        """
+        if not in_memory:
+            raise NotImplementedError(
+                "Out-of-memory group by is not implemented.")
+        if lambda_agg is None:
+            def lambda_agg_(gr):
+                "sum"
+                return gr.sum()
+            lambda_agg = lambda_agg_
+        ckw = kwargs.copy()
+        ckw["as_index"] = False
+
+        if strategy == 'cum':
+            def iterate_cum():
+                agg = None
+                for df in self:
+                    gr = df.groupby(by=by, **ckw)
+                    gragg = lambda_agg(gr)
+                    if agg is None:
+                        agg = gragg.groupby(by=by, **kwargs).sum()
+                        yield agg
+                    else:
+                        agg2 = gragg.groupby(by=by, **kwargs).sum()
+                        agg = pandas.concat([agg, agg2])
+                        agg = agg.groupby(by=by, **kwargs).sum()
+                        yield agg
+            return StreamingDataFrame(lambda: iterate_cum(), **self.get_kwargs())
+        elif strategy == 'streaming':
+            def iterate_streaming():
+                for df in self:
+                    gr = df.groupby(by=by, **ckw)
+                    gragg = lambda_agg(gr)
+                    yield gragg.groupby(by=by, **kwargs).sum()
+            return StreamingDataFrame(lambda: iterate_streaming(), **self.get_kwargs())
+        else:
+            raise ValueError("Unknown strategy '{0}'".format(strategy))
 
     def ensure_dtype(self, df, dtypes):
         """
@@ -659,3 +788,62 @@ class StreamingDataFrame:
                 yield df[cols]
 
         return StreamingDataFrame(lambda: iterate_cols(self), **self.get_kwargs())
+
+    def add_column(self, col, value):
+        """
+        Implements some of the functionalities :epkg:`pandas`
+        offers for the operator ``[]``.
+
+        @param      col             new column
+        @param      value           @see cl StreamingDataFrame or a lambda function
+        @return                     @see cl StreamingDataFrame
+
+        ..note::
+
+            If value is a @see cl StreamingDataFrame,
+            *chunksize* must be the same for both.
+
+        .. exref::
+            :title: Add a new column to a StreamingDataFrame
+            :tag: streaming
+
+            .. runpython::
+                :showcode:
+
+                from pandas import DataFrame
+                from pandas_streaming.df import StreamingDataFrame
+
+                df = DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
+                sdf = StreamingDataFrame.read_df(df)
+                sdf2 = sdf.add_column("d", lambda row: int(1))
+                print(sdf2.to_dataframe())
+
+                sdf2 = sdf.add_column("d", lambda row: int(1))
+                print(sdf2.to_dataframe())
+
+        """
+        if not isinstance(col, str):
+            raise NotImplementedError(
+                "Only a column as a string is supported.")
+
+        if isfunction(value):
+            def iterate_fct(self, value, col):
+                "iterate on rows"
+                for df in self:
+                    dfc = df.copy()
+                    dfc.insert(dfc.shape[1], col, dfc.apply(value, axis=1))
+                    yield dfc
+
+            return StreamingDataFrame(lambda: iterate_fct(self, value, col), **self.get_kwargs())
+        elif isinstance(value, (pandas.Series, pandas.DataFrame, StreamingDataFrame)):
+            raise NotImplementedError(
+                "Unable set a new column based on a datadframe.")
+        else:
+            def iterate_cst(self, value, col):
+                "iterate on rows"
+                for df in self:
+                    dfc = df.copy()
+                    dfc[col] = value
+                    yield dfc
+
+            return StreamingDataFrame(lambda: iterate_cst(self, value, col), **self.get_kwargs())
