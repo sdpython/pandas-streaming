@@ -598,17 +598,19 @@ class StreamingDataFrame:
         others = list(map(change_type, others))
         return StreamingDataFrame(lambda: iterator_concat(self, others), **self.get_kwargs())
 
-    def groupby(self, by=None, lambda_agg=None, in_memory=True, **kwargs) -> pandas.DataFrame:
+    def groupby(self, by=None, lambda_agg=None, lambda_agg_agg=None,
+                in_memory=True, **kwargs) -> pandas.DataFrame:
         """
         Implements the streaming :epkg:`pandas:DataFrame:groupby`.
         We assume the result holds in memory. The out-of-memory is
         not implemented yet.
 
-        @param      by          see :epkg:`pandas:DataFrame:groupby`
-        @param      in_memory   in-memory algorithm
-        @param      lambda_agg  aggregation function, *sum* by default
-        @param      kwargs      additional parameters for :epkg:`pandas:DataFrame:groupby`
-        @return                 :epkg:`pandas:DataFrame`
+        @param      by              see :epkg:`pandas:DataFrame:groupby`
+        @param      in_memory       in-memory algorithm
+        @param      lambda_agg      aggregation function, *sum* by default
+        @param      lambda_agg_agg  to aggregate the aggregations, *sum* by default
+        @param      kwargs          additional parameters for :epkg:`pandas:DataFrame:groupby`
+        @return                     :epkg:`pandas:DataFrame`
 
         As the input @see cl StreamingDataFrame does not necessarily hold
         in memory, the aggregation must be done at every iteration.
@@ -655,6 +657,11 @@ class StreamingDataFrame:
                 "sum"
                 return gr.sum()
             lambda_agg = lambda_agg_
+        if lambda_agg_agg is None:
+            def lambda_agg_agg_(gr):
+                "sum"
+                return gr.sum()
+            lambda_agg_agg = lambda_agg_agg_
         ckw = kwargs.copy()
         ckw["as_index"] = False
 
@@ -662,23 +669,24 @@ class StreamingDataFrame:
         for df in self:
             gr = df.groupby(by=by, **ckw)
             agg.append(lambda_agg(gr))
-        conc = pandas.concat(agg)
-        return lambda_agg_(conc.groupby(by=by, **kwargs))
+        conc = pandas.concat(agg, sort=False)
+        return lambda_agg_agg(conc.groupby(by=by, **kwargs))
 
-    def groupby_streaming(self, by=None, lambda_agg=None, in_memory=True,
+    def groupby_streaming(self, by=None, lambda_agg=None, lambda_agg_agg=None, in_memory=True,
                           strategy='cum', **kwargs) -> pandas.DataFrame:
         """
         Implements the streaming :epkg:`pandas:DataFrame:groupby`.
         We assume the result holds in memory. The out-of-memory is
         not implemented yet.
 
-        @param      by          see :epkg:`pandas:DataFrame:groupby`
-        @param      in_memory   in-memory algorithm
-        @param      lambda_agg  aggregation function, *sum* by default
-        @param      kwargs      additional parameters for :epkg:`pandas:DataFrame:groupby`
-        @param      strategy    ``'cum'``, or ``'streaming'``,
-                                see below
-        @return                 :epkg:`pandas:DataFrame`
+        @param      by              see :epkg:`pandas:DataFrame:groupby`
+        @param      in_memory       in-memory algorithm
+        @param      lambda_agg      aggregation function, *sum* by default
+        @param      lambda_agg_agg  to aggregate the aggregations, *sum* by default
+        @param      kwargs          additional parameters for :epkg:`pandas:DataFrame:groupby`
+        @param      strategy        ``'cum'``, or ``'streaming'``,
+                                    see below
+        @return                     :epkg:`pandas:DataFrame`
 
         As the input @see cl StreamingDataFrame does not necessarily hold
         in memory, the aggregation must be done at every iteration.
@@ -688,7 +696,7 @@ class StreamingDataFrame:
         As a consequence, this function should not compute any *mean* or *count*,
         only *sum* because we do not know the size of each iterated
         :epkg:`dataframe`. To compute an average, sum and weights must be
-        aggregated. 
+        aggregated.
 
         Parameter *lambda_agg* is ``lambda gr: gr.sum()`` by default.
         It could also be ``lambda gr: gr.max()`` or
@@ -735,6 +743,11 @@ class StreamingDataFrame:
                 "sum"
                 return gr.sum()
             lambda_agg = lambda_agg_
+        if lambda_agg_agg is None:
+            def lambda_agg_agg_(gr):
+                "sum"
+                return gr.sum()
+            lambda_agg_agg = lambda_agg_agg_
         ckw = kwargs.copy()
         ckw["as_index"] = False
 
@@ -745,20 +758,19 @@ class StreamingDataFrame:
                     gr = df.groupby(by=by, **ckw)
                     gragg = lambda_agg(gr)
                     if agg is None:
-                        agg = lambda_agg_(gragg.groupby(by=by, **kwargs))
-                        yield agg
+                        yield lambda_agg_agg(gragg.groupby(by=by, **kwargs))
+                        agg = gragg
                     else:
-                        agg2 = lambda_agg_(gragg.groupby(by=by, **kwargs))
-                        agg = pandas.concat([agg, agg2])
-                        agg = lambda_agg_(agg.groupby(by=by, **kwargs))
-                        yield agg
+                        lagg = pandas.concat([agg, gragg], sort=False)
+                        yield lambda_agg_agg(lagg.groupby(by=by, **kwargs))
+                        agg = lagg
             return StreamingDataFrame(lambda: iterate_cum(), **self.get_kwargs())
         elif strategy == 'streaming':
             def iterate_streaming():
                 for df in self:
                     gr = df.groupby(by=by, **ckw)
                     gragg = lambda_agg(gr)
-                    yield lambda_agg_(gragg.groupby(by=by, **kwargs))
+                    yield lambda_agg(gragg.groupby(by=by, **kwargs))
             return StreamingDataFrame(lambda: iterate_streaming(), **self.get_kwargs())
         else:
             raise ValueError("Unknown strategy '{0}'".format(strategy))

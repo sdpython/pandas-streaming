@@ -276,3 +276,4 @@ _unittests/ut_df/buggy_hash.csv
 _doc/sphinxdoc/dfs.zip
 _doc/sphinxdoc/dfsa.zip
 _doc/sphinxdoc/source/nbcov-*.png
+.eggs
