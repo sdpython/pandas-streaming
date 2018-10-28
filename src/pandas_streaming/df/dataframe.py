@@ -620,6 +620,11 @@ class StreamingDataFrame:
         :epkg:`dataframe`. To compute an average, sum and weights must be
         aggregated.
 
+        Parameter *lambda_agg* is ``lambda gr: gr.sum()`` by default.
+        It could also be ``lambda gr: gr.max()`` or
+        ``lambda gr: gr.min()`` but not ``lambda gr: gr.mean()``
+        as it would lead to incoherent results.
+
         .. exref::
             :title: StreamingDataFrame and groupby
             :tag: streaming
@@ -658,7 +663,7 @@ class StreamingDataFrame:
             gr = df.groupby(by=by, **ckw)
             agg.append(lambda_agg(gr))
         conc = pandas.concat(agg)
-        return conc.groupby(by=by, **kwargs).sum()
+        return lambda_agg_(conc.groupby(by=by, **kwargs))
 
     def groupby_streaming(self, by=None, lambda_agg=None, in_memory=True,
                           strategy='cum', **kwargs) -> pandas.DataFrame:
@@ -683,7 +688,12 @@ class StreamingDataFrame:
         As a consequence, this function should not compute any *mean* or *count*,
         only *sum* because we do not know the size of each iterated
         :epkg:`dataframe`. To compute an average, sum and weights must be
-        aggregated.
+        aggregated. 
+
+        Parameter *lambda_agg* is ``lambda gr: gr.sum()`` by default.
+        It could also be ``lambda gr: gr.max()`` or
+        ``lambda gr: gr.min()`` but not ``lambda gr: gr.mean()``
+        as it would lead to incoherent results.
 
         Parameter *strategy* allows three scenarios.
         First one if ``strategy is None`` goes through
@@ -735,12 +745,12 @@ class StreamingDataFrame:
                     gr = df.groupby(by=by, **ckw)
                     gragg = lambda_agg(gr)
                     if agg is None:
-                        agg = gragg.groupby(by=by, **kwargs).sum()
+                        agg = lambda_agg_(gragg.groupby(by=by, **kwargs))
                         yield agg
                     else:
-                        agg2 = gragg.groupby(by=by, **kwargs).sum()
+                        agg2 = lambda_agg_(gragg.groupby(by=by, **kwargs))
                         agg = pandas.concat([agg, agg2])
-                        agg = agg.groupby(by=by, **kwargs).sum()
+                        agg = lambda_agg_(agg.groupby(by=by, **kwargs))
                         yield agg
             return StreamingDataFrame(lambda: iterate_cum(), **self.get_kwargs())
         elif strategy == 'streaming':
@@ -748,7 +758,7 @@ class StreamingDataFrame:
                 for df in self:
                     gr = df.groupby(by=by, **ckw)
                     gragg = lambda_agg(gr)
-                    yield gragg.groupby(by=by, **kwargs).sum()
+                    yield lambda_agg_(gragg.groupby(by=by, **kwargs))
             return StreamingDataFrame(lambda: iterate_streaming(), **self.get_kwargs())
         else:
             raise ValueError("Unknown strategy '{0}'".format(strategy))
