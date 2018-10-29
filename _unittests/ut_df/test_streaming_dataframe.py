@@ -484,6 +484,23 @@ class TestStreamingDataFrame(ExtTestCase):
         df["dd12"] = 12
         self.assertEqualDataFrame(df, dfB)
 
+    def test_fillna(self):
+        df = pandas.DataFrame(
+            data=dict(X=[4.5, numpy.nan, 7], Y=["a", "b", numpy.nan]))
+        sdf = StreamingDataFrame.read_df(df)
+
+        df2 = pandas.DataFrame(
+            data=dict(X=[4.5, 10.0, 7], Y=["a", "b", "NAN"]))
+        na = sdf.fillna(value=dict(X=10.0, Y="NAN"))
+        ndf = na.to_df()
+        self.assertEqual(ndf, df2)
+
+        df3 = pandas.DataFrame(
+            data=dict(X=[4.5, 10.0, 7], Y=["a", "b", numpy.nan]))
+        na = sdf.fillna(value=dict(X=10.0))
+        ndf = na.to_df()
+        self.assertEqual(ndf, df3)
+
 
 if __name__ == "__main__":
     TestStreamingDataFrame().test_dataframe()

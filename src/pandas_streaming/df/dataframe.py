@@ -292,11 +292,13 @@ class StreamingDataFrame:
                 sch = (list(it.columns), list(it.dtypes))
             elif self.check_schema:
                 if list(it.columns) != sch[0]:
-                    raise StreamingDataFrameSchemaError(('Column names are different after row {0}\nFirst   chunk: {1}' +
-                                                         '\nCurrent chunk: {2}').format(rows, sch[0], list(it.columns)))
+                    msg = 'Column names are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'
+                    raise StreamingDataFrameSchemaError(
+                        msg.format(rows, sch[0], list(it.columns)))
                 if list(it.dtypes) != sch[1]:
-                    raise StreamingDataFrameSchemaError(('Column types are different after row {0}\n' +
-                                                         'First   chunk: {1}\nCurrent chunk: {2}').format(rows, sch[1], list(it.dtypes)))
+                    msg = 'Column types are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'
+                    raise StreamingDataFrameSchemaError(
+                        msg.format(rows, sch[1], list(it.dtypes)))
             rows += it.shape[0]
             yield it
 
@@ -869,3 +871,30 @@ class StreamingDataFrame:
                     yield dfc
 
             return StreamingDataFrame(lambda: iterate_cst(self, value, col), **self.get_kwargs())
+
+    def fillna(self, **kwargs):
+        """
+        Replaces the missing values, calls
+        :epkg:`pandas:DataFrame:fillna`.
+
+        @param      kwargs      see :epkg:`pandas:DataFrame:fillna`
+        @return                 @see cl StreamingDataFrame
+
+        .. warning::
+            The function does not check what happens at the
+            limit of every chunk of data. Anything but a constant value
+            will probably have an inconsistent behaviour.
+        """
+
+        def iterate_na(self, **kwargs):
+            "iterate on rows"
+            if kwargs.get('inplace', True):
+                kwargs['inplace'] = True
+                for df in self:
+                    df.fillna(**kwargs)
+                    yield df
+            else:
+                for df in self:
+                    yield df.fillna(**kwargs)
+
+        return StreamingDataFrame(lambda: iterate_na(self, **kwargs), **self.get_kwargs())
