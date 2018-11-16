@@ -283,6 +283,16 @@ class StreamingDataFrame:
         If *check_schema* was enabled when calling the constructor,
         the method checks that every :epkg:`DataFrame`
         follows the same schema as the first chunck.
+
+        Even with a big chunk size, it might happen
+        that consecutive chunks might detect different type
+        for one particular column. An error message shows up
+        saying ``Column types are different after row``
+        with more information about the column which failed.
+        In that case, :epkg:`pandas:DataFrame.read_csv` can overwrite
+        the type on one column by specifying
+        ``dtype={column_name: new_type}``. It frequently happens
+        when a string column has many missing values.
         """
         iters = self.iter_creation()
         sch = None
@@ -296,9 +306,15 @@ class StreamingDataFrame:
                     raise StreamingDataFrameSchemaError(
                         msg.format(rows, sch[0], list(it.columns)))
                 if list(it.dtypes) != sch[1]:
-                    msg = 'Column types are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'
+                    errdf = pandas.DataFrame(
+                        dict(names=sch[0], schema1=sch[1], schema2=list(it.dtypes)))
+                    tdf = StringIO()
+                    errdf['diff'] = errdf['schema2'] != errdf['schema1']
+                    errdf = errdf[errdf['diff']]
+                    errdf.to_csv(tdf, sep=",")
+                    msg = 'Column types are different after row {0}\n{1}'
                     raise StreamingDataFrameSchemaError(
-                        msg.format(rows, sch[1], list(it.dtypes)))
+                        msg.format(rows, tdf.getvalue()))
             rows += it.shape[0]
             yield it
 
