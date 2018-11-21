@@ -37,10 +37,6 @@ class TestCodeStyle(ExtTestCase):
                                   'W0212', 'W0703'),
                    skip=["Too many nested blocks",
                          "Module 'numpy.random' has no 'RandomState' member",
-                         "Value 'sch' is unsubscriptable",
-                         "dataframe_io_helpers.py:133: E1137",
-                         "dataframe_io_helpers.py:151: E1137",
-                         "dataframe_io_helpers.py:157: E1137",
                          "dataframe_split.py:60: [E731]",
                          ])
 

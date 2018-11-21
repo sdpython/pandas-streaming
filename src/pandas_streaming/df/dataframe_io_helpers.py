@@ -12,16 +12,145 @@ except ImportError:
 import ijson
 
 
-def enumerate_json_items(filename, encoding=None, fLOG=None):
+class JsonPerRowsStream:
+    """
+    Reads a :epkg:`json` streams and adds
+    ``,``, ``[``, ``]`` to convert a stream containing
+    one :pekg:`json` object per row into one single :epkg:`json` object.
+    It only implements method *readline*.
+    """
+
+    def __init__(self, st):
+        """
+        @param      st      stream
+        """
+        self.st = st
+        self.begin = True
+        self.newline = False
+        self.end = True
+
+    def readline(self, size=-1):
+        """
+        Reads a line, adds ``,``, ``[``, ``]`` if needed.
+        So the number of read characters is not recessarily
+        the requested one but could be greater.
+        """
+        text = self.st.readline(size)
+        if size == 0:
+            return text
+        if self.newline:
+            text = ',' + text
+            self.newline = False
+        elif self.begin:
+            text = '[' + text
+            self.begin = False
+
+        if text.endswith("\n"):
+            self.newline = True
+            return text
+        elif len(text) == 0 or len(text) < size:
+            if self.end:
+                self.end = False
+                return text + ']'
+            else:
+                return text
+        else:
+            return text
+
+    def read(self, size=-1):
+        """
+        Reads characters, adds ``,``, ``[``, ``]`` if needed.
+        So the number of read characters is not recessarily
+        the requested one but could be greater.
+        """
+        text = self.st.read(size)
+        if size == 0:
+            return text
+        if len(text) > 1:
+            t1, t2 = text[:len(text) - 1], text[len(text) - 1:]
+            t1 = t1.replace("\n", "\n,")
+            text = t1 + t2
+
+        if self.newline:
+            text = ',' + text
+            self.newline = False
+        elif self.begin:
+            text = '[' + text
+            self.begin = False
+
+        if text.endswith("\n"):
+            self.newline = True
+            return text
+        elif len(text) == 0 or len(text) < size:
+            if self.end:
+                self.end = False
+                return text + ']'
+            else:
+                return text
+        else:
+            return text
+
+    def getvalue(self):
+        """
+        Returns the whole stream content.
+        """
+        def byline():
+            line = self.readline()
+            while line:
+                yield line
+                line = self.readline()
+        return "".join(byline())
+
+
+def flatten_dictionary(dico, sep="_"):
+    """
+    Flattens a dictionary with nested structure to a dictionary with no
+    hierarchy.
+    :param dico: dictionary to flatten
+    :param sep: string to separate dictionary keys by
+    :return: flattened dictionary
+
+    Inspired from `flatten_json <https://github.com/amirziai/flatten/blob/master/flatten_json.py>`_.
+    """
+    flattened_dict = dict()
+
+    def _flatten(obj, key):
+        if obj is None:
+            flattened_dict[key] = obj
+        elif isinstance(obj, dict):
+            for k, v in obj.items():
+                if not isinstance(k, str):
+                    raise TypeError("All keys must a string.")
+                k2 = k if key is None else "{0}{1}{2}".format(key, sep, k)
+                _flatten(v, k2)
+        elif isinstance(obj, (list, set)):
+            for index, item in enumerate(obj):
+                k2 = k if key is None else "{0}{1}{2}".format(key, sep, index)
+                _flatten(item, k2)
+        else:
+            flattened_dict[key] = obj
+
+    _flatten(dico, None)
+    return flattened_dict
+
+
+def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fLOG=None):
     """
     Enumerates items from a :epkg:`JSON` file or string.
 
     @param      filename        filename or string or stream to parse
     @param      encoding        encoding
+    @param      lines           one record per row
+    @param      flatten         call @see fn flatten_dictionary
     @param      fLOG            logging function
     @return                     iterator on records at first level.
 
     It assumes the syntax follows the format: ``[ {"id":1, ...}, {"id": 2, ...}, ...]``.
+    However, if option *lines* if true, the function considers that the
+    stream or file does have one record per row as follows:
+
+        {"id":1, ...}
+        {"id": 2, ...}
 
     .. exref::
         :title: Processes a json file by streaming.
@@ -90,12 +219,16 @@ def enumerate_json_items(filename, encoding=None, fLOG=None):
     if isinstance(filename, str):
         if "{" not in filename and os.path.exists(filename):
             with open(filename, "r", encoding=encoding) as f:
-                for el in enumerate_json_items(f, encoding=encoding, fLOG=fLOG):
+                for el in enumerate_json_items(f, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
                     yield el
         else:
             st = StringIO(filename)
-            for el in enumerate_json_items(st, encoding=encoding, fLOG=fLOG):
+            for el in enumerate_json_items(st, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
                 yield el
+    elif lines:
+        for el in enumerate_json_items(JsonPerRowsStream(filename),
+                                       encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
+            yield el
     else:
         parser = ijson.parse(filename)
         current = None
@@ -128,9 +261,11 @@ def enumerate_json_items(filename, encoding=None, fLOG=None):
             elif event == "start_map":
                 c = {}
                 if curkey is None:
+                    if current is None:
+                        current = []
                     current.append(c)
                 else:
-                    current[curkey] = c
+                    current[curkey] = c  # pylint: disable=E1137
                 stack.append(c)
                 current = c
                 curkey = None
@@ -139,7 +274,10 @@ def enumerate_json_items(filename, encoding=None, fLOG=None):
                 current = stack[-1]
                 if len(stack) == 1:
                     nbyield += 1
-                    yield current[-1]
+                    if flatten:
+                        yield flatten_dictionary(current[-1])
+                    else:
+                        yield current[-1]
                     # We clear the memory.
                     current.clear()
             elif event == "map_key":
@@ -148,13 +286,13 @@ def enumerate_json_items(filename, encoding=None, fLOG=None):
                 if curkey is None:
                     current.append(value)
                 else:
-                    current[curkey] = value
+                    current[curkey] = value  # pylint: disable=E1137
                     curkey = None
             elif event == "null":
                 if curkey is None:
                     current.append(None)
                 else:
-                    current[curkey] = None
+                    current[curkey] = None  # pylint: disable=E1137
                     curkey = None
             else:
                 raise ValueError("Unknown event '{0}'".format(event))

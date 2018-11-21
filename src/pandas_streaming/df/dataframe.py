@@ -160,7 +160,7 @@ class StreamingDataFrame:
         return kw
 
     @staticmethod
-    def read_json(*args, chunksize=100000, **kwargs) -> 'StreamingDataFrame':
+    def read_json(*args, chunksize=100000, flatten=False, **kwargs) -> 'StreamingDataFrame':
         """
         Reads a :epkg:`json` file or buffer as an iterator
         on :epkg:`DataFrame`. The signature is the same as
@@ -168,9 +168,13 @@ class StreamingDataFrame:
         *chunksize* which defines the number
         of rows to parse in a single bloc
         and it must be defined to return an iterator.
-        If *line* is True, the function falls back into
+        If *lines* is True, the function falls back into
         :epkg:`pandas:read_json`, otherwise it used
-        @see fn enumerate_json_items.
+        @see fn enumerate_json_items. If *lines is ``'stream'``,
+        @see fn enumerate_json_items is called with parameter
+        ``lines=True``.
+        Parameter *flatten* uses the trick described at
+        ` <https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10>`_.
         Examples::
 
         .. runpython::
@@ -203,12 +207,24 @@ class StreamingDataFrame:
             raise ValueError('chunksize must be a positive integer')
         kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
         if isinstance(args[0], (list, dict)):
-            return StreamingDataFrame.read_df(json_normalize(args[0]), **kwargs_create)
+            if flatten:
+                return StreamingDataFrame.read_df(json_normalize(args[0]), **kwargs_create)
+            else:
+                return StreamingDataFrame.read_df(args[0], **kwargs_create)
+        elif kwargs.get('lines', None) == 'stream':
+            del kwargs['lines']
+            st = JsonIterator2Stream(enumerate_json_items(
+                args[0], encoding=kwargs.get('encoding', None), lines=True, flatten=flatten))
+            args = args[1:]
+            return StreamingDataFrame(lambda: pandas.read_json(st, *args, chunksize=chunksize, lines=True, **kwargs), **kwargs_create)
         elif kwargs.get('lines', False):
+            if flatten:
+                raise NotImplementedError(
+                    "flatten==True is implemented with option lines='stream'")
             return StreamingDataFrame(lambda: pandas.read_json(*args, chunksize=chunksize, **kwargs), **kwargs_create)
         else:
             st = JsonIterator2Stream(enumerate_json_items(
-                args[0], encoding=kwargs.get('encoding', None)))
+                args[0], encoding=kwargs.get('encoding', None), flatten=flatten))
             args = args[1:]
             if 'lines' in kwargs:
                 del kwargs['lines']
@@ -265,12 +281,22 @@ class StreamingDataFrame:
         @return                     iterator on @see cl StreamingDataFrame
         """
         if chunksize is None:
-            chunksize = df.shape[0]
+            if hasattr(df, 'shape'):
+                chunksize = df.shape[0]
+            else:
+                raise NotImplementedError(
+                    "Cannot retrieve size to infer chunksize for type={0}".format(type(df)))
+
+        if hasattr(df, 'shape'):
+            size = df.shape[0]
+        else:
+            raise NotImplementedError(
+                "Cannot retrieve size for type={0}".format(type(df)))
 
         def local_iterator():
             "local iterator"
-            for i in range(0, df.shape[0], chunksize):
-                end = min(df.shape[0], i + chunksize)
+            for i in range(0, size, chunksize):
+                end = min(size, i + chunksize)
                 yield df[i:end].copy()
         return StreamingDataFrame(local_iterator, check_schema=check_schema)
 
@@ -301,13 +327,13 @@ class StreamingDataFrame:
             if sch is None:
                 sch = (list(it.columns), list(it.dtypes))
             elif self.check_schema:
-                if list(it.columns) != sch[0]:
+                if list(it.columns) != sch[0]:  # pylint: disable=E1136
                     msg = 'Column names are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'
                     raise StreamingDataFrameSchemaError(
-                        msg.format(rows, sch[0], list(it.columns)))
-                if list(it.dtypes) != sch[1]:
+                        msg.format(rows, sch[0], list(it.columns)))  # pylint: disable=E1136
+                if list(it.dtypes) != sch[1]:  # pylint: disable=E1136
                     errdf = pandas.DataFrame(
-                        dict(names=sch[0], schema1=sch[1], schema2=list(it.dtypes)))
+                        dict(names=sch[0], schema1=sch[1], schema2=list(it.dtypes)))  # pylint: disable=E1136
                     tdf = StringIO()
                     errdf['diff'] = errdf['schema2'] != errdf['schema1']
                     errdf = errdf[errdf['diff']]

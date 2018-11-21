@@ -26,7 +26,7 @@ except ImportError:
     import src
 
 
-from src.pandas_streaming.df.dataframe_io_helpers import enumerate_json_items
+from src.pandas_streaming.df.dataframe_io_helpers import enumerate_json_items, JsonPerRowsStream
 from src.pandas_streaming.df import StreamingDataFrame
 
 
@@ -146,7 +146,9 @@ class TestDataFrameIOHelpers(ExtTestCase):
                 {"id":null,"name":null,"name.family":"Regner","name.first":null,"name.given":"Mose","name.last":null},
                 {"id":2.0,"name":"Faye Raker","name.family":null,"name.first":null,
                 "name.given":null,"name.last":null}]""".replace(" ", "").replace("\n", "")
-        it = StreamingDataFrame.read_json(data)
+        self.assertRaise(lambda: StreamingDataFrame.read_json(
+            data), NotImplementedError)
+        it = StreamingDataFrame.read_json(data, flatten=True)
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records')
@@ -169,6 +171,15 @@ class TestDataFrameIOHelpers(ExtTestCase):
         js = dfs[0].to_json(orient='records')
         self.assertEqual(js, '[{"a":1,"b":2},{"a":3,"b":4}]')
 
+    def test_read_json_rows2(self):
+        data = '''{"a": 1, "b": 2}
+                  {"a": 3, "b": 4}'''
+        it = StreamingDataFrame.read_json(StringIO(data), lines="stream")
+        dfs = list(it)
+        self.assertEqual(len(dfs), 1)
+        js = dfs[0].to_json(orient='records')
+        self.assertEqual(js, '[{"a":1,"b":2},{"a":3,"b":4}]')
+
     def test_read_json_ijson(self):
         it = StreamingDataFrame.read_json(
             StringIO(TestDataFrameIOHelpers.text_json))
@@ -177,6 +188,54 @@ class TestDataFrameIOHelpers(ExtTestCase):
         js = dfs[0].to_json(orient='records', lines=True)
         jsjson = loads('[' + js.replace("\n", ",") + ']')
         self.assertEqual(jsjson, TestDataFrameIOHelpers.text_json_exp)
+
+    def test_read_json_stream(self):
+        text = """{'a': 1}
+        {'b': 1, 'a', 'r'}"""
+        st = JsonPerRowsStream(StringIO(text))
+        val = st.getvalue().replace(" ", "").replace("\n", "")
+        exp = "[{'a':1},{'b':1,'a','r'}]"
+        self.assertEqual(val, exp)
+
+        st = JsonPerRowsStream(StringIO(text))
+        t = st.read(0)
+        t = st.read(1)
+        c = ""
+        while t:
+            c += t
+            t = st.read(1)
+        val = c.replace(" ", "").replace("\n", "")
+        self.assertEqual(val, exp)
+
+    def test_enumerate_json_items_lines(self):
+        data = '''{"a": 1, "b": 2}
+                  {"a": 3, "b": 4}'''
+        items = list(enumerate_json_items(data, lines=True))
+        self.assertEqual(items, [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}])
+
+    def test_read_json_file2(self):
+        data = '''{"a": {"c": 1}, "b": [2, 3]}
+                  {"a": {"a": 3}, "b": [4, 5, "r"]}'''
+
+        obj1 = list(enumerate_json_items(
+            StringIO(data), flatten=False, lines=True))
+        obj2 = list(enumerate_json_items(
+            StringIO(data), flatten=True, lines=True))
+        self.assertNotEqual(obj1, obj2)
+        self.assertEqual(obj2, [{'a_c': 1, 'b_0': 2, 'b_1': 3},
+                                {'a_a': 3, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}])
+
+        it = StreamingDataFrame.read_json(
+            StringIO(data), lines="stream", flatten=True)
+        dfs = list(it)
+        self.assertEqual(list(dfs[0].columns), [
+                         'a_a', 'a_c', 'b_0', 'b_1', 'b_2'])
+        self.assertEqual(len(dfs), 1)
+        js = dfs[0].to_json(orient='records', lines=True)
+        jsjson = loads('[' + js.replace("\n", ",") + ']')
+        exp = [{'a_a': None, 'a_c': 1.0, 'b_0': 2, 'b_1': 3, 'b_2': None},
+               {'a_a': 3.0, 'a_c': None, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}]
+        self.assertEqual(jsjson, exp)
 
 
 if __name__ == "__main__":
