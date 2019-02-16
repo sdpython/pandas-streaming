@@ -56,9 +56,11 @@ class TestStreamingDataFrame(ExtTestCase):
     def test_to_csv(self):
         sdf = dummy_streaming_dataframe(100)
         st = sdf.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,0,s0", st)
+        self.assertStartsWith(",cint,cstr\n0,0,s0",
+                              st.replace('\r', ''))
         st = sdf.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,0,s0", st)
+        self.assertStartsWith(",cint,cstr\n0,0,s0",
+                              st.replace('\r', ''))
 
     def test_iterrows(self):
         sdf = dummy_streaming_dataframe(100)
@@ -102,11 +104,12 @@ class TestStreamingDataFrame(ExtTestCase):
             exp2 = f.read()
         with open(name3, "r") as f:
             text3 = f.read()
-        self.assertEqual(text, exp)
+        self.assertEqual(text.replace('\r', ''), exp)
         sdf2 = StreamingDataFrame.read_df(df)
         self.assertEqualDataFrame(sdf.to_dataframe(), sdf2.to_dataframe())
-        self.assertEqual(text2, exp2)
-        self.assertEqual(text3, exp2)
+        self.assertEqual(text2.replace('\r', ''), exp2)
+        self.assertEqual(text3.replace('\r', '').replace('\n\n', '\n'),
+                         exp2.replace('\r', ''))
 
     def test_where(self):
         sdf = dummy_streaming_dataframe(100)
@@ -116,10 +119,12 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(len(dts), 2)
         res = sdf.where(lambda row: row["cint"] == 1)
         st = res.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1", st)
+        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1",
+                              st.replace('\r', ''))
         res = sdf.where(lambda row: row["cint"] == 1)
         st = res.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1", st)
+        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1",
+                              st.replace('\r', ''))
 
     def test_dataframe(self):
         sdf = dummy_streaming_dataframe(100)
@@ -166,7 +171,8 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = sdf.apply(lambda row: row[["cint"]] + "r", axis=1)
         self.assertNotEmpty(list(sdf))
         text = sdf.to_csv(header=False)
-        self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r", text)
+        self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r",
+                              text.replace('\r', ''))
 
     def test_train_test_split(self):
         sdf = dummy_streaming_dataframe(100)
@@ -503,5 +509,5 @@ class TestStreamingDataFrame(ExtTestCase):
 
 
 if __name__ == "__main__":
-    TestStreamingDataFrame().test_dataframe()
+    TestStreamingDataFrame().test_apply()
     unittest.main()
