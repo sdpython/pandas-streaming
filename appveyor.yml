@@ -25,6 +25,7 @@ install:
   - "%PYTHON%\\Scripts\\pymy_install3 scikit-learn scipy ujson"
   - "%PYTHON%\\Scripts\\pip install  -r requirements.txt"
   - "set PATH=%PATH%;C:\\projects\\jyquickhelper\\build\\update_modules\\Graphviz\\bin"
+  - set PYTHONPATH=src
 build: off
 
 before_test:

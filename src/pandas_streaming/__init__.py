@@ -7,7 +7,7 @@ reimplementing streeaming versions of
 :epkg:`pandas` functionalites.
 """
 
-__version__ = "0.1"
+__version__ = "0.2"
 __author__ = "Xavier Dupré"
 __github__ = "https://github.com/sdpython/pandas_streaming"
 __url__ = "http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html"

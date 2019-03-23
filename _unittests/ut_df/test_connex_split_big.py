@@ -2,37 +2,16 @@
 """
 @brief      test log(time=30s)
 """
-
-import sys
 import os
 import unittest
 from collections import Counter
 import pandas
 from pyquickhelper.loghelper import fLOG
 from pyquickhelper.pycode import ExtTestCase
-
-
-try:
-    import src
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import src
-
-from src.pandas_streaming.df import train_test_connex_split
+from pandas_streaming.df import train_test_connex_split
 
 
 class TestConnexSplitBig(ExtTestCase):
-
-    def test_src(self):
-        "for pylint"
-        self.assertFalse(src is None)
 
     def test_connex_big(self):
         fLOG(

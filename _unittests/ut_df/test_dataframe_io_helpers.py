@@ -2,32 +2,13 @@
 """
 @brief      test log(time=4s)
 """
-
-import sys
-import os
 import unittest
 from io import StringIO
 from json import loads
 import pandas
 from pyquickhelper.pycode import ExtTestCase
-
-
-try:
-    import src
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import src
-
-
-from src.pandas_streaming.df.dataframe_io_helpers import enumerate_json_items, JsonPerRowsStream
-from src.pandas_streaming.df import StreamingDataFrame
+from pandas_streaming.df.dataframe_io_helpers import enumerate_json_items, JsonPerRowsStream
+from pandas_streaming.df import StreamingDataFrame
 
 
 class TestDataFrameIOHelpers(ExtTestCase):
@@ -126,10 +107,6 @@ class TestDataFrameIOHelpers(ExtTestCase):
             }
         }
     ]
-
-    def test_src(self):
-        "for pylint"
-        self.assertFalse(src is None)
 
     def test_enumerate_json_items(self):
         items = list(enumerate_json_items(TestDataFrameIOHelpers.text_json))

@@ -2,8 +2,6 @@
 """
 @brief      test log(time=4s)
 """
-
-import sys
 import os
 import unittest
 import io
@@ -11,29 +9,10 @@ import zipfile
 import numpy
 import pandas
 from pyquickhelper.pycode import ExtTestCase, get_temp_folder
-
-
-try:
-    import src
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import src
-
-from src.pandas_streaming.df import to_zip, read_zip
+from pandas_streaming.df import to_zip, read_zip
 
 
 class TestDataFrameIO(ExtTestCase):
-
-    def test_src(self):
-        "for pylint"
-        self.assertFalse(src is None)
 
     def test_zip_dataframe(self):
         df = pandas.DataFrame([dict(a=1, b="eé", c=5.6, ind="a1", ai=1),

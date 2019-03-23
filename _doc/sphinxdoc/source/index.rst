@@ -34,10 +34,6 @@ pandas_streaming
     :alt: GitHub Issues
     :target: https://github.com/sdpython/pandas_streaming/issues
 
-.. image:: https://badge.waffle.io/sdpython/pandas_streaming.png?label=to%20do&title=to%20do
-    :alt: Waffle
-    :target: https://waffle.io/sdpython/pandas_streaming
-
 .. image:: nbcov.png
     :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
     :alt: Notebook Coverage

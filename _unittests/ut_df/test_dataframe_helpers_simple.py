@@ -2,37 +2,15 @@
 """
 @brief      test log(time=4s)
 """
-
-import sys
-import os
 import unittest
 import pandas
 import numpy
 from pyquickhelper.pycode import ExtTestCase
-
-
-try:
-    import src
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import src
-
-from src.pandas_streaming.df import dataframe_unfold
-from src.pandas_streaming.df.dataframe_helpers import hash_int, hash_str, hash_float
+from pandas_streaming.df import dataframe_unfold
+from pandas_streaming.df.dataframe_helpers import hash_int, hash_str, hash_float
 
 
 class TestDataFrameHelpersSimple(ExtTestCase):
-
-    def test_src(self):
-        "for pylint"
-        self.assertFalse(src is None)
 
     def test_unfold(self):
         df = pandas.DataFrame([dict(a=1, b="e,f"),

@@ -2,39 +2,18 @@
 """
 @brief      test log(time=4s)
 """
-
-import sys
 import os
 import unittest
 import pandas
 import numpy
 from pyquickhelper.pycode import ExtTestCase, get_temp_folder
-
-
-try:
-    import src
-except ImportError:
-    path = os.path.normpath(
-        os.path.abspath(
-            os.path.join(
-                os.path.split(__file__)[0],
-                "..",
-                "..")))
-    if path not in sys.path:
-        sys.path.append(path)
-    import src
-
-from src.pandas_streaming.data import dummy_streaming_dataframe
-from src.pandas_streaming.exc import StreamingInefficientException
-from src.pandas_streaming.df import StreamingDataFrame
-from src.pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
+from pandas_streaming.data import dummy_streaming_dataframe
+from pandas_streaming.exc import StreamingInefficientException
+from pandas_streaming.df import StreamingDataFrame
+from pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
 
 
 class TestStreamingDataFrame(ExtTestCase):
-
-    def test_src(self):
-        "for pylint"
-        self.assertFalse(src is None)
 
     def test_shape(self):
         sdf = dummy_streaming_dataframe(100)
