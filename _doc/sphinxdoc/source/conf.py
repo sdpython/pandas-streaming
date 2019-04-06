@@ -15,7 +15,7 @@ set_sphinx_variables(__file__, "pandas_streaming", "Xavier Dupré", 2019,
                          sphinx_rtd_theme.get_html_theme_path()],
                      locals(), extlinks=dict(
                          issue=('https://github.com/sdpython/pandas_streaming/issues/%s', 'issue')),
-                     title="pandas_streaming", book=True)
+                     title="Streaming functionalities for pandas", book=True)
 
 blog_root = "http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/"
 
