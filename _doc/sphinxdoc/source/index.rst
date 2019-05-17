@@ -10,7 +10,7 @@ pandas_streaming
     :alt: Build status
 
 .. image:: https://ci.appveyor.com/api/projects/status/4te066r8ne1ymmhy?svg=true
-    :target: https://ci.appveyor.com/project/sdpython/pandas_streaming
+    :target: https://ci.appveyor.com/project/sdpython/pandas-streaming
     :alt: Build Status Windows
 
 .. image:: https://circleci.com/gh/sdpython/pandas_streaming/tree/master.svg?style=svg
