@@ -7,7 +7,6 @@ Pillow
 pyquickhelper>=1.9
 scikit-learn
 scipy
-sphinx_rtd_theme
-sphinxjp.themes.sphinxjp
+sphinx_readable_theme
 ujson
 wheel
