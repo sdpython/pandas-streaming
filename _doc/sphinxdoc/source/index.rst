@@ -16,6 +16,9 @@ pandas_streaming
 .. image:: https://circleci.com/gh/sdpython/pandas_streaming/tree/master.svg?style=svg
     :target: https://circleci.com/gh/sdpython/pandas_streaming/tree/master
 
+.. image:: https://dev.azure.com/xavierdupre3/pandas_streaming/_apis/build/status/sdpython.pandas_streaming
+    :target: https://dev.azure.com/xavierdupre3/pandas_streaming/
+
 .. image:: https://badge.fury.io/py/pandas_streaming.svg
     :target: http://badge.fury.io/py/pandas-streaming
 

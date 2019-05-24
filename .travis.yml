@@ -3,14 +3,11 @@ sudo: true
 language: python
 matrix:
   include:
-  - python: 3.6
-    name: "Py36-skl021"
-    env: sklearnc="==0.21"
   - python: 3.7
     name: "Py37-skl020"
     env: sklearnc="==0.20"
   - python: 3.7
-    name: "Py36-skl"
+    name: "Py37-skl021+"
     env: sklearnc=">=0.21"
 before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
