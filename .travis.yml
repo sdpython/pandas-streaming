@@ -4,9 +4,6 @@ language: python
 matrix:
   include:
   - python: 3.7
-    name: "Py37-skl020"
-    env: sklearnc="==0.20"
-  - python: 3.7
     name: "Py37-skl021+"
     env: sklearnc=">=0.21"
 before_install:
