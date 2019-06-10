@@ -87,6 +87,12 @@ class TestPandasHelper(ExtTestCase):
             self.assertEqual(d[0]["n"], 1)
             self.assertEqual(d[1]["a"], "NAN")
 
+    def test_pandas_groupbynan_regular(self):
+        df = pandas.DataFrame([dict(a="a", b=1), dict(a="a", b=2)])
+        gr = df.groupby(["a"]).sum()
+        gr2_ = pandas_groupby_nan(df, ["a"]).sum()
+        self.assertEqualDataFrame(gr, gr2_)
+
 
 if __name__ == "__main__":
     unittest.main()

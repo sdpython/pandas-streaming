@@ -214,6 +214,17 @@ class TestDataFrameIOHelpers(ExtTestCase):
                {'a_a': 3.0, 'a_c': None, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}]
         self.assertEqual(jsjson, exp)
 
+    def test_read_json_item(self):
+        text = TestDataFrameIOHelpers.text_json
+        st = JsonPerRowsStream(StringIO(text))
+        res = []
+        while True:
+            n = st.read()
+            if not n:
+                break
+            res.append(n)
+        self.assertGreater(len(res), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
