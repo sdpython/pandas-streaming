@@ -1,30 +1,41 @@
-.admonition-mathdef {
-	color: #424242;
-	background-color: #F9F9F9;
-	font-size: 14px;
+
+.highlight-ipython3 {
+	background-color: #f8f8c8;
 }
-.admonition-todoext {
-	color: #424242;
-	background-color: #F9F9B9;
-	font-size: 14px;
+
+div.highlight-ipython3 pre {
+	background-color: #f8f8c8;
 }
-.admonition-faqref {
-	color: #424242;
-	background-color: #F9F9B9;
-	font-size: 14px;
+
+.wy-nav-top {
+	background-color: #FF0040;
 }
-.admonition-exref {
-	color: #424242;
-	background-color: #F9F9B9;
-	font-size: 14px;
+
+.wy-side-nav-search {
+	background-color: #FF0040;
 }
-.admonition-nbref {
-	color: #424242;
-	background-color: #F9F9B9;
-	font-size: 14px;
+
+pre.highlight-default {
+	background-color: #b5b5b5;
 }
-.admonition-blocref {
-	color: #424242;
-	background-color: #F9F9B9;
-	font-size: 14px;
+
+table {
+    border: solid 1px #DDEEEE;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font: normal 13px Arial, sans-serif;
+}
+thead th {
+    background-color: #DDEFEF;
+    border: solid 1px #DDEEEE;
+    color: #336B6B;
+    padding: 10px;
+    text-align: left;
+    text-shadow: 1px 1px 1px #fff;
+}
+tbody td {
+    border: solid 1px #DDEEEE;
+    color: #333;
+    padding: 10px;
+    text-shadow: 1px 1px 1px #fff;
 }
