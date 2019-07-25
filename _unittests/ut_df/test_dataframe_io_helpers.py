@@ -118,10 +118,10 @@ class TestDataFrameIOHelpers(ExtTestCase):
     def test_read_json_raw(self):
         data = [{'id': 1, 'name': {'first': 'Coleen', 'last': 'Volk'}},
                 {'name': {'given': 'Mose', 'family': 'Regner'}},
-                {'id': 2, 'name': 'Faye Raker'}]
+                {'id': 2, 'name': 'FayeRaker'}]
         exp = """[{"id":1.0,"name":null,"name.family":null,"name.first":"Coleen","name.given":null,"name.last":"Volk"},
                 {"id":null,"name":null,"name.family":"Regner","name.first":null,"name.given":"Mose","name.last":null},
-                {"id":2.0,"name":"Faye Raker","name.family":null,"name.first":null,
+                {"id":2.0,"name":"FayeRaker","name.family":null,"name.first":null,
                 "name.given":null,"name.last":null}]""".replace(" ", "").replace("\n", "")
         self.assertRaise(lambda: StreamingDataFrame.read_json(
             data), NotImplementedError)
@@ -129,7 +129,9 @@ class TestDataFrameIOHelpers(ExtTestCase):
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records')
-        self.assertEqual(js.replace(" ", ""), exp)
+        js_read = loads(js)
+        js_exp = loads(exp)
+        self.assertEqual(js_exp, js_read)
 
     def test_pandas_json_chunksize(self):
         jsonl = '''{"a": 1, "b": 2}
@@ -205,7 +207,7 @@ class TestDataFrameIOHelpers(ExtTestCase):
         it = StreamingDataFrame.read_json(
             StringIO(data), lines="stream", flatten=True)
         dfs = list(it)
-        self.assertEqual(list(dfs[0].columns), [
+        self.assertEqual(list(sorted(dfs[0].columns)), [
                          'a_a', 'a_c', 'b_0', 'b_1', 'b_2'])
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records', lines=True)
