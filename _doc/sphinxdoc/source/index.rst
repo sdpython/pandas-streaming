@@ -44,6 +44,18 @@ pandas_streaming
 .. image:: https://api.codacy.com/project/badge/Grade/f53b7f4d6a0447aa9ce0c4ad5df659ef
     :target: https://www.codacy.com/app/sdpython/pandas_streaming?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sdpython/pandas_streaming&amp;utm_campaign=Badge_Grade
 
+.. image:: https://pepy.tech/badge/pandas_streaming
+    :target: https://pypi.org/project/pandas_streaming/
+    :alt: Downloads
+
+.. image:: https://img.shields.io/github/forks/sdpython/pandas_streaming.svg
+    :target: https://github.com/sdpython/pandas_streaming/
+    :alt: Forks
+
+.. image:: https://img.shields.io/github/stars/sdpython/pandas_streaming.svg
+    :target: https://github.com/sdpython/pandas_streaming/
+    :alt: Stars
+
 *pandas_streaming* aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
 too big to hold in memory, too small to be parallelized with a significant gain.
 The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API
