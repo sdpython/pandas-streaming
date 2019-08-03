@@ -517,7 +517,7 @@ class StreamingDataFrame:
                 if len(indices) < n:
                     indices.append((i, ir))
                 else:
-                    x = nrandom.random()
+                    x = nrandom.random()  # pylint: disable=E1101
                     if x * n < (seen - n):
                         k = nrandom.randint(0, len(indices) - 1)
                         indices[k] = (i, ir)
