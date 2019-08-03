@@ -2,8 +2,8 @@
 .. |gitlogo| image:: _static/git_logo.png
              :height: 20
 
-pandas_streaming
-================
+pandas_streaming: streaming API over pandas
+===========================================
 
 .. image:: https://travis-ci.org/sdpython/pandas_streaming.svg?branch=master
     :target: https://travis-ci.org/sdpython/pandas_streaming

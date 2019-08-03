@@ -52,8 +52,8 @@
 
 .. _l-README:
 
-pandas_streaming
-================
+pandas_streaming: streaming API over pandas
+===========================================
 
 `pandas_streaming <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_
 aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
