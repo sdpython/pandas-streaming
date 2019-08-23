@@ -1,4 +1,12 @@
 
+.. image:: https://github.com/sdpython/pandas_streaming/blob/master/_doc/sphinxdoc/source/phdoc_static/project_ico.png?raw=true
+    :target: https://github.com/sdpython/pandas_streaming/
+
+.. _l-README:
+
+pandas_streaming: streaming API over pandas
+===========================================
+
 .. image:: https://travis-ci.org/sdpython/pandas_streaming.svg?branch=master
     :target: https://travis-ci.org/sdpython/pandas_streaming
     :alt: Build status
@@ -49,11 +57,6 @@
 .. image:: https://img.shields.io/github/stars/sdpython/pandas_streaming.svg
     :target: https://github.com/sdpython/pandas_streaming/
     :alt: Stars
-
-.. _l-README:
-
-pandas_streaming: streaming API over pandas
-===========================================
 
 `pandas_streaming <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_
 aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
