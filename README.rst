@@ -46,8 +46,8 @@ pandas_streaming: streaming API over pandas
 .. image:: https://api.codacy.com/project/badge/Grade/f53b7f4d6a0447aa9ce0c4ad5df659ef
     :target: https://www.codacy.com/app/sdpython/pandas_streaming?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sdpython/pandas_streaming&amp;utm_campaign=Badge_Grade
 
-.. image:: https://pepy.tech/badge/pandas_streaming
-    :target: https://pypi.org/project/pandas_streaming/
+.. image:: https://pepy.tech/badge/pandas_streaming/month
+    :target: https://pepy.tech/project/pandas_streaming/month
     :alt: Downloads
 
 .. image:: https://img.shields.io/github/forks/sdpython/pandas_streaming.svg
