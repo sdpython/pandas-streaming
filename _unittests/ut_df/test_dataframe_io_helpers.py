@@ -13,7 +13,7 @@ from pandas_streaming.df import StreamingDataFrame
 
 class TestDataFrameIOHelpers(ExtTestCase):
 
-    text_json = '''
+    text_json = b'''
         [
         {
             "glossary": {
@@ -112,7 +112,7 @@ class TestDataFrameIOHelpers(ExtTestCase):
         items = list(enumerate_json_items(TestDataFrameIOHelpers.text_json))
         self.assertEqual(TestDataFrameIOHelpers.text_json_exp, items)
         items = list(enumerate_json_items(
-            StringIO(TestDataFrameIOHelpers.text_json)))
+            BytesIO(TestDataFrameIOHelpers.text_json)))
         self.assertEqual(TestDataFrameIOHelpers.text_json_exp, items)
 
     def test_read_json_raw(self):
@@ -161,7 +161,7 @@ class TestDataFrameIOHelpers(ExtTestCase):
 
     def test_read_json_ijson(self):
         it = StreamingDataFrame.read_json(
-            StringIO(TestDataFrameIOHelpers.text_json))
+            BytesIO(TestDataFrameIOHelpers.text_json))
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records', lines=True)
@@ -218,7 +218,7 @@ class TestDataFrameIOHelpers(ExtTestCase):
 
     def test_read_json_item(self):
         text = TestDataFrameIOHelpers.text_json
-        st = JsonPerRowsStream(StringIO(text))
+        st = JsonPerRowsStream(BytesIO(text))
         res = []
         while True:
             n = st.read()

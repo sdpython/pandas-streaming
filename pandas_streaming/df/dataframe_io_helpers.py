@@ -4,7 +4,7 @@
 @brief Saves and reads a :epkg:`dataframe` into a :epkg:`zip` file.
 """
 import os
-from io import StringIO
+from io import StringIO, BytesIO
 try:
     from ujson import dumps
 except ImportError:
@@ -229,6 +229,10 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
             st = StringIO(filename)
             for el in enumerate_json_items(st, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
                 yield el
+    elif isinstance(filename, bytes):
+        st = BytesIO(filename)
+        for el in enumerate_json_items(st, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
+            yield el
     elif lines:
         for el in enumerate_json_items(JsonPerRowsStream(filename),
                                        encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
