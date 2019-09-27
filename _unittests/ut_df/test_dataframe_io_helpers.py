@@ -193,19 +193,19 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqual(items, [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}])
 
     def test_read_json_file2(self):
-        data = '''{"a": {"c": 1}, "b": [2, 3]}
-                  {"a": {"a": 3}, "b": [4, 5, "r"]}'''
+        data = b'''{"a": {"c": 1}, "b": [2, 3]}
+                   {"a": {"a": 3}, "b": [4, 5, "r"]}'''
 
         obj1 = list(enumerate_json_items(
-            StringIO(data), flatten=False, lines=True))
+            BytesIO(data), flatten=False, lines=True))
         obj2 = list(enumerate_json_items(
-            StringIO(data), flatten=True, lines=True))
+            BytesIO(data), flatten=True, lines=True))
         self.assertNotEqual(obj1, obj2)
         self.assertEqual(obj2, [{'a_c': 1, 'b_0': 2, 'b_1': 3},
                                 {'a_a': 3, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}])
 
         it = StreamingDataFrame.read_json(
-            StringIO(data), lines="stream", flatten=True)
+            BytesIO(data), lines="stream", flatten=True)
         dfs = list(it)
         self.assertEqual(list(sorted(dfs[0].columns)), [
                          'a_a', 'a_c', 'b_0', 'b_1', 'b_2'])
