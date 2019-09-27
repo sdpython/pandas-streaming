@@ -64,27 +64,31 @@ class JsonPerRowsStream:
         the requested one but could be greater.
         """
         text = self.st.read(size)
+        if isinstance(text, bytes):
+            cst = b"\n", b"\n,", b",", b"[", b"]"
+        else:
+            cst = "\n", "\n,", ",", "[", "]"
         if size == 0:
             return text
         if len(text) > 1:
             t1, t2 = text[:len(text) - 1], text[len(text) - 1:]
-            t1 = t1.replace("\n", "\n,")
+            t1 = t1.replace(cst[0], cst[1])
             text = t1 + t2
 
         if self.newline:
-            text = ',' + text
+            text = cst[2] + text
             self.newline = False
         elif self.begin:
-            text = '[' + text
+            text = cst[3] + text
             self.begin = False
 
-        if text.endswith("\n"):
+        if text.endswith(cst[0]):
             self.newline = True
             return text
         elif len(text) == 0 or len(text) < size:
             if self.end:
                 self.end = False
-                return text + ']'
+                return text + cst[4]
             else:
                 return text
         else:

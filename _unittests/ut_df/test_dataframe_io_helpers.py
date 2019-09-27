@@ -3,7 +3,7 @@
 @brief      test log(time=4s)
 """
 import unittest
-from io import StringIO
+from io import StringIO, BytesIO
 from json import loads
 import pandas
 from pyquickhelper.pycode import ExtTestCase
@@ -151,9 +151,9 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqual(js, '[{"a":1,"b":2},{"a":3,"b":4}]')
 
     def test_read_json_rows2(self):
-        data = '''{"a": 1, "b": 2}
+        data = b'''{"a": 1, "b": 2}
                   {"a": 3, "b": 4}'''
-        it = StreamingDataFrame.read_json(StringIO(data), lines="stream")
+        it = StreamingDataFrame.read_json(BytesIO(data), lines="stream")
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records')
