@@ -168,7 +168,7 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
 
             from pandas_streaming.df.dataframe_io_helpers import enumerate_json_items
 
-            text_json = '''
+            text_json = b'''
                 [
                 {
                     "glossary": {
