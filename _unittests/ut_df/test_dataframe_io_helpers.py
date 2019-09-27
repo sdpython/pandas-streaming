@@ -187,8 +187,8 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqual(val, exp)
 
     def test_enumerate_json_items_lines(self):
-        data = '''{"a": 1, "b": 2}
-                  {"a": 3, "b": 4}'''
+        data = b'''{"a": 1, "b": 2}
+                   {"a": 3, "b": 4}'''
         items = list(enumerate_json_items(data, lines=True))
         self.assertEqual(items, [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}])
 
