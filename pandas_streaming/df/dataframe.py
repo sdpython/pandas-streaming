@@ -3,7 +3,7 @@
 @file
 @brief Defines a streaming dataframe.
 """
-from io import StringIO
+from io import StringIO, BytesIO
 from inspect import isfunction
 import numpy.random as nrandom
 import pandas
@@ -180,26 +180,27 @@ class StreamingDataFrame:
         .. runpython::
             :showcode:
 
+            from io import BytesIO
             from pandas_streaming.df import StreamingDataFrame
 
-            data = '''{"a": 1, "b": 2}
-                      {"a": 3, "b": 4}'''
-            it = StreamingDataFrame.read_json(StringIO(data), lines=True)
+            data = b'''{"a": 1, "b": 2}
+                       {"a": 3, "b": 4}'''
+            it = StreamingDataFrame.read_json(BytesIO(data), lines=True)
             dfs = list(it)
             print(dfs)
 
         .. runpython::
             :showcode:
 
-            from io import StringIO
+            from io import BytesIO
             from pandas_streaming.df import StreamingDataFrame
 
-            data = '''[{"a": 1,
-                        "b": 2},
-                       {"a": 3,
-                        "b": 4}]'''
+            data = b'''[{"a": 1,
+                         "b": 2},
+                        {"a": 3,
+                         "b": 4}]'''
 
-            it = StreamingDataFrame.read_json(StringIO(data))
+            it = StreamingDataFrame.read_json(BytesIO(data))
             dfs = list(it)
             print(dfs)
         """
@@ -266,8 +267,12 @@ class StreamingDataFrame:
         kwargs['iterator'] = True
         if 'chunksize' not in kwargs:
             kwargs['chunksize'] = 100000
-        buffer = StringIO(text)
-        return StreamingDataFrame(lambda: pandas.read_csv(buffer, **kwargs), **kwargs_create)
+        if isinstance(text, str):
+            buffer = StringIO(text)
+        else:
+            buffer = BytesIO(text)
+        return StreamingDataFrame(
+            lambda: pandas.read_csv(buffer, **kwargs), **kwargs_create)
 
     @staticmethod
     def read_df(df, chunksize=None, check_schema=True) -> 'StreamingDataFrame':
