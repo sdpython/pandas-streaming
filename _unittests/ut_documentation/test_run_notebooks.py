@@ -13,7 +13,7 @@ import pandas_streaming
 class TestRunNotebooksPython(ExtTestCase):
 
     def setUp(self):
-        import jyquickhelper
+        import jyquickhelper  # pylint: disable=C0415
         self.assertTrue(jyquickhelper is not None)
 
     def test_notebook_artificiel(self):

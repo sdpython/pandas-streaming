@@ -17,7 +17,7 @@ class TestStreamingDataFrame(ExtTestCase):
 
     def test_shape(self):
         sdf = dummy_streaming_dataframe(100)
-        dfs = [df for df in sdf]
+        dfs = list(sdf)
         self.assertEqual(len(dfs), 10)
         self.assertEqual(len(dfs), 10)
         shape = sdf.shape
@@ -385,7 +385,7 @@ class TestStreamingDataFrame(ExtTestCase):
         sgr = sdf20.groupby_streaming(
             "key", lambda gr: gr.sum(), strategy='streaming', as_index=False)
         gr2 = df20.groupby("key", as_index=False).sum()
-        grs = [gr for gr in sgr]
+        grs = list(sgr)
         gr = pandas.concat(grs).groupby("key", as_index=False).sum()
         self.assertEqualDataFrame(gr, gr2)
 

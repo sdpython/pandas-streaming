@@ -128,7 +128,8 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
         "hash float"
         return hash_float(c, hash_length)
 
-    coltype = {n: t for n, t in zip(df.columns, df.dtypes)}
+    coltype = {n: t for n, t in zip(  # pylint: disable=R1721
+        df.columns, df.dtypes)}  # pylint: disable=R1721
     for c in cols:
         t = coltype[c]
         if t == int:
@@ -371,7 +372,8 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             if not nanback:
                 dummy = DataFrame([{"a": "a"}])
                 do = dummy.dtypes[0]
-                typ = {c: t for c, t in zip(df.columns, df.dtypes)}
+                typ = {c: t for c, t in zip(  # pylint: disable=R1721
+                    df.columns, df.dtypes)}  # pylint: disable=R1721
                 if typ[by[0]] != do:
                     warnings.warn(
                         "[pandas_groupby_nan] NaN value: {0}".format(rep))
@@ -399,7 +401,8 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             if not nanback:
                 dummy = DataFrame([{"a": "a"}])
                 do = dummy.dtypes[0]
-                typ = {c: t for c, t in zip(df.columns, df.dtypes)}
+                typ = {c: t for c, t in zip(  # pylint: disable=R1721
+                    df.columns, df.dtypes)}  # pylint: disable=R1721
                 for b in by:
                     if typ[b] != do:
                         warnings.warn(
