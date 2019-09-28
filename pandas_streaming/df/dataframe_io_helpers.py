@@ -326,7 +326,7 @@ class JsonIterator2Stream:
 
             from pandas_streaming.df.dataframe_io_helpers import enumerate_json_items, JsonIterator2Stream
 
-            text_json = '''
+            text_json = b'''
                 [
                 {
                     "glossary": {
