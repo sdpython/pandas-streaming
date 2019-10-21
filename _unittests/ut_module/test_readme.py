@@ -4,7 +4,7 @@
 import os
 import unittest
 from pyquickhelper.loghelper import fLOG
-from pyquickhelper.pycode import get_temp_folder, ExtTestCase
+from pyquickhelper.pycode import get_temp_folder, ExtTestCase, check_readme_syntax
 
 
 class TestReadme(ExtTestCase):
@@ -28,7 +28,6 @@ class TestReadme(ExtTestCase):
             # does not work from a virtual environment
             return
 
-        from pyquickhelper.pycode import check_readme_syntax
         check_readme_syntax(readme, folder=temp, fLOG=fLOG)
 
 
