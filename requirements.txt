@@ -4,7 +4,7 @@ jyquickhelper
 pandas>=0.22
 pandocfilters
 Pillow
-pyquickhelper>=1.9.3141
+pyquickhelper>=1.9.3240
 scikit-learn
 scipy
 sphinx_readable_theme
