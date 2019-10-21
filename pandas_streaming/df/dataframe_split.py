@@ -45,7 +45,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
             "No implementation yet for the stratified version.")
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=ImportWarning)
-        from sklearn.model_selection import train_test_split
+        from sklearn.model_selection import train_test_split  # pylint: disable=C0415
 
     opts = ['test_size', 'train_size',
             'random_state', 'shuffle', 'stratify']
