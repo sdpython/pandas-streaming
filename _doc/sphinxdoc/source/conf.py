@@ -74,5 +74,7 @@ epkg_dictionary.update({
     'Hadoop': 'http://hadoop.apache.org/',
     'pyarrow': 'https://arrow.apache.org/docs/python/',
     'pyspark': 'http://spark.apache.org/docs/2.1.1/api/python/index.html',
+    'scikit-multiflow': 'https://scikit-multiflow.github.io/',
     'streamz': 'https://streamz.readthedocs.io/en/latest/index.html',
+    'tornado': 'https://www.tornadoweb.org/en/stable/',
 })

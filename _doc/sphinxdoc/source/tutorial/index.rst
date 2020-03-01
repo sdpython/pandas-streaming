@@ -61,6 +61,12 @@ I expect this module to be live until
 :epkg:`scikit-learn` updates its code to handle
 a streaming container. This one will probably be
 the winner.
+:epkg:`streamz` follows a different direction.
+It offers parallelisation, relies on :epkg:`tornado` but not
+on :epkg:`pandas` meaning using it for machine learning
+might hide some unexpected loopholes.
+:epkg:`scikit-multiflow` does not only implement streaming
+container but also streaming machine learning trainings.
 
 One element of design to remember
 +++++++++++++++++++++++++++++++++
