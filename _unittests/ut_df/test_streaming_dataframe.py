@@ -4,6 +4,7 @@
 """
 import os
 import unittest
+from io import StringIO
 import pandas
 import numpy
 from pyquickhelper.pycode import ExtTestCase, get_temp_folder
@@ -74,6 +75,14 @@ class TestStreamingDataFrame(ExtTestCase):
         df.to_csv(name2, index=True)
         sdf = StreamingDataFrame.read_csv(name)
         text = sdf.to_csv(index=False)
+        self.assertRaise(
+            lambda: StreamingDataFrame.read_csv(
+                name2, index_col=0, chunksize=None),
+            ValueError)
+        self.assertRaise(
+            lambda: StreamingDataFrame.read_csv(
+                name2, index_col=0, iterator=False),
+            ValueError)
         sdf2 = StreamingDataFrame.read_csv(name2, index_col=0)
         text2 = sdf2.to_csv(index=True)
         sdf2.to_csv(name3, index=True)
@@ -156,6 +165,13 @@ class TestStreamingDataFrame(ExtTestCase):
     def test_train_test_split(self):
         sdf = dummy_streaming_dataframe(100)
         tr, te = sdf.train_test_split(index=False, streaming=False)
+        self.assertRaise(
+            lambda: StreamingDataFrame.read_str(tr, chunksize=None),
+            ValueError)
+        self.assertRaise(
+            lambda: StreamingDataFrame.read_str(tr, iterator=False),
+            ValueError)
+        StreamingDataFrame.read_str(tr.encode('utf-8'))
         trsdf = StreamingDataFrame.read_str(tr)
         tesdf = StreamingDataFrame.read_str(te)
         trdf = trsdf.to_dataframe()
@@ -420,6 +436,9 @@ class TestStreamingDataFrame(ExtTestCase):
                                dict(cf=2, cint="s2", cstr="2"), dict(cf=3, cint=3, cstr="3")])
         temp = get_temp_folder(__file__, "temp_schema_consistant")
         name = os.path.join(temp, "df.csv")
+        stio = StringIO()
+        df.to_csv(stio, index=False)
+        self.assertNotEmpty(stio.getvalue())
         df.to_csv(name, index=False)
         self.assertEqual(df.shape, (4, 3))
         sdf = StreamingDataFrame.read_csv(name, chunksize=2)

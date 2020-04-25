@@ -142,10 +142,9 @@ class StreamingDataFrame:
                 kwargs['train_size'] = partitions[0]
                 kwargs['test_size'] = partitions[1]
             return sklearn_train_test_split_streaming(self, **kwargs)
-        else:
-            return sklearn_train_test_split(self, path_or_buf=path_or_buf,
-                                            export_method=export_method,
-                                            names=names, **kwargs)
+        return sklearn_train_test_split(self, path_or_buf=path_or_buf,
+                                        export_method=export_method,
+                                        names=names, **kwargs)
 
     @staticmethod
     def _process_kwargs(kwargs):
@@ -205,7 +204,8 @@ class StreamingDataFrame:
             print(dfs)
         """
         if not isinstance(chunksize, int) or chunksize <= 0:
-            raise ValueError('chunksize must be a positive integer')
+            raise ValueError(
+                'chunksize must be a positive integer')  # pragma: no cover
         kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
         if isinstance(args[0], (list, dict)):
             if flatten:
@@ -407,8 +407,7 @@ class StreamingDataFrame:
             st.close()
         if isinstance(st, StringIO):
             return st.getvalue()
-        else:
-            return path_or_buf
+        return path_or_buf
 
     def to_dataframe(self) -> pandas.DataFrame:
         """
@@ -447,8 +446,7 @@ class StreamingDataFrame:
             return st[0]
         elif len(st) == 0:
             return None
-        else:
-            return pandas.concat(st, axis=0)
+        return pandas.concat(st, axis=0)
 
     def tail(self, n=5) -> pandas.DataFrame:
         """
@@ -468,7 +466,9 @@ class StreamingDataFrame:
         This function returns a @see cl StreamingDataFrame.
         """
         kwargs['inplace'] = False
-        return StreamingDataFrame(lambda: map(lambda df: df.where(*args, **kwargs), self), **self.get_kwargs())
+        return StreamingDataFrame(
+            lambda: map(lambda df: df.where(*args, **kwargs), self),
+            **self.get_kwargs())
 
     def sample(self, reservoir=False, cache=False, **kwargs) -> 'StreamingDataFrame':
         """
@@ -489,13 +489,11 @@ class StreamingDataFrame:
                 raise ValueError(
                     'frac cannot be specified for reservoir sampling.')
             return self._reservoir_sampling(cache=cache, n=kwargs['n'], random_state=kwargs.get('random_state'))
-        else:
-            if cache:
-                sdf = self.sample(cache=False, **kwargs)
-                df = sdf.to_df()
-                return StreamingDataFrame.read_df(df, chunksize=df.shape[0])
-            else:
-                return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self), **self.get_kwargs(), stable=False)
+        if cache:
+            sdf = self.sample(cache=False, **kwargs)
+            df = sdf.to_df()
+            return StreamingDataFrame.read_df(df, chunksize=df.shape[0])
+        return StreamingDataFrame(lambda: map(lambda df: df.sample(**kwargs), self), **self.get_kwargs(), stable=False)
 
     def _reservoir_sampling(self, cache=True, n=1000, random_state=None) -> 'StreamingDataFrame':
         """
@@ -541,21 +539,26 @@ class StreamingDataFrame:
             if len(buffer) > 0:
                 yield pandas.DataFrame(buffer)
 
-        return StreamingDataFrame(lambda: reservoir_iterate(sdf=self, indices=indices, chunksize=1000))
+        return StreamingDataFrame(
+            lambda: reservoir_iterate(sdf=self, indices=indices, chunksize=1000))
 
     def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:apply`.
         This function returns a @see cl StreamingDataFrame.
         """
-        return StreamingDataFrame(lambda: map(lambda df: df.apply(*args, **kwargs), self), **self.get_kwargs())
+        return StreamingDataFrame(
+            lambda: map(lambda df: df.apply(*args, **kwargs), self),
+            **self.get_kwargs())
 
     def applymap(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:applymap`.
         This function returns a @see cl StreamingDataFrame.
         """
-        return StreamingDataFrame(lambda: map(lambda df: df.applymap(*args, **kwargs), self), **self.get_kwargs())
+        return StreamingDataFrame(
+            lambda: map(lambda df: df.applymap(*args, **kwargs), self),
+            **self.get_kwargs())
 
     def merge(self, right, **kwargs) -> 'StreamingDataFrame':
         """
@@ -574,7 +577,8 @@ class StreamingDataFrame:
                     df = df1.merge(df2, **kw)
                     yield df
 
-        return StreamingDataFrame(lambda: iterator_merge(self, right, **kwargs), **self.get_kwargs())
+        return StreamingDataFrame(
+            lambda: iterator_merge(self, right, **kwargs), **self.get_kwargs())
 
     def concat(self, others, axis=0) -> 'StreamingDataFrame':
         """
@@ -588,10 +592,9 @@ class StreamingDataFrame:
         """
         if axis == 1:
             return self._concath(others)
-        elif axis == 0:
+        if axis == 0:
             return self._concatv(others)
-        else:
-            raise ValueError("axis must be 0 or 1")
+        raise ValueError("axis must be 0 or 1")
 
     def _concath(self, others):
         if not isinstance(others, list):
@@ -645,7 +648,8 @@ class StreamingDataFrame:
                 return obj
 
         others = list(map(change_type, others))
-        return StreamingDataFrame(lambda: iterator_concat(self, others), **self.get_kwargs())
+        return StreamingDataFrame(
+            lambda: iterator_concat(self, others), **self.get_kwargs())
 
     def groupby(self, by=None, lambda_agg=None, lambda_agg_agg=None,
                 in_memory=True, **kwargs) -> pandas.DataFrame:
@@ -814,15 +818,16 @@ class StreamingDataFrame:
                         yield lambda_agg_agg(lagg.groupby(by=by, **kwargs))
                         agg = lagg
             return StreamingDataFrame(lambda: iterate_cum(), **self.get_kwargs())
-        elif strategy == 'streaming':
+
+        if strategy == 'streaming':
             def iterate_streaming():
                 for df in self:
                     gr = df.groupby(by=by, **ckw)
                     gragg = lambda_agg(gr)
                     yield lambda_agg(gragg.groupby(by=by, **kwargs))
             return StreamingDataFrame(lambda: iterate_streaming(), **self.get_kwargs())
-        else:
-            raise ValueError("Unknown strategy '{0}'".format(strategy))
+
+        raise ValueError("Unknown strategy '{0}'".format(strategy))
 
     def ensure_dtype(self, df, dtypes):
         """
@@ -906,18 +911,20 @@ class StreamingDataFrame:
                     yield dfc
 
             return StreamingDataFrame(lambda: iterate_fct(self, value, col), **self.get_kwargs())
-        elif isinstance(value, (pandas.Series, pandas.DataFrame, StreamingDataFrame)):
+
+        if isinstance(value, (pandas.Series, pandas.DataFrame, StreamingDataFrame)):
             raise NotImplementedError(
                 "Unable set a new column based on a datadframe.")
-        else:
-            def iterate_cst(self, value, col):
-                "iterate on rows"
-                for df in self:
-                    dfc = df.copy()
-                    dfc[col] = value
-                    yield dfc
 
-            return StreamingDataFrame(lambda: iterate_cst(self, value, col), **self.get_kwargs())
+        def iterate_cst(self, value, col):
+            "iterate on rows"
+            for df in self:
+                dfc = df.copy()
+                dfc[col] = value
+                yield dfc
+
+        return StreamingDataFrame(
+            lambda: iterate_cst(self, value, col), **self.get_kwargs())
 
     def fillna(self, **kwargs):
         """
@@ -944,4 +951,5 @@ class StreamingDataFrame:
                 for df in self:
                     yield df.fillna(**kwargs)
 
-        return StreamingDataFrame(lambda: iterate_na(self, **kwargs), **self.get_kwargs())
+        return StreamingDataFrame(
+            lambda: iterate_na(self, **kwargs), **self.get_kwargs())
