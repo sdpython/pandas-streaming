@@ -100,9 +100,9 @@ class TestConnexSplit(ExtTestCase):
                                dict(user="UD", prod="PG", card="C5"),
                                ])
 
-        train, test = train_test_connex_split(df, test_size=0.5,
-                                              groups=['user', 'prod', 'card'],
-                                              fail_imbalanced=0.4, fLOG=fLOG)
+        train, test = train_test_connex_split(  # pylint: disable=W0632
+            df, test_size=0.5, groups=['user', 'prod', 'card'],
+            fail_imbalanced=0.4, fLOG=fLOG)
 
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
         for col in ['user', 'prod', 'card']:
@@ -113,9 +113,9 @@ class TestConnexSplit(ExtTestCase):
                     'Non empty intersection {0} & {1}\n{2}\n{3}'.format(s1, s2, train, test))
 
         df['connex'] = 'ole'
-        train, test = train_test_connex_split(df, test_size=0.5,
-                                              groups=['user', 'prod', 'card'],
-                                              fail_imbalanced=0.4, fLOG=fLOG)
+        train, test = train_test_connex_split(  # pylint: disable=W0632
+            df, test_size=0.5, groups=['user', 'prod', 'card'],
+            fail_imbalanced=0.4, fLOG=fLOG)
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
 
     def test_split_connex2(self):
