@@ -7,7 +7,7 @@ import os
 from io import StringIO, BytesIO
 try:
     from ujson import dumps
-except ImportError:
+except ImportError:  # pragma: no cover
     from json import dumps
 import ijson
 
@@ -124,7 +124,7 @@ def flatten_dictionary(dico, sep="_"):
         elif isinstance(obj, dict):
             for k, v in obj.items():
                 if not isinstance(k, str):
-                    raise TypeError("All keys must a string.")
+                    raise TypeError("All keys must a string.")  # pragma: no cover
                 k2 = k if key is None else "{0}{1}{2}".format(key, sep, k)
                 _flatten(v, k2)
         elif isinstance(obj, (list, set)):
@@ -245,14 +245,14 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
         nbyield = 0
         for i, (_, event, value) in enumerate(parser):
             if i % 1000000 == 0 and fLOG is not None:
-                fLOG("[enumerate_json_items] i={0} yielded={1}".format(
-                    i, nbyield))
+                fLOG(  # pragma: no cover
+                    "[enumerate_json_items] i={0} yielded={1}".format(i, nbyield))
             if event == "start_array":
                 if curkey is None:
                     current = []
                 else:
                     if not isinstance(current, dict):
-                        raise RuntimeError(
+                        raise RuntimeError(  # pragma: no cover
                             "Type issue {0}".format(type(current)))
                     c = []
                     current[curkey] = c
@@ -303,7 +303,7 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
                     current[curkey] = None  # pylint: disable=E1137
                     curkey = None
             else:
-                raise ValueError("Unknown event '{0}'".format(event))
+                raise ValueError("Unknown event '{0}'".format(event))  # pragma: no cover
 
 
 class JsonIterator2Stream:

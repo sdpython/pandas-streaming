@@ -230,9 +230,10 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
             for obs, part in iterator_rows():
                 h = h11(obs)
                 if unique_rows and h in cache:
-                    raise ValueError("A row or at least its hash is already cached. "
-                                     "Increase hash_size or check for duplicates "
-                                     "('{0}')\n{1}.".format(h, obs))
+                    raise ValueError(  # pragma: no cover
+                        "A row or at least its hash is already cached. "
+                        "Increase hash_size or check for duplicates "
+                        "('{0}')\n{1}.".format(h, obs))
                 if h not in cache:
                     cache[h] = part
                 else:
@@ -252,7 +253,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                     h = h11(obs)
                     part = cache.get(h)
                     if part is None:
-                        raise ValueError(
+                        raise ValueError(  # pragma: no cover
                             "Second iteration. A row was never met in the first one\n{0}".format(obs))
                     if part == part_requested:
                         accumul.append(obs)

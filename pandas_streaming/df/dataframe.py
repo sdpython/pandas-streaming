@@ -92,7 +92,7 @@ class StreamingDataFrame:
                     break
                 try:
                     assert_frame_equal(a, b)
-                except AssertionError:
+                except AssertionError:  # pragma: no cover
                     return False
             return True
         else:
@@ -210,26 +210,24 @@ class StreamingDataFrame:
         if isinstance(args[0], (list, dict)):
             if flatten:
                 return StreamingDataFrame.read_df(json_normalize(args[0]), **kwargs_create)
-            else:
-                return StreamingDataFrame.read_df(args[0], **kwargs_create)
-        elif kwargs.get('lines', None) == 'stream':
+            return StreamingDataFrame.read_df(args[0], **kwargs_create)
+        if kwargs.get('lines', None) == 'stream':
             del kwargs['lines']
             st = JsonIterator2Stream(enumerate_json_items(
                 args[0], encoding=kwargs.get('encoding', None), lines=True, flatten=flatten))
             args = args[1:]
             return StreamingDataFrame(lambda: pandas.read_json(st, *args, chunksize=chunksize, lines=True, **kwargs), **kwargs_create)
-        elif kwargs.get('lines', False):
+        if kwargs.get('lines', False):
             if flatten:
                 raise NotImplementedError(
                     "flatten==True is implemented with option lines='stream'")
             return StreamingDataFrame(lambda: pandas.read_json(*args, chunksize=chunksize, **kwargs), **kwargs_create)
-        else:
-            st = JsonIterator2Stream(enumerate_json_items(
-                args[0], encoding=kwargs.get('encoding', None), flatten=flatten))
-            args = args[1:]
-            if 'lines' in kwargs:
-                del kwargs['lines']
-            return StreamingDataFrame(lambda: pandas.read_json(st, *args, chunksize=chunksize, lines=True, **kwargs), **kwargs_create)
+        st = JsonIterator2Stream(enumerate_json_items(
+            args[0], encoding=kwargs.get('encoding', None), flatten=flatten))
+        args = args[1:]
+        if 'lines' in kwargs:
+            del kwargs['lines']
+        return StreamingDataFrame(lambda: pandas.read_json(st, *args, chunksize=chunksize, lines=True, **kwargs), **kwargs_create)
 
     @staticmethod
     def read_csv(*args, **kwargs) -> 'StreamingDataFrame':
@@ -444,7 +442,7 @@ class StreamingDataFrame:
             n -= h.shape[0]
         if len(st) == 1:
             return st[0]
-        elif len(st) == 0:
+        if len(st) == 0:
             return None
         return pandas.concat(st, axis=0)
 
@@ -594,7 +592,7 @@ class StreamingDataFrame:
             return self._concath(others)
         if axis == 0:
             return self._concatv(others)
-        raise ValueError("axis must be 0 or 1")
+        raise ValueError("axis must be 0 or 1")  # pragma: no cover
 
     def _concath(self, others):
         if not isinstance(others, list):
@@ -827,7 +825,8 @@ class StreamingDataFrame:
                     yield lambda_agg(gragg.groupby(by=by, **kwargs))
             return StreamingDataFrame(lambda: iterate_streaming(), **self.get_kwargs())
 
-        raise ValueError("Unknown strategy '{0}'".format(strategy))
+        raise ValueError(  # pragma: no cover
+            "Unknown strategy '{0}'".format(strategy))
 
     def ensure_dtype(self, df, dtypes):
         """

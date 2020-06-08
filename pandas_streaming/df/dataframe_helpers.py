@@ -29,8 +29,7 @@ def hash_str(c, hash_length):
         r = m.hexdigest()
         if len(r) >= hash_length:
             return r[:hash_length]
-        else:
-            return r
+        return r
 
 
 def hash_int(c, hash_length):
@@ -279,8 +278,9 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
             elif isinstance(val, bytes):
                 cst = b"_"
             else:
-                raise TypeError(
-                    "Unable to determine a constant for type='{0}' dtype='{1}'".format(val, df[c].dtype))
+                raise TypeError(  # pragma: no cover
+                    "Unable to determine a constant for type='{0}' dtype='{1}'".format(
+                        val, df[c].dtype))
             val += cst
             while val in se:
                 val += suffix
@@ -292,8 +292,9 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
             ma = abs(dr.max())
             val = ma + mi
             if val <= ma:
-                raise ValueError(
-                    "Unable to find a different value for column '{0}': min={1} max={2}".format(val, mi, ma))
+                raise ValueError(  # pragma: no cover
+                    "Unable to find a different value for column '{0}': min={1} max={2}"
+                    "".format(val, mi, ma))
             df[c].fillna(val, inplace=True)
             rep[c] = val
     return rep, df
@@ -405,7 +406,7 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                     df.columns, df.dtypes)}  # pylint: disable=R1721
                 for b in by:
                     if typ[b] != do:
-                        warnings.warn(
+                        warnings.warn(  # pragma: no cover
                             "[pandas_groupby_nan] NaN values: {0}".format(rep))
                         break
                 return res

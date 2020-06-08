@@ -207,7 +207,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     if stratify is not None:
         raise NotImplementedError("Option stratify is not implemented.")
     if groups is None or len(groups) == 0:
-        raise ValueError("groups is empty. Use regular train_test_split.")
+        raise ValueError(  # pragma: no cover
+            "groups is empty. Use regular train_test_split.")
     if hasattr(df, 'iter_creation'):
         raise NotImplementedError(
             'Not implemented yet for StreamingDataFrame.')
@@ -270,7 +271,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                                 len(counts_cnx[c]) - maxi
                             r = diff / float(maxi)
                             if r > kb:
-                                if fLOG:
+                                if fLOG:  # pragma: no cover
                                     fLOG('[train_test_connex_split]    balance r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
                                         r, kb, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
                                 continue
@@ -317,7 +318,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
         fLOG(
             "[train_test_connex_split] #connex {0}/{1}".format(grsum.shape[0], dfids.shape[0]))
     if grsum.shape[0] <= 1:
-        raise ValueError("Every element is in the same connected components.")
+        raise ValueError(  # pragma: no cover
+            "Every element is in the same connected components.")
 
     # Statistics: top connected components
     if fLOG:
@@ -430,7 +432,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
         p = train_size
     test_size = 1 - p
     if p is None or min(test_size, p) <= 0:
-        raise ValueError(
+        raise ValueError(  # pragma: no cover
             "test_size={0} or train_size={1} cannot be null".format(test_size, train_size))
 
     couples = df[[group, stratify]].itertuples(name=None, index=False)
