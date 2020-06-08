@@ -1,5 +1,6 @@
 coverage
 ijson
+jupyter_sphinx
 jyquickhelper
 matplotlib
 pandas>=0.22
