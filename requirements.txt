@@ -1,12 +1,16 @@
 coverage
 ijson
 jyquickhelper
+matplotlib
 pandas>=0.22
 pandocfilters
 Pillow
+pycodestyle
 pyquickhelper>=1.9.3240
 scikit-learn
 scipy
+sphinx
+sphinxcontrib.imagesvg
 sphinx_readable_theme
 ujson
 wheel
