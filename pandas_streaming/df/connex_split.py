@@ -405,14 +405,15 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
         :showcode:
 
         import pandas
+        from pandas_streaming.df import train_test_apart_stratify
+
         df = pandas.DataFrame([dict(a=1, b="e"),
                                dict(a=1, b="f"),
                                dict(a=2, b="e"),
-                               dict(a=2, b="f"),
-                               ])
+                               dict(a=2, b="f")])
 
-        from pandas_streaming.df import train_test_apart_stratify
-        train, test = train_test_apart_stratify(df, group="a", stratify="b", test_size=0.5)
+        train, test = train_test_apart_stratify(
+            df, group="a", stratify="b", test_size=0.5)
         print(train)
         print('-----------')
         print(test)
