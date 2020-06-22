@@ -59,6 +59,10 @@ pandas_streaming: streaming API over pandas
     :target: https://github.com/sdpython/pandas_streaming/
     :alt: Stars
 
+.. image:: https://img.shields.io/github/repo-size/sdpython/pandas_streaming
+    :target: https://github.com/sdpython/pandas_streaming/
+    :alt: size
+
 *pandas_streaming* aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
 too big to hold in memory, too small to be parallelized with a significant gain.
 The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API

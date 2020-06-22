@@ -14,6 +14,6 @@ scikit-learn
 scipy
 sphinx
 sphinxcontrib.imagesvg
-sphinx_readable_theme
+sphinx_gallery
 ujson
 wheel

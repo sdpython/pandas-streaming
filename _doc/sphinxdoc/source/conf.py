@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-import sphinx_readable_theme
+import alabaster
 from pyquickhelper.helpgen.default_conf import set_sphinx_variables, get_default_stylesheet
 
 
@@ -11,7 +11,7 @@ local_template = os.path.join(os.path.abspath(
     os.path.dirname(__file__)), "phdoc_templates")
 
 set_sphinx_variables(__file__, "pandas_streaming", "Xavier Dupré", 2020,
-                     "readable", sphinx_readable_theme.get_html_theme_path(),
+                     "alabaster", alabaster.get_path(),
                      locals(), extlinks=dict(
                          issue=('https://github.com/sdpython/pandas_streaming/issues/%s', 'issue')),
                      title="Streaming functionalities for pandas", book=True)
