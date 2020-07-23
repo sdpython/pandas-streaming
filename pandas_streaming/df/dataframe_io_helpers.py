@@ -124,7 +124,8 @@ def flatten_dictionary(dico, sep="_"):
         elif isinstance(obj, dict):
             for k, v in obj.items():
                 if not isinstance(k, str):
-                    raise TypeError("All keys must a string.")  # pragma: no cover
+                    raise TypeError(
+                        "All keys must a string.")  # pragma: no cover
                 k2 = k if key is None else "{0}{1}{2}".format(key, sep, k)
                 _flatten(v, k2)
         elif isinstance(obj, (list, set)):
@@ -303,7 +304,8 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
                     current[curkey] = None  # pylint: disable=E1137
                     curkey = None
             else:
-                raise ValueError("Unknown event '{0}'".format(event))  # pragma: no cover
+                raise ValueError("Unknown event '{0}'".format(
+                    event))  # pragma: no cover
 
 
 class JsonIterator2Stream:

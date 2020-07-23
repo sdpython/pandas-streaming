@@ -74,17 +74,18 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         stb = io.BytesIO()
         ext = os.path.splitext(zname)[-1]
         if ext != '.npy':
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "Extension '.npy' is required when saving a numpy array.")
         numpy.save(stb, df, **kwargs)
     else:
-        raise TypeError("Type not handled {0}".format(type(df)))
+        raise TypeError(  # pragma: no cover
+            "Type not handled {0}".format(type(df)))
     text = stb.getvalue()
 
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
         if ext != '.zip':
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: no cover
                 "Only zip file are implemented not '{0}'.".format(ext))
         zf = zipfile.ZipFile(zipfilename, 'w')
         close = True
@@ -92,7 +93,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         zf = zipfilename
         close = False
     else:
-        raise TypeError(
+        raise TypeError(  # pragma: no cover
             "No implementation for type '{0}'".format(type(zipfilename)))
 
     zf.writestr(zname, text)
@@ -121,7 +122,7 @@ def read_zip(zipfilename, zname="df.csv", **kwargs):
         zf = zipfilename
         close = False
     else:
-        raise TypeError(
+        raise TypeError(  # pragma: no cover
             "No implementation for type '{0}'".format(type(zipfilename)))
 
     content = zf.read(zname)

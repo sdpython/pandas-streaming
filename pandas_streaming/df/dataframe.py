@@ -331,9 +331,10 @@ class StreamingDataFrame:
                 sch = (list(it.columns), list(it.dtypes))
             elif self.check_schema:
                 if list(it.columns) != sch[0]:  # pylint: disable=E1136
-                    msg = 'Column names are different after row {0}\nFirst   chunk: {1}\nCurrent chunk: {2}'
-                    raise StreamingDataFrameSchemaError(
-                        msg.format(rows, sch[0], list(it.columns)))  # pylint: disable=E1136
+                    raise StreamingDataFrameSchemaError(  # pragma: no cover
+                        'Column names are different after row {0}\nFirst   chunk: {1}'
+                        '\nCurrent chunk: {2}'.format(
+                            rows, sch[0], list(it.columns)))
                 if list(it.dtypes) != sch[1]:  # pylint: disable=E1136
                     errdf = pandas.DataFrame(
                         dict(names=sch[0], schema1=sch[1], schema2=list(it.dtypes)))  # pylint: disable=E1136

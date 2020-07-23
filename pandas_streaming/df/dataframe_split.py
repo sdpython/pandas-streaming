@@ -68,14 +68,15 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
         if names is None:
             names = ['train', 'test']
         elif len(names) != len(path_or_buf):
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 'names and path_or_buf must have the same length')
         path_or_buf = [path_or_buf.format(n) for n in names]
     elif path_or_buf is None:
         path_or_buf = [None, None]
     else:
         if not isinstance(path_or_buf, list):
-            raise TypeError('path_or_buf must be a list or a string')
+            raise TypeError(  # pragma: no cover
+                'path_or_buf must be a list or a string')
 
     bufs = []
     close = []

@@ -280,7 +280,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                         r = (len(counts_cnx[new_c]) +
                              len(counts_cnx[c])) / float(len(elements))
                         if r > sib:
-                            if fLOG:
+                            if fLOG:  # pragma: no cover
                                 fLOG('[train_test_connex_split]    no merge r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
                                     r, sib, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
                             avoids_merge[new_c, c] = i
