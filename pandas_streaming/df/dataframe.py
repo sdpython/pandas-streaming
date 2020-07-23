@@ -334,7 +334,7 @@ class StreamingDataFrame:
                     raise StreamingDataFrameSchemaError(  # pragma: no cover
                         'Column names are different after row {0}\nFirst   chunk: {1}'
                         '\nCurrent chunk: {2}'.format(
-                            rows, sch[0], list(it.columns)))
+                            rows, sch[0], list(it.columns)))  # pylint: disable=E1136
                 if list(it.dtypes) != sch[1]:  # pylint: disable=E1136
                     errdf = pandas.DataFrame(
                         dict(names=sch[0], schema1=sch[1], schema2=list(it.dtypes)))  # pylint: disable=E1136
