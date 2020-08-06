@@ -4,7 +4,7 @@ ijson
 jupyter_sphinx
 jyquickhelper
 matplotlib
-pandas>=0.22
+pandas>=1.1.0
 pandocfilters
 Pillow
 pycodestyle
