@@ -153,11 +153,13 @@ class TestDataFrameIOHelpers(ExtTestCase):
     def test_read_json_rows2(self):
         data = b'''{"a": 1, "b": 2}
                   {"a": 3, "b": 4}'''
+        dfs = pandas.read_json(BytesIO(data), lines=True)
+        self.assertEqual(dfs.shape, (2, 2))
         it = StreamingDataFrame.read_json(BytesIO(data), lines="stream")
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records')
-        self.assertEqual(js, '[{"a":1,"b":2},{"a":3,"b":4}]')
+        self.assertEqual('[{"a":1,"b":2},{"a":3,"b":4}]', js)
 
     def test_read_json_ijson(self):
         it = StreamingDataFrame.read_json(
@@ -207,14 +209,14 @@ class TestDataFrameIOHelpers(ExtTestCase):
         it = StreamingDataFrame.read_json(
             BytesIO(data), lines="stream", flatten=True)
         dfs = list(it)
-        self.assertEqual(list(sorted(dfs[0].columns)), [
-                         'a_a', 'a_c', 'b_0', 'b_1', 'b_2'])
+        self.assertEqual(['a_a', 'a_c', 'b_0', 'b_1', 'b_2'],
+                         list(sorted(dfs[0].columns)), )
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records', lines=True)
         jsjson = loads('[' + js.replace("\n", ",") + ']')
         exp = [{'a_a': None, 'a_c': 1.0, 'b_0': 2, 'b_1': 3, 'b_2': None},
                {'a_a': 3.0, 'a_c': None, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}]
-        self.assertEqual(jsjson, exp)
+        self.assertEqual(exp, jsjson)
 
     def test_read_json_item(self):
         text = TestDataFrameIOHelpers.text_json

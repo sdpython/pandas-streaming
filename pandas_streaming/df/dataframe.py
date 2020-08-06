@@ -204,30 +204,64 @@ class StreamingDataFrame:
             print(dfs)
         """
         if not isinstance(chunksize, int) or chunksize <= 0:
-            raise ValueError(
-                'chunksize must be a positive integer')  # pragma: no cover
+            raise ValueError(  # pragma: no cover
+                'chunksize must be a positive integer')
         kwargs_create = StreamingDataFrame._process_kwargs(kwargs)
+
         if isinstance(args[0], (list, dict)):
             if flatten:
                 return StreamingDataFrame.read_df(json_normalize(args[0]), **kwargs_create)
             return StreamingDataFrame.read_df(args[0], **kwargs_create)
+
         if kwargs.get('lines', None) == 'stream':
             del kwargs['lines']
             st = JsonIterator2Stream(enumerate_json_items(
                 args[0], encoding=kwargs.get('encoding', None), lines=True, flatten=flatten))
             args = args[1:]
-            return StreamingDataFrame(lambda: pandas.read_json(st, *args, chunksize=chunksize, lines=True, **kwargs), **kwargs_create)
+
+            if chunksize is None:
+                return StreamingDataFrame(
+                    lambda: pandas.read_json(
+                        st, *args, chunksize=None, lines=True, **kwargs),
+                    **kwargs_create)
+
+            def fct1(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
+                for r in pandas.read_json(st, *args, chunksize=chunksize, nrows=chunksize,
+                                          lines=True, **kw):
+                    yield r
+            return StreamingDataFrame(fct1, **kwargs_create)
+
         if kwargs.get('lines', False):
             if flatten:
                 raise NotImplementedError(
                     "flatten==True is implemented with option lines='stream'")
-            return StreamingDataFrame(lambda: pandas.read_json(*args, chunksize=chunksize, **kwargs), **kwargs_create)
+            if chunksize is None:
+                return StreamingDataFrame(
+                    lambda: pandas.read_json(*args, chunksize=None, **kwargs),
+                    **kwargs_create)
+
+            def fct2(args=args, chunksize=chunksize, kw=kwargs.copy()):
+                for r in pandas.read_json(*args, chunksize=chunksize, nrows=chunksize, **kw):
+                    yield r
+            return StreamingDataFrame(fct2, **kwargs_create)
+
         st = JsonIterator2Stream(enumerate_json_items(
             args[0], encoding=kwargs.get('encoding', None), flatten=flatten))
         args = args[1:]
         if 'lines' in kwargs:
             del kwargs['lines']
-        return StreamingDataFrame(lambda: pandas.read_json(st, *args, chunksize=chunksize, lines=True, **kwargs), **kwargs_create)
+
+        if chunksize is None:
+            return StreamingDataFrame(
+                lambda: pandas.read_json(
+                    st, *args, chunksize=chunksize, lines=True, **kwargs),
+                **kwargs_create)
+
+        def fct3(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
+            for r in pandas.read_json(st, *args, chunksize=chunksize, nrows=chunksize,
+                                      lines=True, **kw):
+                yield r
+        return StreamingDataFrame(fct3, **kwargs_create)
 
     @staticmethod
     def read_csv(*args, **kwargs) -> 'StreamingDataFrame':
