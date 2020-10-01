@@ -170,7 +170,7 @@ class StreamingDataFrame:
         If *lines* is True, the function falls back into
         :epkg:`pandas:read_json`, otherwise it used
         @see fn enumerate_json_items. If *lines is ``'stream'``,
-        @see fn enumerate_json_items is called with parameter
+        *enumerate_json_items* is called with parameter
         ``lines=True``.
         Parameter *flatten* uses the trick described at
         `Flattening JSON objects in Python
