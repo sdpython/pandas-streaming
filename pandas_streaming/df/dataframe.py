@@ -173,8 +173,9 @@ class StreamingDataFrame:
         @see fn enumerate_json_items is called with parameter
         ``lines=True``.
         Parameter *flatten* uses the trick described at
-        ` <https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10>`_.
-        Examples::
+        `Flattening JSON objects in Python
+        <https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10>`_.
+        Examples:
 
         .. runpython::
             :showcode:
