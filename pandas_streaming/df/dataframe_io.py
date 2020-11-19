@@ -67,7 +67,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         stb = io.StringIO()
         ext = os.path.splitext(zname)[-1]
         if ext == '.npy':
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "Extension '.npy' cannot be used to save a dataframe.")
         df.to_csv(stb, **kwargs)
     elif isinstance(df, numpy.ndarray):

@@ -376,7 +376,7 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                 typ = {c: t for c, t in zip(  # pylint: disable=R1721
                     df.columns, df.dtypes)}  # pylint: disable=R1721
                 if typ[by[0]] != do:
-                    warnings.warn(
+                    warnings.warn(  # pragma: no cover
                         "[pandas_groupby_nan] NaN value: {0}".format(rep))
                 return res
             for b in by:
