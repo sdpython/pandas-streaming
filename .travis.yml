@@ -1,19 +1,15 @@
-dist: xenial
+dist: focal
 sudo: true
 language: python
 matrix:
   include:
-  - python: 3.7
-    name: "Py37-skl021+"
-    env: sklearnc=">=0.21"
-  - python: 3.8
-    name: "Py38-skl022+"
+  - python: 3.9
+    name: "Py39-skl022+"
     env: sklearnc=">=0.22"
 before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
 install:
-  - sudo apt-get install -qq gcc-6 g++-6
   - pip install -r requirements.txt
   - pip install pyquickhelper --no-deps
   - pip install scikit-learn$sklearnc
@@ -21,4 +17,4 @@ install:
 before_script:
   - python setup.py build_ext --inplace
 script:
-    - python setup.py unittests
+  - python setup.py unittests
