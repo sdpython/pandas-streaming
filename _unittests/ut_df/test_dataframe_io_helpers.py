@@ -167,7 +167,7 @@ class TestDataFrameIOHelpers(ExtTestCase):
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records', lines=True)
-        jsjson = loads('[' + js.replace("\n", ",") + ']')
+        jsjson = loads('[' + js.replace("\n", ",").strip(',') + ']')
         self.assertEqual(jsjson, TestDataFrameIOHelpers.text_json_exp)
 
     def test_read_json_stream(self):
@@ -213,7 +213,7 @@ class TestDataFrameIOHelpers(ExtTestCase):
                          list(sorted(dfs[0].columns)), )
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records', lines=True)
-        jsjson = loads('[' + js.replace("\n", ",") + ']')
+        jsjson = loads('[' + js.replace("\n", ",").strip(',') + ']')
         exp = [{'a_a': None, 'a_c': 1.0, 'b_0': 2, 'b_1': 3, 'b_2': None},
                {'a_a': 3.0, 'a_c': None, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}]
         self.assertEqual(exp, jsjson)

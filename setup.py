@@ -174,6 +174,6 @@ if not r:
         packages=packages,
         package_dir=package_dir,
         package_data=package_data,
-        setup_requires=["pyquickhelper>=1.9"],
+        setup_requires=["pyquickhelper>=1.10"],
         install_requires=['numpy', 'pandas', 'ijson'],
     )
