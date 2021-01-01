@@ -6,13 +6,8 @@ matrix:
   - python: 3.9
     name: "Py39-skl022+"
     env: sklearnc=">=0.22"
-before_install:
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update -qq
 install:
   - pip install -r requirements.txt
-  - pip install pyquickhelper --no-deps
-  - pip install scikit-learn$sklearnc
   - python -c "import sklearn;print(sklearn.__version__)"
 before_script:
   - python setup.py build_ext --inplace
