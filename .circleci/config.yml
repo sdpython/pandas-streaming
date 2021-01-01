@@ -48,7 +48,14 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            pip install --upgrade pip
             pip install numpy scipy
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
             pip install scikit-learn --no-deps
             pip install -r requirements.txt
 
