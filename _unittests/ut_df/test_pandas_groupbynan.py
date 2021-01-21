@@ -93,6 +93,14 @@ class TestPandasHelper(ExtTestCase):
         gr2_ = pandas_groupby_nan(df, ["a"]).sum()
         self.assertEqualDataFrame(gr, gr2_)
 
+    def test_pandas_groupbynan_regular_nanback(self):
+        df = pandas.DataFrame([dict(a="a", b=1, cc=0), dict(a="a", b=2)])
+        gr = df.groupby(["a", "cc"]).sum()
+        self.assertEqual(len(gr), 1)
+        self.assertRaise(
+            lambda: pandas_groupby_nan(df, ["a", "cc"], nanback=True).sum(),
+            NotImplementedError)
+
 
 if __name__ == "__main__":
     unittest.main()

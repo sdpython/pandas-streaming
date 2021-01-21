@@ -10,6 +10,34 @@ import numpy
 from pandas import DataFrame, Index
 
 
+def numpy_types():
+    """
+    Returns the list of :epkg:`numpy` available types.
+
+    :return: list of types
+    """
+
+    return [numpy.bool_,
+            numpy.int_,
+            numpy.intc,
+            numpy.intp,
+            numpy.int8,
+            numpy.int16,
+            numpy.int32,
+            numpy.int64,
+            numpy.uint8,
+            numpy.uint16,
+            numpy.uint32,
+            numpy.uint64,
+            numpy.float_,
+            numpy.float16,
+            numpy.float32,
+            numpy.float64,
+            numpy.complex_,
+            numpy.complex64,
+            numpy.complex128]
+
+
 def hash_str(c, hash_length):
     """
     Hashes a string.
@@ -21,15 +49,13 @@ def hash_str(c, hash_length):
     if isinstance(c, float):
         if numpy.isnan(c):
             return c
-        else:
-            raise ValueError("numpy.nan expected, not {0}".format(c))
-    else:
-        m = hashlib.sha256()
-        m.update(c.encode("utf-8"))
-        r = m.hexdigest()
-        if len(r) >= hash_length:
-            return r[:hash_length]
-        return r
+        raise ValueError("numpy.nan expected, not {0}".format(c))
+    m = hashlib.sha256()
+    m.update(c.encode("utf-8"))
+    r = m.hexdigest()
+    if len(r) >= hash_length:
+        return r[:hash_length]
+    return r
 
 
 def hash_int(c, hash_length):
@@ -209,9 +235,9 @@ def dataframe_shuffle(df, random_state=None):
     """
     Shuffles a dataframe.
 
-    @param      df              :epkg:`pandas:DataFrame`
-    @param      random_state    seed
-    @return                     new :epkg:`pandas:DataFrame`
+    :param df: :epkg:`pandas:DataFrame`
+    :param random_state: seed
+    :return: new :epkg:`pandas:DataFrame`
 
     .. exref::
         :title: Shuffles the rows of a dataframe
@@ -257,11 +283,11 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
     Replaces the :epkg:`nan` values for something not :epkg:`nan`.
     Mostly used by @see fn pandas_groupby_nan.
 
-    @param      df      dataframe
-    @param      by      list of columns for which we need to replace nan
-    @param      hasna   None or list of columns for which we need to replace NaN
-    @param      suffix  use a prefix for the NaN value
-    @return             list of values chosen for each column, new dataframe (new copy)
+    :param df: dataframe
+    :param by: list of columns for which we need to replace nan
+    :param hasna: None or list of columns for which we need to replace NaN
+    :param suffix: use a prefix for the NaN value
+    :return: list of values chosen for each column, new dataframe (new copy)
     """
     suffix = suffix if suffix else "²"
     df = df.copy()
@@ -291,10 +317,12 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
             mi = abs(dr.min())
             ma = abs(dr.max())
             val = ma + mi
+            if val == ma and not isinstance(val, str):
+                val += ma + 1.
             if val <= ma:
                 raise ValueError(  # pragma: no cover
-                    "Unable to find a different value for column '{0}': min={1} max={2}"
-                    "".format(val, mi, ma))
+                    "Unable to find a different value for column '{}' v='{}: "
+                    "min={} max={}".format(c, val, mi, ma))
             df[c].fillna(val, inplace=True)
             rep[c] = val
     return rep, df
@@ -304,19 +332,21 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
     """
     Does a *groupby* including keeping missing values (:epkg:`nan`).
 
-    @param      df          dataframe
-    @param      by          column or list of columns
-    @param      axis        only 0 is allowed
-    @param      as_index    should be False
-    @param      suffix      None or a string
-    @param      nanback     put :epkg:`nan` back in the index,
-                            otherwise it leaves a replacement for :epkg:`nan`.
-                            (does not work when grouping by multiple columns)
-    @param      kwargs      other parameters sent to
-                            `groupby <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.groupby.html>`_
-    @return                 groupby results
+    :param df: dataframe
+    :param by: column or list of columns
+    :param axis: only 0 is allowed
+    :param as_index: should be False
+    :param suffix: None or a string
+    :param nanback: put :epkg:`nan` back in the index,
+        otherwise it leaves a replacement for :epkg:`nan`.
+        (does not work when grouping by multiple columns)
+    :param kwargs: other parameters sent to
+        `groupby <http://pandas.pydata.org/pandas-docs/stable/
+        generated/pandas.DataFrame.groupby.html>`_
+    :return: groupby results
 
-    See `groupby and missing values <http://pandas-docs.github.io/pandas-docs-travis/groupby.html#na-and-nat-group-handling>`_.
+    See `groupby and missing values <http://pandas-docs.github.io/
+    pandas-docs-travis/groupby.html#na-and-nat-group-handling>`_.
     If no :epkg:`nan` is detected, the function falls back in regular
     :epkg:`pandas:DataFrame:groupby` which has the following
     behavior.
@@ -411,7 +441,8 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                         break
                 return res
             raise NotImplementedError(
-                "Not yet implemented. Replacing pseudo nan values by real nan values is not as easy as it looks. Use nanback=False")
+                "Not yet implemented. Replacing pseudo nan values by real nan "
+                "values is not as easy as it looks. Use nanback=False")
 
             # keys = list(res.grouper.groups.keys())
             # didit = False
@@ -459,31 +490,3 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
         return res
     else:
         return df.groupby(by, axis=axis, **kwargs)
-
-
-def numpy_types():
-    """
-    Returns the list of :epkg:`numpy` available types.
-
-    @return     list of types
-    """
-
-    return [numpy.bool_,
-            numpy.int_,
-            numpy.intc,
-            numpy.intp,
-            numpy.int8,
-            numpy.int16,
-            numpy.int32,
-            numpy.int64,
-            numpy.uint8,
-            numpy.uint16,
-            numpy.uint32,
-            numpy.uint64,
-            numpy.float_,
-            numpy.float16,
-            numpy.float32,
-            numpy.float64,
-            numpy.complex_,
-            numpy.complex64,
-            numpy.complex128]

@@ -45,6 +45,8 @@ class TestDataFrameHelpersSimple(ExtTestCase):
         self.assertRaise(lambda: hash_float("0.1", 3), TypeError, "isnan")
         r = hash_float(numpy.nan, 3)
         self.assertTrue(numpy.isnan(r))
+        r = hash_str("3", 100)
+        self.assertLess(len(r), 100)
 
 
 if __name__ == "__main__":

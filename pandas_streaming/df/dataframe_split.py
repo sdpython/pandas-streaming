@@ -102,7 +102,8 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
     for b, c in zip(bufs, close):
         if c:
             b.close()
-    return [st.getvalue() if isinstance(st, StringIO) else p for st, p in zip(bufs, path_or_buf)]
+    return [st.getvalue() if isinstance(st, StringIO) else p
+            for st, p in zip(bufs, path_or_buf)]
 
 
 def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,

@@ -97,7 +97,7 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
     r = abs(train_weights - test_weights) / \
         (1.0 * (train_weights + test_weights))
     if r >= fail_imbalanced:
-        raise ImbalancedSplitException(
+        raise ImbalancedSplitException(  # pragma: no cover
             "Split is imbalanced: train_weights={0} test_weights={1} r={2}".format(train_weights, test_weights, r))
 
     return df.iloc[train_ids, :], df.iloc[test_ids, :]
