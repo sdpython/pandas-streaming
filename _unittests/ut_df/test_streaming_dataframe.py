@@ -505,7 +505,25 @@ class TestStreamingDataFrame(ExtTestCase):
         ndf = na.to_df()
         self.assertEqual(ndf, df3)
 
+    def test_describe(self):
+        x = numpy.arange(100001).astype(numpy.float64) / 100000 - 0.5
+        y = numpy.arange(100001).astype(numpy.int64)
+        z = numpy.array([chr(65 + j % 45) for j in y])
+        df = pandas.DataFrame(data=dict(X=x, Y=y, Z=z))
+        sdf = StreamingDataFrame.read_df(df)
+
+        desc = sdf.describe()
+        self.assertEqual(['X', 'Y'], list(desc.columns))
+        self.assertEqual(desc.loc['min', :].tolist(), [-0.5, 0])
+        self.assertEqual(desc.loc['max', :].tolist(), [0.5, 100000])
+        self.assertEqualArray(desc.loc['mean', :], numpy.array([0, 50000]))
+        self.assertEqualArray(desc.loc['25%', :], numpy.array([-0.25, 25000]))
+        self.assertEqualArray(desc.loc['50%', :], numpy.array([0.0, 50000]))
+        self.assertEqualArray(desc.loc['75%', :], numpy.array([0.25, 75000]))
+        self.assertEqualArray(desc.loc['std', :], numpy.array(
+            [2.886795e-01, 28867.946472]), decimal=4)
+
 
 if __name__ == "__main__":
-    TestStreamingDataFrame().test_apply()
+    # TestStreamingDataFrame().test_describe()
     unittest.main()
