@@ -10,6 +10,7 @@ Pillow
 pycodestyle
 pylint
 pyquickhelper>=1.10
+pyquicksetup
 scikit-learn
 scipy
 sphinx
