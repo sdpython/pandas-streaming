@@ -85,7 +85,8 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
             st = StringIO()
             cl = False
         elif isinstance(p, str):
-            st = open(p, "w", encoding=kwargs.get('encoding'))
+            st = open(  # pylint: disable=R1732
+                p, "w", encoding=kwargs.get('encoding'))
             cl = True
         else:
             st = p

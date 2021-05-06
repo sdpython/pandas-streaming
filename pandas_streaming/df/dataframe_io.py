@@ -87,7 +87,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         if ext != '.zip':
             raise NotImplementedError(  # pragma: no cover
                 "Only zip file are implemented not '{0}'.".format(ext))
-        zf = zipfile.ZipFile(zipfilename, 'w')
+        zf = zipfile.ZipFile(zipfilename, 'w')  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
         zf = zipfilename
@@ -116,7 +116,7 @@ def read_zip(zipfilename, zname="df.csv", **kwargs):
         if ext != '.zip':
             raise NotImplementedError(
                 "Only zip file are implemented not '{0}'.".format(ext))
-        zf = zipfile.ZipFile(zipfilename, 'r')
+        zf = zipfile.ZipFile(zipfilename, 'r')  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
         zf = zipfilename

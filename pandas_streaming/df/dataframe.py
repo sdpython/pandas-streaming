@@ -431,7 +431,8 @@ class StreamingDataFrame:
             st = StringIO()
             close = False
         elif isinstance(path_or_buf, str):
-            st = open(path_or_buf, "w", encoding=kwargs.get('encoding'))
+            st = open(  # pylint: disable=R1732
+                path_or_buf, "w", encoding=kwargs.get('encoding'))
             close = True
         else:
             st = path_or_buf
