@@ -7,8 +7,8 @@
 pandas_streaming: streaming API over pandas
 ===========================================
 
-.. image:: https://travis-ci.org/sdpython/pandas_streaming.svg?branch=master
-    :target: https://travis-ci.org/sdpython/pandas_streaming
+.. image:: https://travis-ci.com/sdpython/pandas_streaming.svg?branch=master
+    :target: https://travis-ci.com/sdpython/pandas_streaming
     :alt: Build status
 
 .. image:: https://ci.appveyor.com/api/projects/status/4te066r8ne1ymmhy?svg=true
