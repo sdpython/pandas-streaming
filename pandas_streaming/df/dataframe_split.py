@@ -166,8 +166,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                     memory[strat] = []
                 memory[strat].append(obs)
 
-                for k in memory:
-                    v = memory[k]
+                for k, v in memory.items():
                     if len(v) >= n + random.randint(0, 10):  # changement
                         vr = list(range(len(v)))
                         # on permute aléatoirement
@@ -190,12 +189,11 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                             counts[0, k] += i
                             counts[1, k] += len(v) - i
                         # on efface de la mémoire les informations produites
-                        memory[k].clear()
+                        v.clear()
 
         # Lorsqu'on a fini, il faut tout de même répartir les
         # observations stockées.
-        for k in memory:
-            v = memory[k]
+        for k, v in memory.items():
             vr = list(range(len(v)))
             # on permute aléatoirement
             random.shuffle(vr)
