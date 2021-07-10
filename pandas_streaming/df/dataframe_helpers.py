@@ -419,14 +419,27 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                 res.grouper.groupings[0]._group_index = Index(new_val)
                 res.grouper.groupings[0].obj[b].replace(
                     fnan, numpy.nan, inplace=True)
-                if isinstance(res.grouper.groupings[0].grouper, numpy.ndarray):
-                    arr = numpy.array(new_val)
-                    res.grouper.groupings[0].grouper = arr
-                    if hasattr(res.grouper.groupings[0], '_cache') and 'result_index' in res.grouper.groupings[0]._cache:
-                        del res.grouper.groupings[0]._cache['result_index']
+                if hasattr(res.grouper, 'grouping'):
+                    if isinstance(res.grouper.groupings[0].grouper, numpy.ndarray):
+                        arr = numpy.array(new_val)
+                        res.grouper.groupings[0].grouper = arr
+                        if (hasattr(res.grouper.groupings[0], '_cache') and
+                                'result_index' in res.grouper.groupings[0]._cache):
+                            del res.grouper.groupings[0]._cache['result_index']
+                    else:
+                        raise NotImplementedError("Not implemented for type: {0}".format(
+                            type(res.grouper.groupings[0].grouper)))
                 else:
-                    raise NotImplementedError("Not implemented for type: {0}".format(
-                        type(res.grouper.groupings[0].grouper)))
+                    grouper = res.grouper._get_grouper()
+                    if isinstance(grouper, numpy.ndarray):
+                        arr = numpy.array(new_val)
+                        res.grouper.groupings[0].grouping_vector = arr
+                        if (hasattr(res.grouper.groupings[0], '_cache') and
+                                'result_index' in res.grouper.groupings[0]._cache):
+                            res.grouper.groupings[0]._cache = {}
+                    else:
+                        raise NotImplementedError("Not implemented for type: {0}".format(
+                            type(res.grouper.groupings[0].grouper)))
                 res.grouper._cache['result_index'] = res.grouper.groupings[0]._group_index
         else:
             if not nanback:
