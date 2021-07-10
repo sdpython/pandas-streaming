@@ -289,7 +289,7 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
     :param suffix: use a prefix for the NaN value
     :return: list of values chosen for each column, new dataframe (new copy)
     """
-    suffix = suffix if suffix else "²"
+    suffix = suffix if suffix else "²nan"
     df = df.copy()
     rep = {}
     for c in by:
@@ -364,7 +364,10 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
 
             from pandas import DataFrame
 
-            data = [dict(a=2, ind="a", n=1), dict(a=2, ind="a"), dict(a=3, ind="b"), dict(a=30)]
+            data = [dict(a=2, ind="a", n=1),
+                    dict(a=2, ind="a"),
+                    dict(a=3, ind="b"),
+                    dict(a=30)]
             df = DataFrame(data)
             print(df)
             gr = df.groupby(["ind"]).sum()
@@ -378,7 +381,10 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             from pandas import DataFrame
             from pandas_streaming.df import pandas_groupby_nan
 
-            data = [dict(a=2, ind="a", n=1), dict(a=2, ind="a"), dict(a=3, ind="b"), dict(a=30)]
+            data = [dict(a=2, ind="a", n=1),
+                    dict(a=2, ind="a"),
+                    dict(a=3, ind="b"),
+                    dict(a=30)]
             df = DataFrame(data)
             gr2 = pandas_groupby_nan(df, ["ind"]).sum()
             print(gr2)
@@ -436,10 +442,22 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                         res.grouper.groupings[0].grouping_vector = arr
                         if (hasattr(res.grouper.groupings[0], '_cache') and
                                 'result_index' in res.grouper.groupings[0]._cache):
-                            res.grouper.groupings[0]._cache = {}
+                            index = res.grouper.groupings[0]._cache['result_index']
+                            if len(rep) == 1:
+                                key = list(rep.values())[0]
+                                new_index = numpy.array(index)
+                                for i in range(0, len(new_index)):  # pylint: disable=C0200
+                                    if new_index[i] == key:
+                                        new_index[i] = numpy.nan
+                                res.grouper.groupings[0]._cache['result_index'] = (
+                                    index.__class__(new_index))
+                            else:
+                                raise NotImplementedError(
+                                    "NaN values not implemented for multiindex.")
                     else:
-                        raise NotImplementedError("Not implemented for type: {0}".format(
-                            type(res.grouper.groupings[0].grouper)))
+                        raise NotImplementedError(
+                            "Not implemented for type: {0}".format(
+                                type(res.grouper.groupings[0].grouper)))
                 res.grouper._cache['result_index'] = res.grouper.groupings[0]._group_index
         else:
             if not nanback:
