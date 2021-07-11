@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 @brief      test log(time=1s)
 """
@@ -5,7 +6,7 @@ import unittest
 import pandas
 import numpy
 from scipy.sparse.linalg import lsqr as sparse_lsqr
-from pyquickhelper.pycode import ExtTestCase
+from pyquickhelper.pycode import ExtTestCase, ignore_warnings
 from pandas_streaming.df import pandas_groupby_nan, numpy_types
 
 
@@ -101,6 +102,40 @@ class TestPandasHelper(ExtTestCase):
         self.assertRaise(
             lambda: pandas_groupby_nan(df, ["a", "cc"], nanback=True).sum(),
             NotImplementedError)
+
+    def test_pandas_groupbynan_doc(self):
+        data = [dict(a=2, ind="a", n=1),
+                dict(a=2, ind="a"),
+                dict(a=3, ind="b"),
+                dict(a=30)]
+        df = pandas.DataFrame(data)
+        gr2 = pandas_groupby_nan(df, ["ind"]).sum()
+        ind = list(gr2['ind'])
+        self.assertTrue(numpy.isnan(ind[-1]))
+        val = list(gr2['a'])
+        self.assertEqual(val[-1], 30)
+
+    @ignore_warnings(UserWarning)
+    def test_pandas_groupbynan_doc2(self):
+        data = [dict(a=2, ind="a", n=1),
+                dict(a=2, ind="a"),
+                dict(a=3, ind="b"),
+                dict(a=30)]
+        df = pandas.DataFrame(data)
+        gr2 = pandas_groupby_nan(df, ["ind", "a"], nanback=False).sum()
+        ind = list(gr2['ind'])
+        self.assertEqual(ind[-1], "²nan")
+
+    def test_pandas_groupbynan_doc3(self):
+        data = [dict(a=2, ind="a", n=1),
+                dict(a=2, ind="a"),
+                dict(a=3, ind="b"),
+                dict(a=30)]
+        df = pandas.DataFrame(data)
+        self.assertRaise(lambda: pandas_groupby_nan(df, ["ind", "n"]).sum(),
+                         NotImplementedError)
+        # ind = list(gr2['ind'])
+        # self.assertTrue(numpy.isnan(ind[-1]))
 
 
 if __name__ == "__main__":
