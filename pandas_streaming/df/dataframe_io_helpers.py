@@ -256,7 +256,7 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
                         raise RuntimeError(  # pragma: no cover
                             "Type issue {0}".format(type(current)))
                     c = []
-                    current[curkey] = c
+                    current[curkey] = c  # pylint: disable=E1137
                     current = c
                 curkey = None
                 stack.append(current)
