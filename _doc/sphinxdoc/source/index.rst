@@ -29,10 +29,6 @@ pandas_streaming: streaming API over pandas
     :alt: MIT License
     :target: http://opensource.org/licenses/MIT
 
-.. image:: https://requires.io/github/sdpython/pandas_streaming/requirements.svg?branch=master
-     :target: https://requires.io/github/sdpython/pandas_streaming/requirements/?branch=master
-     :alt: Requirements Status
-
 .. image:: https://codecov.io/github/sdpython/pandas_streaming/coverage.svg?branch=master
     :target: https://codecov.io/github/sdpython/pandas_streaming?branch=master
 
