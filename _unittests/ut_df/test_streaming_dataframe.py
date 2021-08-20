@@ -86,11 +86,11 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf2 = StreamingDataFrame.read_csv(name2, index_col=0)
         text2 = sdf2.to_csv(index=True)
         sdf2.to_csv(name3, index=True)
-        with open(name, "r") as f:
+        with open(name, "r") as f:  # pylint: disable=W1514
             exp = f.read()
-        with open(name2, "r") as f:
+        with open(name2, "r") as f:  # pylint: disable=W1514
             exp2 = f.read()
-        with open(name3, "r") as f:
+        with open(name3, "r") as f:  # pylint: disable=W1514
             text3 = f.read()
         self.assertEqual(text.replace('\r', ''), exp)
         sdf2 = StreamingDataFrame.read_df(df)
