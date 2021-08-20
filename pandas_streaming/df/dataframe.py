@@ -153,7 +153,7 @@ class StreamingDataFrame:
         Filters out parameters for the constructor of this class.
         """
         kw = {}
-        for k in {'check_schema'}:
+        for k in ['check_schema']:
             if k in kwargs:
                 kw[k] = kwargs[k]
                 del kwargs[k]

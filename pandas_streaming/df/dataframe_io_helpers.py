@@ -116,7 +116,7 @@ def flatten_dictionary(dico, sep="_"):
 
     Inspired from `flatten_json <https://github.com/amirziai/flatten/blob/master/flatten_json.py>`_.
     """
-    flattened_dict = dict()
+    flattened_dict = {}
 
     def _flatten(obj, key):
         if obj is None:
