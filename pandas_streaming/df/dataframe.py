@@ -217,13 +217,20 @@ class StreamingDataFrame:
 
         if isinstance(args[0], (list, dict)):
             if flatten:
-                return StreamingDataFrame.read_df(json_normalize(args[0]), **kwargs_create)
+                return StreamingDataFrame.read_df(
+                    json_normalize(args[0]), **kwargs_create)
             return StreamingDataFrame.read_df(args[0], **kwargs_create)
 
         if kwargs.get('lines', None) == 'stream':
             del kwargs['lines']
-            st = JsonIterator2Stream(enumerate_json_items(
-                args[0], encoding=kwargs.get('encoding', None), lines=True, flatten=flatten))
+            
+            def localf(a0=args[0]):
+                a0.seek(0)
+                return enumerate_json_items(
+                    a0, encoding=kwargs.get('encoding', None), lines=True,
+                    flatten=flatten)
+            
+            st = JsonIterator2Stream(localf)
             args = args[1:]
 
             if chunksize is None:
@@ -233,8 +240,9 @@ class StreamingDataFrame:
                     **kwargs_create)
 
             def fct1(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
-                for r in pandas.read_json(st, *args, chunksize=chunksize, nrows=chunksize,
-                                          lines=True, **kw):
+                for r in pandas.read_json(
+                        st, *args, chunksize=chunksize, nrows=chunksize,
+                        lines=True, **kw):
                     yield r
             return StreamingDataFrame(fct1, **kwargs_create)
 
@@ -248,12 +256,14 @@ class StreamingDataFrame:
                     **kwargs_create)
 
             def fct2(args=args, chunksize=chunksize, kw=kwargs.copy()):
-                for r in pandas.read_json(*args, chunksize=chunksize, nrows=chunksize, **kw):
+                for r in pandas.read_json(
+                        *args, chunksize=chunksize, nrows=chunksize, **kw):
                     yield r
             return StreamingDataFrame(fct2, **kwargs_create)
 
-        st = JsonIterator2Stream(enumerate_json_items(
-            args[0], encoding=kwargs.get('encoding', None), flatten=flatten))
+        st = JsonIterator2Stream(
+            lambda a0=args[0]: enumerate_json_items(
+                a0, encoding=kwargs.get('encoding', None), flatten=flatten))
         args = args[1:]
         if 'lines' in kwargs:
             del kwargs['lines']
@@ -265,8 +275,9 @@ class StreamingDataFrame:
                 **kwargs_create)
 
         def fct3(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
-            for r in pandas.read_json(st, *args, chunksize=chunksize, nrows=chunksize,
-                                      lines=True, **kw):
+            for r in pandas.read_json(
+                    st, *args, chunksize=chunksize, nrows=chunksize,
+                    lines=True, **kw):
                 yield r
         return StreamingDataFrame(fct3, **kwargs_create)
 
@@ -906,11 +917,11 @@ class StreamingDataFrame:
             # One column.
             iter_creation = self.iter_creation
 
-            def iterate_col(sdf):
+            def iterate_col():
                 "iterate on one column"
                 for df in iter_creation():
                     yield df[[cols]]
-            return StreamingSeries(lambda: iterate_col(self), **self.get_kwargs())
+            return StreamingSeries(lambda: iterate_col(), **self.get_kwargs())
 
         if not isinstance(cols, list):
             raise NotImplementedError("Only a list of columns is supported.")
@@ -942,6 +953,7 @@ class StreamingDataFrame:
                     yield dfc
 
             self.iter_creation = iterate_fct
+
         elif isinstance(value, StreamingSeries):
             iter_creation = self.iter_creation
 
@@ -961,7 +973,7 @@ class StreamingDataFrame:
             self.iter_creation = iterate_fct
         else:
             raise NotImplementedError(
-                "No implemented for type(index)=%r and type(value)=%r." % (
+                "Not implemented for type(index)=%r and type(value)=%r." % (
                     type(index), type(value)))
 
     def add_column(self, col, value):
@@ -1115,6 +1127,15 @@ class StreamingSeries(StreamingDataFrame):
             raise RuntimeError(
                 "A series can contain only one column not %r." % len(self.columns))
 
+    def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
+        """
+        Applies :epkg:`pandas:Series:apply`.
+        This function returns a @see cl StreamingSeries.
+        """
+        return StreamingSeries(
+            lambda: map(lambda df: df.apply(*args, **kwargs), self),
+            **self.get_kwargs())
+
     def __add__(self, value):
         """
         Does an addition on every value hoping that has a meaning.
@@ -1127,3 +1148,4 @@ class StreamingSeries(StreamingDataFrame):
                 yield df + value
 
         return StreamingSeries(iterate, **self.get_kwargs())
+

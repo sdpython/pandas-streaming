@@ -545,6 +545,16 @@ class TestStreamingDataFrame(ExtTestCase):
             data=dict(a=[4.5], b=[6], c=[7], aa=[10], bb=[16]))
         self.assertEqualDataFrame(df, ddf)
 
+    def test_set_item_function(self):
+        df = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7]))
+        self.assertRaise(lambda: StreamingDataFrame(df), TypeError)
+        sdf = StreamingDataFrame.read_df(df)
+        sdf['bb'] = sdf['b'].apply(lambda x: x + 11)
+        df = sdf.to_df()
+        ddf = ddf = pandas.DataFrame(
+            data=dict(a=[4.5], b=[6], c=[7], bb=[17]))
+        self.assertEqualDataFrame(df, ddf)
+
 
 if __name__ == "__main__":
     # TestStreamingDataFrame().test_describe()

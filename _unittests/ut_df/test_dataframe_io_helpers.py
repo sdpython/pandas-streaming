@@ -133,6 +133,19 @@ class TestDataFrameIOHelpers(ExtTestCase):
         js_exp = loads(exp)
         self.assertEqual(js_exp, js_read)
 
+    def test_read_json_raw_head(self):
+        data = [{'id': 1, 'name': {'first': 'Coleen', 'last': 'Volk'}},
+                {'name': {'given': 'Mose', 'family': 'Regner'}},
+                {'id': 2, 'name': 'FayeRaker'}]
+        exp = """[{"id":1.0,"name":null,"name.family":null,"name.first":"Coleen","name.given":null,"name.last":"Volk"},
+                {"id":null,"name":null,"name.family":"Regner","name.first":null,"name.given":"Mose","name.last":null},
+                {"id":2.0,"name":"FayeRaker","name.family":null,"name.first":null,
+                "name.given":null,"name.last":null}]""".replace(" ", "").replace("\n", "")
+        it = StreamingDataFrame.read_json(data, flatten=True, chunksize=1)
+        h1 = it.head()
+        h2 = it.head()
+        self.assertEqualDataFrame(h1, h2)
+
     def test_pandas_json_chunksize(self):
         jsonl = '''{"a": 1, "b": 2}
                    {"a": 3, "b": 4}'''
@@ -160,6 +173,18 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqual(len(dfs), 1)
         js = dfs[0].to_json(orient='records')
         self.assertEqual('[{"a":1,"b":2},{"a":3,"b":4}]', js)
+
+    def test_read_json_rows2_head(self):
+        data = b'''{"a": 1, "b": 2}
+                  {"a": 3, "b": 4}'''
+        dfs = pandas.read_json(BytesIO(data), lines=True)
+        self.assertEqual(dfs.shape, (2, 2))
+        it = StreamingDataFrame.read_json(BytesIO(data), lines="stream")
+        h1 = it.head()
+        h2 = it.head()
+        self.assertNotEmpty(h1)
+        self.assertNotEmpty(h2)
+        self.assertEqualDataFrame(h1, h2)
 
     def test_read_json_ijson(self):
         it = StreamingDataFrame.read_json(
@@ -231,4 +256,5 @@ class TestDataFrameIOHelpers(ExtTestCase):
 
 
 if __name__ == "__main__":
+    TestDataFrameIOHelpers().test_read_json_rows2()
     unittest.main()

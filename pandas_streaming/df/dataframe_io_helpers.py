@@ -29,6 +29,10 @@ class JsonPerRowsStream:
         self.newline = False
         self.end = True
 
+    def seek(self, pos):
+        "Updates position in the stream."
+        self.st.seek(pos)
+
     def readline(self, size=-1):
         """
         Reads a line, adds ``,``, ``[``, ``]`` if needed.
@@ -48,14 +52,12 @@ class JsonPerRowsStream:
         if text.endswith("\n"):
             self.newline = True
             return text
-        elif len(text) == 0 or len(text) < size:
+        if len(text) == 0 or len(text) < size:
             if self.end:
                 self.end = False
                 return text + ']'
-            else:
-                return text
-        else:
             return text
+        return text
 
     def read(self, size=-1):
         """
@@ -85,14 +87,12 @@ class JsonPerRowsStream:
         if text.endswith(cst[0]):
             self.newline = True
             return text
-        elif len(text) == 0 or len(text) < size:
+        if len(text) == 0 or len(text) < size:
             if self.end:
                 self.end = False
                 return text + cst[4]
-            else:
-                return text
-        else:
             return text
+        return text
 
     def getvalue(self):
         """
@@ -224,19 +224,26 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
     if isinstance(filename, str):
         if "{" not in filename and os.path.exists(filename):
             with open(filename, "r", encoding=encoding) as f:
-                for el in enumerate_json_items(f, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
+                for el in enumerate_json_items(
+                        f, encoding=encoding, lines=lines,
+                        flatten=flatten, fLOG=fLOG):
                     yield el
         else:
             st = StringIO(filename)
-            for el in enumerate_json_items(st, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
+            for el in enumerate_json_items(
+                    st, encoding=encoding, lines=lines,
+                    flatten=flatten, fLOG=fLOG):
                 yield el
     elif isinstance(filename, bytes):
         st = BytesIO(filename)
-        for el in enumerate_json_items(st, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
+        for el in enumerate_json_items(
+                st, encoding=encoding, lines=lines, flatten=flatten,
+                fLOG=fLOG):
             yield el
     elif lines:
-        for el in enumerate_json_items(JsonPerRowsStream(filename),
-                                       encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
+        for el in enumerate_json_items(
+                JsonPerRowsStream(filename),
+                encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
             yield el
     else:
         parser = ijson.parse(filename)
@@ -247,7 +254,8 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
         for i, (_, event, value) in enumerate(parser):
             if i % 1000000 == 0 and fLOG is not None:
                 fLOG(  # pragma: no cover
-                    "[enumerate_json_items] i={0} yielded={1}".format(i, nbyield))
+                    "[enumerate_json_items] i={0} yielded={1}"
+                    "".format(i, nbyield))
             if event == "start_array":
                 if curkey is None:
                     current = []
@@ -388,6 +396,13 @@ class JsonIterator2Stream:
         """
         self.it = it
         self.kwargs = kwargs
+        self.it0 = it()
+
+    def seek(self, pos):
+        if pos != 0:
+            raise NotImplementedError(
+                "The iterator can only return at the beginning.")
+        self.it0 = self.it()
 
     def write(self):
         """
@@ -400,7 +415,7 @@ class JsonIterator2Stream:
         Reads the next item and returns it as a string.
         """
         try:
-            value = next(self.it)
+            value = next(self.it0)
             return dumps(value, **self.kwargs)
         except StopIteration:
             return None
@@ -409,5 +424,5 @@ class JsonIterator2Stream:
         """
         Iterate on each row.
         """
-        for value in self.it:
+        for value in self.it0:
             yield dumps(value, **self.kwargs)
