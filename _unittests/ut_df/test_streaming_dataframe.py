@@ -455,7 +455,6 @@ class TestStreamingDataFrame(ExtTestCase):
         df1 = sdf.to_df()
         df2 = sdf2.to_df()
         self.assertEqualDataFrame(df1[["cint"]], df2)
-        self.assertRaise(lambda: sdf["cint"], NotImplementedError)
         self.assertRaise(lambda: sdf[:, "cint"], NotImplementedError)
 
     def test_read_csv_names(self):
@@ -522,6 +521,29 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualArray(desc.loc['75%', :], numpy.array([0.25, 75000]))
         self.assertEqualArray(desc.loc['std', :], numpy.array(
             [2.886795e-01, 28867.946472]), decimal=4)
+
+    def test_set_item(self):
+        df = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7]))
+        self.assertRaise(lambda: StreamingDataFrame(df), TypeError)
+        sdf = StreamingDataFrame.read_df(df)
+
+        def f():
+            sdf[['a']] = 10
+        self.assertRaise(f, ValueError)
+
+        def g():
+            sdf['a'] = [10]
+        self.assertRaise(g, NotImplementedError)
+
+        sdf['aa'] = 10
+        df = sdf.to_df()
+        ddf = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7], aa=[10]))
+        self.assertEqualDataFrame(df, ddf)
+        sdf['bb'] = sdf['b'] + 10
+        df = sdf.to_df()
+        ddf = ddf = pandas.DataFrame(
+            data=dict(a=[4.5], b=[6], c=[7], aa=[10], bb=[16]))
+        self.assertEqualDataFrame(df, ddf)
 
 
 if __name__ == "__main__":

@@ -67,6 +67,11 @@ class StreamingDataFrame:
     """
 
     def __init__(self, iter_creation, check_schema=True, stable=True):
+        if isinstance(iter_creation, (pandas.DataFrame, dict,
+                                      numpy.ndarray, str)):
+            raise TypeError(
+                "Unexpected type %r for iter_creation. It must "
+                "be an iterator." % type(iter_creation))
         if isinstance(iter_creation, StreamingDataFrame):
             self.iter_creation = iter_creation.iter_creation
             self.stable = iter_creation.stable
@@ -413,6 +418,8 @@ class StreamingDataFrame:
         """
         for it in self:
             return it.columns
+        # The dataframe is empty.
+        return []
 
     @property
     def dtypes(self):
@@ -895,6 +902,16 @@ class StreamingDataFrame:
         if len(args) != 1:
             raise NotImplementedError("Only a list of columns is supported.")
         cols = args[0]
+        if isinstance(cols, str):
+            # One column.
+            iter_creation = self.iter_creation
+
+            def iterate_col(sdf):
+                "iterate on one column"
+                for df in iter_creation():
+                    yield df[[cols]]
+            return StreamingSeries(lambda: iterate_col(self), **self.get_kwargs())
+
         if not isinstance(cols, list):
             raise NotImplementedError("Only a list of columns is supported.")
 
@@ -904,6 +921,48 @@ class StreamingDataFrame:
                 yield df[cols]
 
         return StreamingDataFrame(lambda: iterate_cols(self), **self.get_kwargs())
+
+    def __setitem__(self, index, value):
+        """
+        Limited set of operators are supported.
+        """
+        if not isinstance(index, str):
+            raise ValueError(
+                "Only column affected are supported but index=%r." % index)
+        if isinstance(value, (int, float, numpy.number, str)):
+            # Is is equivalent to add_column.
+            iter_creation = self.iter_creation
+
+            def iterate_fct():
+                "iterate on rows"
+                iters = iter_creation()
+                for df in iters:
+                    dfc = df.copy()
+                    dfc[index] = value
+                    yield dfc
+
+            self.iter_creation = iterate_fct
+        elif isinstance(value, StreamingSeries):
+            iter_creation = self.iter_creation
+
+            def iterate_fct():
+                "iterate on rows"
+                iters = iter_creation()
+                for df, dfs in zip(iters, value):
+                    if df.shape[0] != dfs.shape[0]:
+                        raise RuntimeError(
+                            "Chunksize or shape are different when "
+                            "iterating on two StreamDataFrame at the same "
+                            "time: %r != %r." % (df.shape[0], dfs.shape[0]))
+                    dfc = df.copy()
+                    dfc[index] = dfs
+                    yield dfc
+
+            self.iter_creation = iterate_fct
+        else:
+            raise NotImplementedError(
+                "No implemented for type(index)=%r and type(value)=%r." % (
+                    type(index), type(value)))
 
     def add_column(self, col, value):
         """
@@ -1042,3 +1101,29 @@ class StreamingDataFrame:
         rows = [name for name in summary.index if name not in notper]
         summary = summary.loc[rows, :]
         return pandas.concat([merged, summary])
+
+
+class StreamingSeries(StreamingDataFrame):
+    """
+    Seens as a :epkg:`StreamingDataFrame` of one column.
+    """
+
+    def __init__(self, iter_creation, check_schema=True, stable=True):
+        StreamingDataFrame.__init__(
+            self, iter_creation, check_schema=check_schema, stable=stable)
+        if len(self.columns) != 1:
+            raise RuntimeError(
+                "A series can contain only one column not %r." % len(self.columns))
+
+    def __add__(self, value):
+        """
+        Does an addition on every value hoping that has a meaning.
+
+        :param value: any value which makes sense
+        :return: a new series
+        """
+        def iterate():
+            for df in self:
+                yield df + value
+
+        return StreamingSeries(iterate, **self.get_kwargs())
