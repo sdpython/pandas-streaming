@@ -15,12 +15,12 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     Saves a :epkg:`Dataframe` into a :epkg:`zip` file.
     It can be read by @see fn to_zip.
 
-    @param      df          :epkg:`dataframe` or :epkg:`numpy:array`
-    @param      zipfilename a :epkg:`*py:zipfile:ZipFile` or a filename
-    @param      zname       a filename in th zipfile
-    @param      kwargs      parameters for :epkg:`pandas:to_csv` or
-                            :epkg:`numpy:save`
-    @return                 zipfilename
+    :param df: :epkg:`dataframe` or :epkg:`numpy:array`
+    :param zipfilename: a :epkg:`*py:zipfile:ZipFile` or a filename
+    :param zname: a filename in th zipfile
+    :param kwargs: parameters for :epkg:`pandas:to_csv` or
+        :epkg:`numpy:save`
+    :return: zipfilename
 
     .. exref::
         :title: Saves and reads a dataframe in a zip file
@@ -101,15 +101,15 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         zf.close()
 
 
-def read_zip(zipfilename, zname="df.csv", **kwargs):
+def read_zip(zipfilename, zname=None, **kwargs):
     """
     Reads a :epkg:`dataframe` from a :epkg:`zip` file.
     It can be saved by @see fn read_zip.
 
-    @param      zipfilename a :epkg:`*py:zipfile:ZipFile` or a filename
-    @param      zname       a filename in th zipfile
-    @param      kwargs      parameters for :epkg:`pandas:read_csv`
-    @return                 :epkg:`pandas:dataframe` or :epkg:`numpy:array`
+    :param zipfilename: a :epkg:`*py:zipfile:ZipFile` or a filename
+    :param zname: a filename in zipfile, if None, takes the first one
+    :param kwargs: parameters for :func:`pandas.read_csv`
+    :return: :func:`pandas.DataFrame` or :epkg:`numpy:array`
     """
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
@@ -125,6 +125,8 @@ def read_zip(zipfilename, zname="df.csv", **kwargs):
         raise TypeError(  # pragma: no cover
             "No implementation for type '{0}'".format(type(zipfilename)))
 
+    if zname is None:
+        zname = zf.namelist()[0]
     content = zf.read(zname)
     stb = io.BytesIO(content)
     ext = os.path.splitext(zname)[-1]

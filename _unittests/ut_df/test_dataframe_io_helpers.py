@@ -114,6 +114,9 @@ class TestDataFrameIOHelpers(ExtTestCase):
         items = list(enumerate_json_items(
             BytesIO(TestDataFrameIOHelpers.text_json)))
         self.assertEqual(TestDataFrameIOHelpers.text_json_exp, items)
+        items = list(enumerate_json_items(
+            BytesIO(TestDataFrameIOHelpers.text_json)))
+        self.assertEqual(TestDataFrameIOHelpers.text_json_exp, items)
 
     def test_read_json_raw(self):
         data = [{'id': 1, 'name': {'first': 'Coleen', 'last': 'Volk'}},
@@ -137,10 +140,6 @@ class TestDataFrameIOHelpers(ExtTestCase):
         data = [{'id': 1, 'name': {'first': 'Coleen', 'last': 'Volk'}},
                 {'name': {'given': 'Mose', 'family': 'Regner'}},
                 {'id': 2, 'name': 'FayeRaker'}]
-        exp = """[{"id":1.0,"name":null,"name.family":null,"name.first":"Coleen","name.given":null,"name.last":"Volk"},
-                {"id":null,"name":null,"name.family":"Regner","name.first":null,"name.given":"Mose","name.last":null},
-                {"id":2.0,"name":"FayeRaker","name.family":null,"name.first":null,
-                "name.given":null,"name.last":null}]""".replace(" ", "").replace("\n", "")
         it = StreamingDataFrame.read_json(data, flatten=True, chunksize=1)
         h1 = it.head()
         h2 = it.head()
@@ -256,5 +255,4 @@ class TestDataFrameIOHelpers(ExtTestCase):
 
 
 if __name__ == "__main__":
-    TestDataFrameIOHelpers().test_read_json_rows2()
     unittest.main()

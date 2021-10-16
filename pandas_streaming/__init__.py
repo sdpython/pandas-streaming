@@ -35,8 +35,8 @@ def check(log=False):
     It raises an exception.
     If you want to disable the logs:
 
-    @param      log     if True, display information, otherwise
-    @return             0 or exception
+    :param log: if True, display information, otherwise none
+    :return: 0 or exception
     """
     return True
 

@@ -223,13 +223,13 @@ class StreamingDataFrame:
 
         if kwargs.get('lines', None) == 'stream':
             del kwargs['lines']
-            
+
             def localf(a0=args[0]):
                 a0.seek(0)
                 return enumerate_json_items(
                     a0, encoding=kwargs.get('encoding', None), lines=True,
                     flatten=flatten)
-            
+
             st = JsonIterator2Stream(localf)
             args = args[1:]
 
@@ -240,10 +240,12 @@ class StreamingDataFrame:
                     **kwargs_create)
 
             def fct1(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
+                st.seek(0)
                 for r in pandas.read_json(
                         st, *args, chunksize=chunksize, nrows=chunksize,
                         lines=True, **kw):
                     yield r
+
             return StreamingDataFrame(fct1, **kwargs_create)
 
         if kwargs.get('lines', False):
@@ -1148,4 +1150,3 @@ class StreamingSeries(StreamingDataFrame):
                 yield df + value
 
         return StreamingSeries(iterate, **self.get_kwargs())
-
