@@ -3,6 +3,8 @@
 @file
 @brief Defines a streaming dataframe.
 """
+import pickle
+import os
 from io import StringIO, BytesIO
 from inspect import isfunction
 import numpy
@@ -10,7 +12,6 @@ import numpy.random as nrandom
 import pandas
 from pandas.testing import assert_frame_equal
 from pandas.io.json import json_normalize
-from ..exc import StreamingInefficientException
 from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
 from .dataframe_io_helpers import enumerate_json_items, JsonIterator2Stream
 
@@ -79,6 +80,7 @@ class StreamingDataFrame:
             self.iter_creation = iter_creation
             self.stable = stable
         self.check_schema = check_schema
+        self._delete_ = []
 
     def is_stable(self, do_check=False, n=10):
         """
@@ -406,12 +408,6 @@ class StreamingDataFrame:
 
             rows += it.shape[0]
             yield it
-
-    def sort_values(self, *args, **kwargs):
-        """
-        Not implemented.
-        """
-        raise StreamingInefficientException(StreamingDataFrame.sort_values)
 
     @property
     def shape(self):
@@ -1117,6 +1113,71 @@ class StreamingDataFrame:
         rows = [name for name in summary.index if name not in notper]
         summary = summary.loc[rows, :]
         return pandas.concat([merged, summary])
+
+    def sort_values(self, by, axis=0, ascending=True, kind='quicksort',
+                    na_position='last',
+                    temp_file='_pandas_streaming_sort_values_'):
+        """
+        Sorts the streaming dataframe by values.
+
+        :param by: one column
+        :param ascending: order
+        :param kind: see :meth:`pandas.DataFrame.sort_values`
+        :param na_position: see :meth:`pandas.DataFrame.sort_values`
+        :param temp_file: sorting a whole database is impossible
+            without storing intermediate results on disk
+            unless it can fit into the memory, but in that case,
+            it is easier to convert the streaming database into
+            a dataframe and sort it
+        :return: streaming database
+        """
+        if not isinstance(by, str):
+            raise NotImplementedError(
+                "Only one column can be used to sort not %r." % by)
+        keys = {}
+        indices = []
+        with open(temp_file, 'wb') as f:
+            for df in self:
+                dfs = df.sort_values(by, ascending=ascending, kind=kind,
+                                     na_position=na_position)
+                for tu in dfs[by]:
+                    if tu not in keys:
+                        keys[tu] = []
+                    keys[tu].append(len(indices))
+                indices.append(f.tell())
+                st = BytesIO()
+                pickle.dump(dfs, st)
+                f.write(st.getvalue())
+
+            indices.append(f.tell())
+
+        values = list(keys.items())
+        values.sort(reverse=not ascending)
+
+        def iterate():
+
+            with open(temp_file, 'rb') as f:
+
+                for key, positions in values:
+                    for p in positions:
+                        f.seek(indices[p])
+                        length = indices[p + 1] - indices[p]
+                        pkl = f.read(length)
+                        dfs = pickle.load(BytesIO(pkl))
+                        sub = dfs[dfs[by] == key]
+                        yield sub
+
+        res = StreamingDataFrame(
+            lambda: iterate(), **self.get_kwargs())
+        res._delete_.append(lambda: os.remove(temp_file))
+        return res
+
+    def __del__(self):
+        """
+        Calls every function in `_delete_`.
+        """
+        for f in self._delete_:
+            f()
 
 
 class StreamingSeries(StreamingDataFrame):
