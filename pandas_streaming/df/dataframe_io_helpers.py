@@ -16,18 +16,25 @@ class JsonPerRowsStream:
     """
     Reads a :epkg:`json` streams and adds
     ``,``, ``[``, ``]`` to convert a stream containing
-    one :pekg:`json` object per row into one single :epkg:`json` object.
+    one :epkg:`json` object per row into one single :epkg:`json` object.
     It only implements method *readline*.
+
+    :param st: stream
     """
 
     def __init__(self, st):
-        """
-        @param      st      stream
-        """
         self.st = st
         self.begin = True
         self.newline = False
         self.end = True
+
+    def seek(self, offset):
+        """
+        Change the stream position to the given byte offset.
+
+        :param offset: offset, only 0 is implemented
+        """
+        self.st.seek(offset)
 
     def readline(self, size=-1):
         """
@@ -48,14 +55,12 @@ class JsonPerRowsStream:
         if text.endswith("\n"):
             self.newline = True
             return text
-        elif len(text) == 0 or len(text) < size:
+        if len(text) == 0 or len(text) < size:
             if self.end:
                 self.end = False
                 return text + ']'
-            else:
-                return text
-        else:
             return text
+        return text
 
     def read(self, size=-1):
         """
@@ -85,14 +90,12 @@ class JsonPerRowsStream:
         if text.endswith(cst[0]):
             self.newline = True
             return text
-        elif len(text) == 0 or len(text) < size:
+        if len(text) == 0 or len(text) < size:
             if self.end:
                 self.end = False
                 return text + cst[4]
-            else:
-                return text
-        else:
             return text
+        return text
 
     def getvalue(self):
         """
@@ -143,12 +146,12 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
     """
     Enumerates items from a :epkg:`JSON` file or string.
 
-    @param      filename        filename or string or stream to parse
-    @param      encoding        encoding
-    @param      lines           one record per row
-    @param      flatten         call @see fn flatten_dictionary
-    @param      fLOG            logging function
-    @return                     iterator on records at first level.
+    :param filename: filename or string or stream to parse
+    :param encoding: encoding
+    :param lines: one record per row
+    :param flatten: call @see fn flatten_dictionary
+    :param fLOG: logging function
+    :return: iterator on records at first level.
 
     It assumes the syntax follows the format: ``[ {"id":1, ...}, {"id": 2, ...}, ...]``.
     However, if option *lines* if true, the function considers that the
@@ -224,19 +227,26 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
     if isinstance(filename, str):
         if "{" not in filename and os.path.exists(filename):
             with open(filename, "r", encoding=encoding) as f:
-                for el in enumerate_json_items(f, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
+                for el in enumerate_json_items(
+                        f, encoding=encoding, lines=lines,
+                        flatten=flatten, fLOG=fLOG):
                     yield el
         else:
             st = StringIO(filename)
-            for el in enumerate_json_items(st, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
+            for el in enumerate_json_items(
+                    st, encoding=encoding, lines=lines,
+                    flatten=flatten, fLOG=fLOG):
                 yield el
     elif isinstance(filename, bytes):
         st = BytesIO(filename)
-        for el in enumerate_json_items(st, encoding=encoding, lines=lines, flatten=flatten, fLOG=fLOG):
+        for el in enumerate_json_items(
+                st, encoding=encoding, lines=lines, flatten=flatten,
+                fLOG=fLOG):
             yield el
     elif lines:
-        for el in enumerate_json_items(JsonPerRowsStream(filename),
-                                       encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
+        for el in enumerate_json_items(
+                JsonPerRowsStream(filename),
+                encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
             yield el
     else:
         parser = ijson.parse(filename)
@@ -247,7 +257,8 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
         for i, (_, event, value) in enumerate(parser):
             if i % 1000000 == 0 and fLOG is not None:
                 fLOG(  # pragma: no cover
-                    "[enumerate_json_items] i={0} yielded={1}".format(i, nbyield))
+                    "[enumerate_json_items] i={0} yielded={1}"
+                    "".format(i, nbyield))
             if event == "start_array":
                 if curkey is None:
                     current = []
@@ -314,6 +325,9 @@ class JsonIterator2Stream:
     into a stream which returns an items as a string every time
     method *read* is called.
     The iterator could be one returned by @see fn enumerate_json_items.
+
+    :param it: iterator
+    :param kwargs: arguments to :epkg:`*py:json:dumps`
 
     .. exref::
         :title: Reshape a json file
@@ -382,12 +396,20 @@ class JsonIterator2Stream:
     """
 
     def __init__(self, it, **kwargs):
-        """
-        @param      it      iterator
-        @param      kwargs  arguments to :epkg:`*py:json:dumps`
-        """
         self.it = it
         self.kwargs = kwargs
+        self.it0 = it()
+
+    def seek(self, offset):
+        """
+        Change the stream position to the given byte offset.
+
+        :param offset: offset, only 0 is implemented
+        """
+        if offset != 0:
+            raise NotImplementedError(
+                "The iterator can only return at the beginning.")
+        self.it0 = self.it()
 
     def write(self):
         """
@@ -400,14 +422,18 @@ class JsonIterator2Stream:
         Reads the next item and returns it as a string.
         """
         try:
-            value = next(self.it)
+            value = next(self.it0)
             return dumps(value, **self.kwargs)
         except StopIteration:
             return None
 
     def __iter__(self):
         """
-        Iterate on each row.
+        Iterates on each row. The behaviour is a bit tricky.
+        It is implemented to be swalled by :func:`pandas.read_json` which
+        uses :func:`itertools.islice` to go through the items.
+        It calls multiple times `__iter__` but does expect the
+        iterator to continue from where it stopped last time.
         """
-        for value in self.it:
+        for value in self.it0:
             yield dumps(value, **self.kwargs)

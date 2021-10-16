@@ -16,7 +16,7 @@ class StreamingInefficientException(Exception):
         This method is inefficient in streaming mode
         and not implemented.
 
-        @param      meth    method
+        :param meth: inefficient method
         """
         Exception.__init__(
             self, "{0} should not be done in streaming mode.".format(meth))

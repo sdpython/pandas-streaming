@@ -67,6 +67,11 @@ class StreamingDataFrame:
     """
 
     def __init__(self, iter_creation, check_schema=True, stable=True):
+        if isinstance(iter_creation, (pandas.DataFrame, dict,
+                                      numpy.ndarray, str)):
+            raise TypeError(
+                "Unexpected type %r for iter_creation. It must "
+                "be an iterator." % type(iter_creation))
         if isinstance(iter_creation, StreamingDataFrame):
             self.iter_creation = iter_creation.iter_creation
             self.stable = iter_creation.stable
@@ -137,8 +142,9 @@ class StreamingDataFrame:
         if streaming:
             if partitions is not None:
                 if len(partitions) != 2:
-                    raise NotImplementedError(
-                        "Only train and test split is allowed, *partitions* must be of length 2.")
+                    raise NotImplementedError(  # pragma: no cover
+                        "Only train and test split is allowed, *partitions* "
+                        "must be of length 2.")
                 kwargs = kwargs.copy()
                 kwargs['train_size'] = partitions[0]
                 kwargs['test_size'] = partitions[1]
@@ -212,13 +218,20 @@ class StreamingDataFrame:
 
         if isinstance(args[0], (list, dict)):
             if flatten:
-                return StreamingDataFrame.read_df(json_normalize(args[0]), **kwargs_create)
+                return StreamingDataFrame.read_df(
+                    json_normalize(args[0]), **kwargs_create)
             return StreamingDataFrame.read_df(args[0], **kwargs_create)
 
         if kwargs.get('lines', None) == 'stream':
             del kwargs['lines']
-            st = JsonIterator2Stream(enumerate_json_items(
-                args[0], encoding=kwargs.get('encoding', None), lines=True, flatten=flatten))
+
+            def localf(a0=args[0]):
+                a0.seek(0)
+                return enumerate_json_items(
+                    a0, encoding=kwargs.get('encoding', None), lines=True,
+                    flatten=flatten)
+
+            st = JsonIterator2Stream(localf)
             args = args[1:]
 
             if chunksize is None:
@@ -228,9 +241,12 @@ class StreamingDataFrame:
                     **kwargs_create)
 
             def fct1(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
-                for r in pandas.read_json(st, *args, chunksize=chunksize, nrows=chunksize,
-                                          lines=True, **kw):
+                st.seek(0)
+                for r in pandas.read_json(
+                        st, *args, chunksize=chunksize, nrows=chunksize,
+                        lines=True, **kw):
                     yield r
+
             return StreamingDataFrame(fct1, **kwargs_create)
 
         if kwargs.get('lines', False):
@@ -243,12 +259,14 @@ class StreamingDataFrame:
                     **kwargs_create)
 
             def fct2(args=args, chunksize=chunksize, kw=kwargs.copy()):
-                for r in pandas.read_json(*args, chunksize=chunksize, nrows=chunksize, **kw):
+                for r in pandas.read_json(
+                        *args, chunksize=chunksize, nrows=chunksize, **kw):
                     yield r
             return StreamingDataFrame(fct2, **kwargs_create)
 
-        st = JsonIterator2Stream(enumerate_json_items(
-            args[0], encoding=kwargs.get('encoding', None), flatten=flatten))
+        st = JsonIterator2Stream(
+            lambda a0=args[0]: enumerate_json_items(
+                a0, encoding=kwargs.get('encoding', None), flatten=flatten))
         args = args[1:]
         if 'lines' in kwargs:
             del kwargs['lines']
@@ -260,8 +278,9 @@ class StreamingDataFrame:
                 **kwargs_create)
 
         def fct3(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
-            for r in pandas.read_json(st, *args, chunksize=chunksize, nrows=chunksize,
-                                      lines=True, **kw):
+            for r in pandas.read_json(
+                    st, *args, chunksize=chunksize, nrows=chunksize,
+                    lines=True, **kw):
                 yield r
         return StreamingDataFrame(fct3, **kwargs_create)
 
@@ -324,13 +343,14 @@ class StreamingDataFrame:
                 chunksize = df.shape[0]
             else:
                 raise NotImplementedError(
-                    "Cannot retrieve size to infer chunksize for type={0}".format(type(df)))
+                    "Cannot retrieve size to infer chunksize for type={0}"
+                    ".".format(type(df)))
 
         if hasattr(df, 'shape'):
             size = df.shape[0]
         else:
-            raise NotImplementedError(
-                "Cannot retrieve size for type={0}".format(type(df)))
+            raise NotImplementedError(  # pragma: no cover
+                "Cannot retrieve size for type={0}.".format(type(df)))
 
         def local_iterator():
             "local iterator"
@@ -413,6 +433,8 @@ class StreamingDataFrame:
         """
         for it in self:
             return it.columns
+        # The dataframe is empty.
+        return []
 
     @property
     def dtypes(self):
@@ -771,14 +793,13 @@ class StreamingDataFrame:
         We assume the result holds in memory. The out-of-memory is
         not implemented yet.
 
-        @param      by              see :epkg:`pandas:DataFrame:groupby`
-        @param      in_memory       in-memory algorithm
-        @param      lambda_agg      aggregation function, *sum* by default
-        @param      lambda_agg_agg  to aggregate the aggregations, *sum* by default
-        @param      kwargs          additional parameters for :epkg:`pandas:DataFrame:groupby`
-        @param      strategy        ``'cum'``, or ``'streaming'``,
-                                    see below
-        @return                     :epkg:`pandas:DataFrame`
+        :param by: see :epkg:`pandas:DataFrame:groupby`
+        :param in_memory: in-memory algorithm
+        :param lambda_agg: aggregation function, *sum* by default
+        :param lambda_agg_agg: to aggregate the aggregations, *sum* by default
+        :param kwargs: additional parameters for :epkg:`pandas:DataFrame:groupby`
+        :param strategy: ``'cum'``, or ``'streaming'``, see below
+        :return: :epkg:`pandas:DataFrame`
 
         As the input @see cl StreamingDataFrame does not necessarily hold
         in memory, the aggregation must be done at every iteration.
@@ -822,7 +843,8 @@ class StreamingDataFrame:
                 df20 = dummy_streaming_dataframe(20).to_dataframe()
                 df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
                 sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
-                sgr = sdf20.groupby_streaming("key", lambda gr: gr.sum(), strategy='cum', as_index=False)
+                sgr = sdf20.groupby_streaming("key", lambda gr: gr.sum(),
+                                              strategy='cum', as_index=False)
                 for gr in sgr:
                     print()
                     print(gr)
@@ -874,9 +896,9 @@ class StreamingDataFrame:
         Ensures the :epkg:`dataframe` *df* has types indicated in dtypes.
         Changes it if not.
 
-        @param      df      dataframe
-        @param      dtypes  list of types
-        @return             updated?
+        :param df: dataframe
+        :param dtypes: list of types
+        :return: updated?
         """
         ch = False
         cols = df.columns
@@ -895,15 +917,68 @@ class StreamingDataFrame:
         if len(args) != 1:
             raise NotImplementedError("Only a list of columns is supported.")
         cols = args[0]
+        if isinstance(cols, str):
+            # One column.
+            iter_creation = self.iter_creation
+
+            def iterate_col():
+                "iterate on one column"
+                for df in iter_creation():
+                    yield df[[cols]]
+            return StreamingSeries(iterate_col, **self.get_kwargs())
+
         if not isinstance(cols, list):
             raise NotImplementedError("Only a list of columns is supported.")
 
         def iterate_cols(sdf):
-            "iterate on columns"
+            """Iterate on columns."""
             for df in sdf:
                 yield df[cols]
 
         return StreamingDataFrame(lambda: iterate_cols(self), **self.get_kwargs())
+
+    def __setitem__(self, index, value):
+        """
+        Limited set of operators are supported.
+        """
+        if not isinstance(index, str):
+            raise ValueError(
+                "Only column affected are supported but index=%r." % index)
+        if isinstance(value, (int, float, numpy.number, str)):
+            # Is is equivalent to add_column.
+            iter_creation = self.iter_creation
+
+            def iterate_fct():
+                "iterate on rows"
+                iters = iter_creation()
+                for df in iters:
+                    dfc = df.copy()
+                    dfc[index] = value
+                    yield dfc
+
+            self.iter_creation = iterate_fct
+
+        elif isinstance(value, StreamingSeries):
+            iter_creation = self.iter_creation
+
+            def iterate_fct():
+                "iterate on rows"
+                iters = iter_creation()
+                for df, dfs in zip(iters, value):
+                    if df.shape[0] != dfs.shape[0]:
+                        raise RuntimeError(
+                            "Chunksize or shape are different when "
+                            "iterating on two StreamDataFrame at the same "
+                            "time: %r != %r." % (df.shape[0], dfs.shape[0]))
+                    dfc = df.copy()
+                    dfc[index] = dfs
+                    yield dfc
+
+            self.iter_creation = iterate_fct
+        else:
+            raise NotImplementedError(
+                "Not implemented for type(index)=%r and type(value)=%r." % (
+                    type(index), type(value)))
 
     def add_column(self, col, value):
         """
@@ -1042,3 +1117,38 @@ class StreamingDataFrame:
         rows = [name for name in summary.index if name not in notper]
         summary = summary.loc[rows, :]
         return pandas.concat([merged, summary])
+
+
+class StreamingSeries(StreamingDataFrame):
+    """
+    Seens as a :epkg:`StreamingDataFrame` of one column.
+    """
+
+    def __init__(self, iter_creation, check_schema=True, stable=True):
+        StreamingDataFrame.__init__(
+            self, iter_creation, check_schema=check_schema, stable=stable)
+        if len(self.columns) != 1:
+            raise RuntimeError(
+                "A series can contain only one column not %r." % len(self.columns))
+
+    def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
+        """
+        Applies :epkg:`pandas:Series:apply`.
+        This function returns a @see cl StreamingSeries.
+        """
+        return StreamingSeries(
+            lambda: map(lambda df: df.apply(*args, **kwargs), self),
+            **self.get_kwargs())
+
+    def __add__(self, value):
+        """
+        Does an addition on every value hoping that has a meaning.
+
+        :param value: any value which makes sense
+        :return: a new series
+        """
+        def iterate():
+            for df in self:
+                yield df + value
+
+        return StreamingSeries(iterate, **self.get_kwargs())
