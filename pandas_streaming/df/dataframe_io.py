@@ -114,8 +114,8 @@ def read_zip(zipfilename, zname=None, **kwargs):
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
         if ext != '.zip':
-            raise NotImplementedError(
-                "Only zip file are implemented not '{0}'.".format(ext))
+            raise NotImplementedError(  # pragma: no cover
+                "Only zip files are supported not '{0}'.".format(ext))
         zf = zipfile.ZipFile(zipfilename, 'r')  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):

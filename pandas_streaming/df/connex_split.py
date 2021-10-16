@@ -38,25 +38,30 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
     without using randomness.
     """
     if hasattr(df, 'iter_creation'):
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             'Not implemented yet for StreamingDataFrame.')
     if isinstance(df, numpy.ndarray):
-        raise NotImplementedError("Not implemented on numpy arrays.")
+        raise NotImplementedError(  # pragma: no cover
+            "Not implemented on numpy arrays.")
     if shuffle:
         df = dataframe_shuffle(df, random_state=random_state)
     if weights is None:
         if test_size == 0 or train_size == 0:
             raise ValueError(
-                "test_size={0} or train_size={1} cannot be null (1)".format(test_size, train_size))
-        return train_test_split(df, test_size=test_size, train_size=train_size, random_state=random_state)
+                "test_size={0} or train_size={1} cannot be null (1)."
+                "".format(test_size, train_size))
+        return train_test_split(df, test_size=test_size,
+                                train_size=train_size,
+                                random_state=random_state)
 
     if isinstance(weights, pandas.Series):
         weights = list(weights)
     elif isinstance(weights, str):
         weights = list(df[weights])
     if len(weights) != df.shape[0]:
-        raise ValueError("Dimension mismatch between weights and dataframe {0} != {1}".format(
-            df.shape[0], len(weights)))
+        raise ValueError(
+            "Dimension mismatch between weights and dataframe "
+            "{0} != {1}".format(df.shape[0], len(weights)))
 
     p = (1 - test_size) if test_size else None
     if train_size is not None:
@@ -64,7 +69,8 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
         test_size = 1 - p
     if p is None or min(test_size, p) <= 0:
         raise ValueError(
-            "test_size={0} or train_size={1} cannot be null (2)".format(test_size, train_size))
+            "test_size={0} or train_size={1} cannot be null (2)."
+            "".format(test_size, train_size))
     ratio = test_size / p
 
     if random_state is None:
@@ -98,7 +104,8 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
         (1.0 * (train_weights + test_weights))
     if r >= fail_imbalanced:
         raise ImbalancedSplitException(  # pragma: no cover
-            "Split is imbalanced: train_weights={0} test_weights={1} r={2}".format(train_weights, test_weights, r))
+            "Split is imbalanced: train_weights={0} test_weights={1} r={2}."
+            "".format(train_weights, test_weights, r))
 
     return df.iloc[train_ids, :], df.iloc[test_ids, :]
 
@@ -125,7 +132,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     @param  hash_size       size of the hash to cache information about partition
     @param  unique_rows     ensures that rows are unique
     @param  shuffle         shuffles before the split
-    @param  fail_imbalanced raises an exception if relative weights difference is higher than this value
+    @param  fail_imbalanced raises an exception if relative weights difference
+                            is higher than this value
     @param  stop_if_bigger  (float) stops a connected components from being
                             bigger than this ratio of elements, this should not be used
                             unless a big components emerges, the algorithm stops merging
@@ -135,7 +143,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             if their relative sizes are too different, the value should be
                             close to 1
     @param  return_cnx      returns connected components as a third results
-    @param  must_groups     column name for ids which must not be shared by train/test partitions
+    @param  must_groups     column name for ids which must not be shared by
+                            train/test partitions
     @param  random_state    seed for random generator
     @param  fLOG            logging function
     @return                 Two @see cl StreamingDataFrame, one
@@ -171,9 +180,10 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             dict(user="UD", prod="PG", card="C5"),
                             ])
 
-            train, test = train_test_connex_split(df, test_size=0.5,
-                                                  groups=['user', 'prod', 'card'],
-                                                  fail_imbalanced=0.6)
+            train, test = train_test_connex_split(
+                df, test_size=0.5, groups=['user', 'prod', 'card'],
+                fail_imbalanced=0.6)
+
             print(train)
             print(test)
 
@@ -197,23 +207,25 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                         dict(user="UD", prod="PG", card="C5"),
                         ])
 
-        train, test, cnx = train_test_connex_split(df, test_size=0.5,
-                                              groups=['user', 'prod', 'card'],
-                                              fail_imbalanced=0.6, return_cnx=True)
+        train, test, cnx = train_test_connex_split(
+            df, test_size=0.5, groups=['user', 'prod', 'card'],
+            fail_imbalanced=0.6, return_cnx=True)
 
         print(cnx[0])
         print(cnx[1])
     """
     if stratify is not None:
-        raise NotImplementedError("Option stratify is not implemented.")
+        raise NotImplementedError(  # pragma: no cover
+            "Option stratify is not implemented.")
     if groups is None or len(groups) == 0:
         raise ValueError(  # pragma: no cover
             "groups is empty. Use regular train_test_split.")
     if hasattr(df, 'iter_creation'):
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             'Not implemented yet for StreamingDataFrame.')
     if isinstance(df, numpy.ndarray):
-        raise NotImplementedError("Not implemented on numpy arrays.")
+        raise NotImplementedError(  # pragma: no cover
+            "Not implemented on numpy arrays.")
     if shuffle:
         df = dataframe_shuffle(df, random_state=random_state)
 
@@ -241,8 +253,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
         while modif > 0 and itern < len(elements):
             if fLOG and df.shape[0] > 10000:
-                fLOG("[train_test_connex_split] iteration={0}-#nb connect={1} - modif={2}".format(
-                    iter, len(set(elements)), modif))
+                fLOG("[train_test_connex_split] iteration={0}-#nb connect={1} - "
+                     "modif={2}".format(iter, len(set(elements)), modif))
             modif = 0
             itern += 1
             for i, row in enumerate(dfrows.itertuples(index=False, name=None)):
@@ -272,8 +284,11 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             r = diff / float(maxi)
                             if r > kb:
                                 if fLOG:  # pragma: no cover
-                                    fLOG('[train_test_connex_split]    balance r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
-                                        r, kb, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                                    fLOG('[train_test_connex_split]    balance '
+                                         'r={0:0.00000}>{1:0.00}, #[{2}]={3}, '
+                                         '#[{4}]={5}'.format(r, kb, new_c,
+                                                             len(counts_cnx[new_c]),
+                                                             c, len(counts_cnx[c])))
                                 continue
 
                     if sib is not None:
@@ -281,8 +296,10 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                              len(counts_cnx[c])) / float(len(elements))
                         if r > sib:
                             if fLOG:  # pragma: no cover
-                                fLOG('[train_test_connex_split]    no merge r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'.format(
-                                    r, sib, new_c, len(counts_cnx[new_c]), c, len(counts_cnx[c])))
+                                fLOG('[train_test_connex_split]    no merge '
+                                     'r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}'
+                                     ''.format(r, sib, new_c, len(counts_cnx[new_c]),
+                                               c, len(counts_cnx[c])))
                             avoids_merge[new_c, c] = i
                             continue
 
@@ -316,7 +333,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
             fLOG("[train_test_connex_split]     #nb in '{0}': {1}".format(
                 g, len(set(dfids[g]))))
         fLOG(
-            "[train_test_connex_split] #connex {0}/{1}".format(grsum.shape[0], dfids.shape[0]))
+            "[train_test_connex_split] #connex {0}/{1}".format(
+                grsum.shape[0], dfids.shape[0]))
     if grsum.shape[0] <= 1:
         raise ValueError(  # pragma: no cover
             "Every element is in the same connected components.")
@@ -328,28 +346,28 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
         cl = [(v, k) for k, v in counts.items()]
         cum = 0
         maxc = None
-        fLOG("[train_test_connex_split] number of connected components: {0}".format(
-            len(set(elements))))
+        fLOG("[train_test_connex_split] number of connected components: {0}"
+             "".format(len(set(elements))))
         for i, (v, k) in enumerate(sorted(cl, reverse=True)):
             if i == 0:
                 maxc = k, v
             if i >= 10:
                 break
             cum += v
-            fLOG("[train_test_connex_split]     c={0} #elements={1} cumulated={2}/{3}".format(
-                k, v, cum, len(elements)))
+            fLOG("[train_test_connex_split]     c={0} #elements={1} cumulated"
+                 "={2}/{3}".format(k, v, cum, len(elements)))
 
         # Most important component
-        fLOG(
-            '[train_test_connex_split] first row of the biggest component {0}'.format(maxc))
+        fLOG('[train_test_connex_split] first row of the biggest component '
+             '{0}'.format(maxc))
         tdf = dfids[dfids[name] == maxc[0]]
         fLOG('[train_test_connex_split] \n{0}'.format(tdf.head(n=10)))
 
     # Splits.
-    train, test = train_test_split_weights(grsum, weights=one, test_size=test_size,
-                                           train_size=train_size, shuffle=shuffle,
-                                           fail_imbalanced=fail_imbalanced,
-                                           random_state=random_state)
+    train, test = train_test_split_weights(
+        grsum, weights=one, test_size=test_size, train_size=train_size,
+        shuffle=shuffle, fail_imbalanced=fail_imbalanced,
+        random_state=random_state)
     train.drop(one, inplace=True, axis=1)
     test.drop(one, inplace=True, axis=1)
 
@@ -369,7 +387,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
 
 def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
-                              stratify=None, force=False, random_state=None, fLOG=None):
+                              stratify=None, force=False, random_state=None,
+                              fLOG=None):
     """
     This split is for a specific case where data is linked
     in one way. Let's assume we have two ids as we have
@@ -380,7 +399,8 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
 
     @param  df              :epkg:`pandas:DataFrame`
     @param  group           columns name for the ids
-    @param  test_size       ratio for the test partition (if *train_size* is not specified)
+    @param  test_size       ratio for the test partition
+                            (if *train_size* is not specified)
     @param  train_size      ratio for the train partition
     @param  stratify        column holding the stratification
     @param  force           if True, tries to get at least one example on the test side
@@ -398,7 +418,8 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
     classification. A category (*stratify*) is not exclusive
     and an observation can be assigned to multiple
     categories. In that particular case, the method
-    `train_test_split <http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_
+    `train_test_split <http://scikit-learn.org/stable/modules/generated/
+    sklearn.model_selection.train_test_split.html>`_
     can not directly be used.
 
     .. runpython::
@@ -419,9 +440,11 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
         print(test)
     """
     if stratify is None:
-        raise ValueError("stratify must be specified.")
+        raise ValueError(  # pragma: no cover
+            "stratify must be specified.")
     if group is None:
-        raise ValueError("group must be specified.")
+        raise ValueError(  # pragma: no cover
+            "group must be specified.")
     if hasattr(df, 'iter_creation'):
         raise NotImplementedError(
             'Not implemented yet for StreamingDataFrame.')
@@ -434,7 +457,8 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
     test_size = 1 - p
     if p is None or min(test_size, p) <= 0:
         raise ValueError(  # pragma: no cover
-            "test_size={0} or train_size={1} cannot be null".format(test_size, train_size))
+            "test_size={0} or train_size={1} cannot be null".format(
+                test_size, train_size))
 
     couples = df[[group, stratify]].itertuples(name=None, index=False)
     hist = Counter(df[stratify])

@@ -142,8 +142,9 @@ class StreamingDataFrame:
         if streaming:
             if partitions is not None:
                 if len(partitions) != 2:
-                    raise NotImplementedError(
-                        "Only train and test split is allowed, *partitions* must be of length 2.")
+                    raise NotImplementedError(  # pragma: no cover
+                        "Only train and test split is allowed, *partitions* "
+                        "must be of length 2.")
                 kwargs = kwargs.copy()
                 kwargs['train_size'] = partitions[0]
                 kwargs['test_size'] = partitions[1]
@@ -342,13 +343,14 @@ class StreamingDataFrame:
                 chunksize = df.shape[0]
             else:
                 raise NotImplementedError(
-                    "Cannot retrieve size to infer chunksize for type={0}".format(type(df)))
+                    "Cannot retrieve size to infer chunksize for type={0}"
+                    ".".format(type(df)))
 
         if hasattr(df, 'shape'):
             size = df.shape[0]
         else:
-            raise NotImplementedError(
-                "Cannot retrieve size for type={0}".format(type(df)))
+            raise NotImplementedError(  # pragma: no cover
+                "Cannot retrieve size for type={0}.".format(type(df)))
 
         def local_iterator():
             "local iterator"
@@ -791,14 +793,13 @@ class StreamingDataFrame:
         We assume the result holds in memory. The out-of-memory is
         not implemented yet.
 
-        @param      by              see :epkg:`pandas:DataFrame:groupby`
-        @param      in_memory       in-memory algorithm
-        @param      lambda_agg      aggregation function, *sum* by default
-        @param      lambda_agg_agg  to aggregate the aggregations, *sum* by default
-        @param      kwargs          additional parameters for :epkg:`pandas:DataFrame:groupby`
-        @param      strategy        ``'cum'``, or ``'streaming'``,
-                                    see below
-        @return                     :epkg:`pandas:DataFrame`
+        :param by: see :epkg:`pandas:DataFrame:groupby`
+        :param in_memory: in-memory algorithm
+        :param lambda_agg: aggregation function, *sum* by default
+        :param lambda_agg_agg: to aggregate the aggregations, *sum* by default
+        :param kwargs: additional parameters for :epkg:`pandas:DataFrame:groupby`
+        :param strategy: ``'cum'``, or ``'streaming'``, see below
+        :return: :epkg:`pandas:DataFrame`
 
         As the input @see cl StreamingDataFrame does not necessarily hold
         in memory, the aggregation must be done at every iteration.
@@ -842,7 +843,8 @@ class StreamingDataFrame:
                 df20 = dummy_streaming_dataframe(20).to_dataframe()
                 df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
                 sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
-                sgr = sdf20.groupby_streaming("key", lambda gr: gr.sum(), strategy='cum', as_index=False)
+                sgr = sdf20.groupby_streaming("key", lambda gr: gr.sum(),
+                                              strategy='cum', as_index=False)
                 for gr in sgr:
                     print()
                     print(gr)
@@ -894,9 +896,9 @@ class StreamingDataFrame:
         Ensures the :epkg:`dataframe` *df* has types indicated in dtypes.
         Changes it if not.
 
-        @param      df      dataframe
-        @param      dtypes  list of types
-        @return             updated?
+        :param df: dataframe
+        :param dtypes: list of types
+        :return: updated?
         """
         ch = False
         cols = df.columns
@@ -923,13 +925,13 @@ class StreamingDataFrame:
                 "iterate on one column"
                 for df in iter_creation():
                     yield df[[cols]]
-            return StreamingSeries(lambda: iterate_col(), **self.get_kwargs())
+            return StreamingSeries(iterate_col, **self.get_kwargs())
 
         if not isinstance(cols, list):
             raise NotImplementedError("Only a list of columns is supported.")
 
         def iterate_cols(sdf):
-            "iterate on columns"
+            """Iterate on columns."""
             for df in sdf:
                 yield df[cols]
 
