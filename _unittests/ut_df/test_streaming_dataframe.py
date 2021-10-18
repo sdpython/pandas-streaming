@@ -9,7 +9,6 @@ import pandas
 import numpy
 from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 from pandas_streaming.data import dummy_streaming_dataframe
-from pandas_streaming.exc import StreamingInefficientException
 from pandas_streaming.df import StreamingDataFrame
 from pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
 
