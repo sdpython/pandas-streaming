@@ -9,7 +9,6 @@ import pandas
 import numpy
 from pyquickhelper.pycode import ExtTestCase, get_temp_folder
 from pandas_streaming.data import dummy_streaming_dataframe
-from pandas_streaming.exc import StreamingInefficientException
 from pandas_streaming.df import StreamingDataFrame
 from pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
 
@@ -23,8 +22,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(len(dfs), 10)
         shape = sdf.shape
         self.assertEqual(shape, (100, 2))
-        self.assertRaise(lambda: sdf.sort_values(
-            "r"), StreamingInefficientException)
 
     def test_init(self):
         sdf = dummy_streaming_dataframe(100)
@@ -557,5 +554,4 @@ class TestStreamingDataFrame(ExtTestCase):
 
 
 if __name__ == "__main__":
-    # TestStreamingDataFrame().test_describe()
     unittest.main()
