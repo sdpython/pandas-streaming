@@ -1135,15 +1135,19 @@ class StreamingDataFrame:
             raise NotImplementedError(
                 "Only one column can be used to sort not %r." % by)
         keys = {}
+        nans = []
         indices = []
         with open(temp_file, 'wb') as f:
             for df in self:
                 dfs = df.sort_values(by, ascending=ascending, kind=kind,
                                      na_position=na_position)
                 for tu in dfs[by]:
-                    if tu not in keys:
-                        keys[tu] = []
-                    keys[tu].append(len(indices))
+                    if isinstance(tu, float) and numpy.isnan(tu):
+                        nans.append(len(indices))
+                    else:
+                        if tu not in keys:
+                            keys[tu] = []
+                        keys[tu].append(len(indices))
                 indices.append(f.tell())
                 st = BytesIO()
                 pickle.dump(dfs, st)
@@ -1158,6 +1162,15 @@ class StreamingDataFrame:
 
             with open(temp_file, 'rb') as f:
 
+                if na_position == 'first':
+                    for p in nans:
+                        f.seek(indices[p])
+                        length = indices[p + 1] - indices[p]
+                        pkl = f.read(length)
+                        dfs = pickle.load(BytesIO(pkl))
+                        sub = dfs[numpy.isnan(dfs[by])]
+                        yield sub
+
                 for key, positions in values:
                     for p in positions:
                         f.seek(indices[p])
@@ -1165,6 +1178,15 @@ class StreamingDataFrame:
                         pkl = f.read(length)
                         dfs = pickle.load(BytesIO(pkl))
                         sub = dfs[dfs[by] == key]
+                        yield sub
+
+                if na_position == 'last':
+                    for p in nans:
+                        f.seek(indices[p])
+                        length = indices[p + 1] - indices[p]
+                        pkl = f.read(length)
+                        dfs = pickle.load(BytesIO(pkl))
+                        sub = dfs[numpy.isnan(dfs[by])]
                         yield sub
 
         res = StreamingDataFrame(
