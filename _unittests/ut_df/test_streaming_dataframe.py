@@ -23,8 +23,6 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(len(dfs), 10)
         shape = sdf.shape
         self.assertEqual(shape, (100, 2))
-        self.assertRaise(lambda: sdf.sort_values(
-            "r"), StreamingInefficientException)
 
     def test_init(self):
         sdf = dummy_streaming_dataframe(100)
@@ -557,5 +555,4 @@ class TestStreamingDataFrame(ExtTestCase):
 
 
 if __name__ == "__main__":
-    # TestStreamingDataFrame().test_describe()
     unittest.main()

@@ -68,6 +68,7 @@ class StreamingDataFrame:
     """
 
     def __init__(self, iter_creation, check_schema=True, stable=True):
+        self._delete_ = []
         if isinstance(iter_creation, (pandas.DataFrame, dict,
                                       numpy.ndarray, str)):
             raise TypeError(
@@ -80,7 +81,6 @@ class StreamingDataFrame:
             self.iter_creation = iter_creation
             self.stable = stable
         self.check_schema = check_schema
-        self._delete_ = []
 
     def is_stable(self, do_check=False, n=10):
         """
