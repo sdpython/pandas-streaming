@@ -644,8 +644,9 @@ class StreamingDataFrame:
         Otherwise, the function fails as it cannot guess the schema without
         walking through all :epkg:`dataframes`.
 
-        @param  others      list, enumeration, :epkg:`pandas:DataFrame`
-        @return             @see cl StreamingDataFrame
+        :param others: list, enumeration, :epkg:`pandas:DataFrame`
+        :param axis: concatenate by rows (0) or by columns (1)
+        :return: @see cl StreamingDataFrame
         """
         if axis == 1:
             return self._concath(others)
@@ -1204,7 +1205,7 @@ class StreamingDataFrame:
 
 class StreamingSeries(StreamingDataFrame):
     """
-    Seens as a :epkg:`StreamingDataFrame` of one column.
+    Seens as a @see cl StreamingDataFrame of one column.
     """
 
     def __init__(self, iter_creation, check_schema=True, stable=True):

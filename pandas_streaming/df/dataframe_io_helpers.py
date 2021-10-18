@@ -391,8 +391,13 @@ class JsonIterator2Stream:
                 ]
             '''
 
-            for item in JsonIterator2Stream(enumerate_json_items(text_json)):
+            for item in JsonIterator2Stream(lambda: enumerate_json_items(text_json)):
                 print(item)
+
+    .. versionchanged:: 0.3
+        The class takes a function which outputs an iterator and not an iterator.
+        `JsonIterator2Stream(enumerate_json_items(text_json))` needs to be rewritten
+        into JsonIterator2Stream(lambda: enumerate_json_items(text_json)).
     """
 
     def __init__(self, it, **kwargs):
