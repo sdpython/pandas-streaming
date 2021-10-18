@@ -7,7 +7,8 @@ from io import StringIO, BytesIO
 from json import loads
 import pandas
 from pyquickhelper.pycode import ExtTestCase
-from pandas_streaming.df.dataframe_io_helpers import enumerate_json_items, JsonPerRowsStream
+from pandas_streaming.df.dataframe_io_helpers import (
+    enumerate_json_items, JsonPerRowsStream, JsonIterator2Stream)
 from pandas_streaming.df import StreamingDataFrame
 
 
@@ -252,6 +253,13 @@ class TestDataFrameIOHelpers(ExtTestCase):
                 break
             res.append(n)
         self.assertGreater(len(res), 1)
+
+    def test_bug_documentation(self):
+        items = []
+        for item in JsonIterator2Stream(
+                lambda: enumerate_json_items(TestDataFrameIOHelpers.text_json)):
+            items.append(item)
+        self.assertEqual(len(items), 2)
 
 
 if __name__ == "__main__":
