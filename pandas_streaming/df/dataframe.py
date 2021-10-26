@@ -288,7 +288,8 @@ class StreamingDataFrame:
                 **kwargs_create)
 
         def fct3(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
-            st.seek(0)
+            if hasattr(st, 'seek'):
+                st.seek(0)
             for r in pandas.read_json(
                     st, *args, chunksize=chunksize, nrows=chunksize,
                     lines=True, **kw):
