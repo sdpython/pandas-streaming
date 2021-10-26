@@ -145,6 +145,8 @@ class TestDataFrameIOHelpers(ExtTestCase):
         h1 = it.head()
         h2 = it.head()
         self.assertEqualDataFrame(h1, h2)
+        self.assertGreater(h1.shape[0], 1)
+        self.assertGreater(h2.shape[0], 1)
 
     def test_pandas_json_chunksize(self):
         jsonl = '''{"a": 1, "b": 2}
@@ -180,6 +182,28 @@ class TestDataFrameIOHelpers(ExtTestCase):
         dfs = pandas.read_json(BytesIO(data), lines=True)
         self.assertEqual(dfs.shape, (2, 2))
         it = StreamingDataFrame.read_json(BytesIO(data), lines="stream")
+        h1 = it.head()
+        h2 = it.head()
+        self.assertNotEmpty(h1)
+        self.assertNotEmpty(h2)
+        self.assertEqualDataFrame(h1, h2)
+
+    def test_read_json_rows_file_head(self):
+        data = self.abs_path_join(__file__, 'data', 'example2.json')
+        dfs = pandas.read_json(data, orient='records')
+        self.assertEqual(dfs.shape, (2, 2))
+        it = StreamingDataFrame.read_json(data)
+        h1 = it.head()
+        h2 = it.head()
+        self.assertNotEmpty(h1)
+        self.assertNotEmpty(h2)
+        self.assertEqualDataFrame(h1, h2)
+
+    def test_read_json_rows_file_lines_head(self):
+        data = self.abs_path_join(__file__, 'data', 'example.json')
+        dfs = pandas.read_json(data, orient='records', lines=True)
+        self.assertEqual(dfs.shape, (2, 2))
+        it = StreamingDataFrame.read_json(data, lines="stream")
         h1 = it.head()
         h2 = it.head()
         self.assertNotEmpty(h1)

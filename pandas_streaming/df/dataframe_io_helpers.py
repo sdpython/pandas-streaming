@@ -113,11 +113,13 @@ def flatten_dictionary(dico, sep="_"):
     """
     Flattens a dictionary with nested structure to a dictionary with no
     hierarchy.
+
     :param dico: dictionary to flatten
     :param sep: string to separate dictionary keys by
     :return: flattened dictionary
 
-    Inspired from `flatten_json <https://github.com/amirziai/flatten/blob/master/flatten_json.py>`_.
+    Inspired from `flatten_json
+    <https://github.com/amirziai/flatten/blob/master/flatten_json.py>`_.
     """
     flattened_dict = {}
 
@@ -223,6 +225,11 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
 
             for item in enumerate_json_items(text_json):
                 print(item)
+
+    The parsed json must have an empty line at the end otherwise
+    the following exception is raised:
+    `ijson.common.IncompleteJSONError: `
+    `parse error: unallowed token at this point in JSON text`.
     """
     if isinstance(filename, str):
         if "{" not in filename and os.path.exists(filename):
