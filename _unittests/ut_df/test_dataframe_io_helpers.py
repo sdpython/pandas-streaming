@@ -285,6 +285,51 @@ class TestDataFrameIOHelpers(ExtTestCase):
             items.append(item)
         self.assertEqual(len(items), 2)
 
+    def test_read_json_classic(self):
+        data = self.abs_path_join(__file__, 'data', 'classic.json')
+        dfs = pandas.read_json(data, orient='records')
+        dfs['ts2'] = dfs['ts'].apply(lambda t: t / 1e9)
+        self.assertEqual(dfs.shape[1], 9)
+        self.assertGreater(dfs.shape[0], 2)
+        it = StreamingDataFrame.read_json(data)
+        it['ts2'] = it['ts'].apply(lambda t: t / 1e9)
+        h1 = it.to_df()
+        h2 = it.to_df()
+        self.assertNotEmpty(h1)
+        self.assertNotEmpty(h2)
+        self.assertEqualDataFrame(h1, h2)
+        self.assertEqual(h1.shape[1], 9)
+
+    def test_read_json_classic_file(self):
+        data = self.abs_path_join(__file__, 'data', 'classic.json')
+        dfs = pandas.read_json(data, orient='records')
+        self.assertEqual(dfs.shape[1], 8)
+        self.assertGreater(dfs.shape[0], 2)
+        with open(data, "r", encoding="utf-8") as f:
+            it = StreamingDataFrame.read_json(f, orient='records')
+            h1 = it.to_df()
+            h2 = it.to_df()
+        self.assertNotEmpty(h1)
+        self.assertNotEmpty(h2)
+        self.assertEqualDataFrame(h1, h2)
+        self.assertEqual(h1.shape[1], 8)
+
+    def test_read_json_classic_file_formula(self):
+        data = self.abs_path_join(__file__, 'data', 'classic.json')
+        dfs = pandas.read_json(data, orient='records')
+        dfs['ts2'] = dfs['ts'].apply(lambda t: t / 1e9)
+        self.assertEqual(dfs.shape[1], 9)
+        self.assertGreater(dfs.shape[0], 2)
+        with open(data, "r", encoding="utf-8") as f:
+            it = StreamingDataFrame.read_json(f)
+            it['ts2'] = it['ts'].apply(lambda t: t / 1e9)
+            h1 = it.to_df()
+            h2 = it.to_df()
+        self.assertNotEmpty(h1)
+        self.assertNotEmpty(h2)
+        self.assertEqualDataFrame(h1, h2)
+        self.assertEqual(h1.shape[1], 9)
+
 
 if __name__ == "__main__":
     unittest.main()
