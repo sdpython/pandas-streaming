@@ -256,6 +256,8 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
                 encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
             yield el
     else:
+        if hasattr(filename, 'seek'):
+            filename.seek(0)
         parser = ijson.parse(filename)
         current = None
         curkey = None
