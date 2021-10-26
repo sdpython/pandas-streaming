@@ -178,7 +178,7 @@ class StreamingDataFrame:
         and it must be defined to return an iterator.
         If *lines* is True, the function falls back into
         :epkg:`pandas:read_json`, otherwise it used
-        @see fn enumerate_json_items. If *lines is ``'stream'``,
+        @see fn enumerate_json_items. If *lines* is ``'stream'``,
         *enumerate_json_items* is called with parameter
         ``lines=True``.
         Parameter *flatten* uses the trick described at
@@ -212,6 +212,13 @@ class StreamingDataFrame:
             it = StreamingDataFrame.read_json(BytesIO(data))
             dfs = list(it)
             print(dfs)
+
+        .. index:: IncompleteJSONError
+
+        The parsed json must have an empty line at the end otherwise
+        the following exception is raised:
+        `ijson.common.IncompleteJSONError: `
+        `parse error: unallowed token at this point in JSON text`.
         """
         if not isinstance(chunksize, int) or chunksize <= 0:
             raise ValueError(  # pragma: no cover
@@ -228,7 +235,8 @@ class StreamingDataFrame:
             del kwargs['lines']
 
             def localf(a0=args[0]):
-                a0.seek(0)
+                if hasattr(a0, 'seek'):
+                    a0.seek(0)
                 return enumerate_json_items(
                     a0, encoding=kwargs.get('encoding', None), lines=True,
                     flatten=flatten)
@@ -280,6 +288,7 @@ class StreamingDataFrame:
                 **kwargs_create)
 
         def fct3(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
+            st.seek(0)
             for r in pandas.read_json(
                     st, *args, chunksize=chunksize, nrows=chunksize,
                     lines=True, **kw):
@@ -920,8 +929,9 @@ class StreamingDataFrame:
 
             def iterate_col():
                 "iterate on one column"
+                one_col = [cols]
                 for df in iter_creation():
-                    yield df[[cols]]
+                    yield df[one_col]
             return StreamingSeries(iterate_col, **self.get_kwargs())
 
         if not isinstance(cols, list):
