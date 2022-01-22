@@ -3,8 +3,8 @@ sudo: true
 language: python
 matrix:
   include:
-  - python: 3.9
-    name: "Py39-skl022+"
+  - python: 3.10
+    name: "Py310-skl022+"
     env: sklearnc=">=0.22"
 install:
   - pip install -r requirements.txt
