@@ -16,7 +16,7 @@ readme = 'README.rst'
 history = "HISTORY.rst"
 requirements = None
 
-KEYWORDS = project_var_name + ', Xavier Dupré'
+KEYWORDS = [project_var_name, 'Xavier Dupré', 'pandas', 'streaming']
 DESCRIPTION = """Streaming operations with pandas."""
 CLASSIFIERS = [
     'Programming Language :: Python :: 3',
