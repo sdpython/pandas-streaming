@@ -15,7 +15,7 @@ class TestCodeStyle(ExtTestCase):
         src_ = os.path.normpath(os.path.join(
             thi, "..", "..", "pandas_streaming"))
         check_pep8(src_, fLOG=fLOG,
-                   pylint_ignore=('C0103', 'C1801', 'R0201', 'R1705', 'W0108', 'W0613',
+                   pylint_ignore=('C0103', 'C1801', 'R1705', 'W0108', 'W0613',
                                   'W0212', 'W0703', 'W0107', 'C0302', 'C0209'),
                    skip=["Too many nested blocks",
                          "Module 'numpy.random' has no 'RandomState' member",
@@ -26,7 +26,7 @@ class TestCodeStyle(ExtTestCase):
         thi = os.path.abspath(os.path.dirname(__file__))
         test = os.path.normpath(os.path.join(thi, "..", ))
         check_pep8(test, fLOG=fLOG, neg_pattern="temp_.*",
-                   pylint_ignore=('C0103', 'C1801', 'R0201', 'R1705', 'W0108', 'W0613',
+                   pylint_ignore=('C0103', 'C1801', 'R1705', 'W0108', 'W0613',
                                   'C0111', 'W0107', 'C0302', 'R1732', 'C0209'),
                    skip=[])
 
