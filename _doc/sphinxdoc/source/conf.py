@@ -63,6 +63,7 @@ epkg_dictionary.update({
     'Dataframe': 'https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html',
     'DataFrame': 'https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html',
     'dataframes': 'https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html',
+    'dill': 'https://dill.readthedocs.io/en/latest/dill.html',
     'Hadoop': 'http://hadoop.apache.org/',
     'ijson': 'https://github.com/ICRAR/ijson',
     'nan': 'https://numpy.org/doc/stable/reference/constants.html#numpy.NAN',
