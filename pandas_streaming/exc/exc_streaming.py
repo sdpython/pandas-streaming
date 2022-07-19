@@ -19,4 +19,4 @@ class StreamingInefficientException(Exception):
         :param meth: inefficient method
         """
         Exception.__init__(
-            self, "{0} should not be done in streaming mode.".format(meth))
+            self, f"{meth} should not be done in streaming mode.")

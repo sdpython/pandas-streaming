@@ -255,7 +255,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                     part = cache.get(h)
                     if part is None:
                         raise ValueError(  # pragma: no cover
-                            "Second iteration. A row was never met in the first one\n{0}".format(obs))
+                            f"Second iteration. A row was never met in the first one\n{obs}")
                     if part == part_requested:
                         accumul.append(obs)
                         if len(accumul) >= static_schema[2]:

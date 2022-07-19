@@ -110,7 +110,7 @@ class TestConnexSplit(ExtTestCase):
             s2 = set(test[col])
             if s1 & s2:
                 raise Exception(
-                    'Non empty intersection {0} & {1}\n{2}\n{3}'.format(s1, s2, train, test))
+                    f'Non empty intersection {s1} & {s2}\n{train}\n{test}')
 
         df['connex'] = 'ole'
         train, test = train_test_connex_split(  # pylint: disable=W0632
@@ -148,7 +148,7 @@ class TestConnexSplit(ExtTestCase):
             if s1 & s2:
                 rows = []
                 for k, v in sorted(stats[0].items()):
-                    rows.append("{0}={1}".format(k, v))
+                    rows.append(f"{k}={v}")
                 raise Exception(
                     'Non empty intersection {0} & {1}\n{2}\n{3}\n{4}'.format(s1, s2, train, test, "\n".join(rows)))
 
@@ -180,7 +180,7 @@ class TestConnexSplit(ExtTestCase):
             if s1 & s2:
                 rows = []
                 for k, v in sorted(stats[0].items()):
-                    rows.append("{0}={1}".format(k, v))
+                    rows.append(f"{k}={v}")
                 raise Exception(
                     'Non empty intersection {0} & {1}\n{2}\n{3}\n{4}'.format(s1, s2, train, test, "\n".join(rows)))
 
