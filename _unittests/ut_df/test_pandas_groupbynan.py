@@ -31,7 +31,7 @@ class TestPandasHelper(ExtTestCase):
             try:
                 self.assertIsInstance(li[-1], float)
             except AssertionError as e:
-                raise AssertionError("Issue with {0}".format(ty)) from e
+                raise AssertionError(f"Issue with {ty}") from e
             try:
                 self.assertTrue(numpy.isnan(li[-1]))
             except AssertionError as e:

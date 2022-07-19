@@ -49,7 +49,7 @@ def hash_str(c, hash_length):
     if isinstance(c, float):
         if numpy.isnan(c):
             return c
-        raise ValueError("numpy.nan expected, not {0}".format(c))
+        raise ValueError(f"numpy.nan expected, not {c}")
     m = hashlib.sha256()
     m.update(c.encode("utf-8"))
     r = m.hexdigest()
@@ -70,7 +70,7 @@ def hash_int(c, hash_length):
         if numpy.isnan(c):
             return c
         else:
-            raise ValueError("numpy.nan expected, not {0}".format(c))
+            raise ValueError(f"numpy.nan expected, not {c}")
     else:
         b = struct.pack("i", c)
         m = hashlib.sha256()
@@ -167,7 +167,7 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
             df[c] = df[c].apply(hash_strl)
         else:
             raise NotImplementedError(
-                "Conversion of type {0} in column '{1}' is not implemented".format(t, c))
+                f"Conversion of type {t} in column '{c}' is not implemented")
 
     return df
 
@@ -413,7 +413,7 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                     df.columns, df.dtypes)}  # pylint: disable=R1721
                 if typ[by[0]] != do:
                     warnings.warn(  # pragma: no cover
-                        "[pandas_groupby_nan] NaN value: {0}".format(rep))
+                        f"[pandas_groupby_nan] NaN value: {rep}")
                 return res
             for b in by:
                 fnan = rep[b]
@@ -468,7 +468,7 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                 for b in by:
                     if typ[b] != do:
                         warnings.warn(  # pragma: no cover
-                            "[pandas_groupby_nan] NaN values: {0}".format(rep))
+                            f"[pandas_groupby_nan] NaN values: {rep}")
                         break
                 return res
             raise NotImplementedError(

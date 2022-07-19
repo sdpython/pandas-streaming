@@ -79,14 +79,14 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         numpy.save(stb, df, **kwargs)
     else:
         raise TypeError(  # pragma: no cover
-            "Type not handled {0}".format(type(df)))
+            f"Type not handled {type(df)}")
     text = stb.getvalue()
 
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
         if ext != '.zip':
             raise NotImplementedError(  # pragma: no cover
-                "Only zip file are implemented not '{0}'.".format(ext))
+                f"Only zip file are implemented not '{ext}'.")
         zf = zipfile.ZipFile(zipfilename, 'w')  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
@@ -94,7 +94,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         close = False
     else:
         raise TypeError(  # pragma: no cover
-            "No implementation for type '{0}'".format(type(zipfilename)))
+            f"No implementation for type '{type(zipfilename)}'")
 
     zf.writestr(zname, text)
     if close:
@@ -115,7 +115,7 @@ def read_zip(zipfilename, zname=None, **kwargs):
         ext = os.path.splitext(zipfilename)[-1]
         if ext != '.zip':
             raise NotImplementedError(  # pragma: no cover
-                "Only zip files are supported not '{0}'.".format(ext))
+                f"Only zip files are supported not '{ext}'.")
         zf = zipfile.ZipFile(zipfilename, 'r')  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
@@ -123,7 +123,7 @@ def read_zip(zipfilename, zname=None, **kwargs):
         close = False
     else:
         raise TypeError(  # pragma: no cover
-            "No implementation for type '{0}'".format(type(zipfilename)))
+            f"No implementation for type '{type(zipfilename)}'")
 
     if zname is None:
         zname = zf.namelist()[0]

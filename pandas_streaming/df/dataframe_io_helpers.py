@@ -131,11 +131,11 @@ def flatten_dictionary(dico, sep="_"):
                 if not isinstance(k, str):
                     raise TypeError(
                         "All keys must a string.")  # pragma: no cover
-                k2 = k if key is None else "{0}{1}{2}".format(key, sep, k)
+                k2 = k if key is None else f"{key}{sep}{k}"
                 _flatten(v, k2)
         elif isinstance(obj, (list, set)):
             for index, item in enumerate(obj):
-                k2 = k if key is None else "{0}{1}{2}".format(key, sep, index)
+                k2 = k if key is None else f"{key}{sep}{index}"
                 _flatten(item, k2)
         else:
             flattened_dict[key] = obj
@@ -266,15 +266,14 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
         for i, (_, event, value) in enumerate(parser):
             if i % 1000000 == 0 and fLOG is not None:
                 fLOG(  # pragma: no cover
-                    "[enumerate_json_items] i={0} yielded={1}"
-                    "".format(i, nbyield))
+                    f"[enumerate_json_items] i={i} yielded={nbyield}")
             if event == "start_array":
                 if curkey is None:
                     current = []
                 else:
                     if not isinstance(current, dict):
                         raise RuntimeError(  # pragma: no cover
-                            "Type issue {0}".format(type(current)))
+                            f"Type issue {type(current)}")
                     c = []
                     current[curkey] = c  # pylint: disable=E1137
                     current = c
@@ -324,8 +323,7 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
                     current[curkey] = None  # pylint: disable=E1137
                     curkey = None
             else:
-                raise ValueError("Unknown event '{0}'".format(
-                    event))  # pragma: no cover
+                raise ValueError(f"Unknown event '{event}'")  # pragma: no cover
 
 
 class JsonIterator2Stream:

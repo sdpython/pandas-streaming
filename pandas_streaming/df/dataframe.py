@@ -355,14 +355,13 @@ class StreamingDataFrame:
                 chunksize = df.shape[0]
             else:
                 raise NotImplementedError(
-                    "Cannot retrieve size to infer chunksize for type={0}"
-                    ".".format(type(df)))
+                    f"Cannot retrieve size to infer chunksize for type={type(df)}.")
 
         if hasattr(df, 'shape'):
             size = df.shape[0]
         else:
             raise NotImplementedError(  # pragma: no cover
-                "Cannot retrieve size for type={0}.".format(type(df)))
+                f"Cannot retrieve size for type={type(df)}.")
 
         def local_iterator():
             "local iterator"
@@ -696,10 +695,10 @@ class StreamingDataFrame:
                     if check:
                         if list(columns) != list(df.columns):
                             raise ValueError(
-                                "Frame others[{0}] do not have the same column names or the same order.".format(i))
+                                f"Frame others[{i}] do not have the same column names or the same order.")
                         if list(dtypes) != list(df.dtypes):
                             raise ValueError(
-                                "Frame others[{0}] do not have the same column types.".format(i))
+                                f"Frame others[{i}] do not have the same column types.")
                         check = False
                     yield df
 
@@ -896,7 +895,7 @@ class StreamingDataFrame:
             return StreamingDataFrame(lambda: iterate_streaming(), **self.get_kwargs())
 
         raise ValueError(  # pragma: no cover
-            "Unknown strategy '{0}'".format(strategy))
+            f"Unknown strategy '{strategy}'")
 
     def ensure_dtype(self, df, dtypes):
         """
@@ -951,7 +950,7 @@ class StreamingDataFrame:
         """
         if not isinstance(index, str):
             raise ValueError(
-                "Only column affected are supported but index=%r." % index)
+                f"Only column affected are supported but index={index!r}.")
         if isinstance(value, (int, float, numpy.number, str)):
             # Is is equivalent to add_column.
             iter_creation = self.iter_creation
@@ -1145,7 +1144,7 @@ class StreamingDataFrame:
         """
         if not isinstance(by, str):
             raise NotImplementedError(
-                "Only one column can be used to sort not %r." % by)
+                f"Only one column can be used to sort not {by!r}.")
         keys = {}
         nans = []
         indices = []
@@ -1224,7 +1223,7 @@ class StreamingSeries(StreamingDataFrame):
             self, iter_creation, check_schema=check_schema, stable=stable)
         if len(self.columns) != 1:
             raise RuntimeError(
-                "A series can contain only one column not %r." % len(self.columns))
+                f"A series can contain only one column not {len(self.columns)!r}.")
 
     def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
         """

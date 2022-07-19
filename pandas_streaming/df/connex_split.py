@@ -48,8 +48,7 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
     if weights is None:
         if test_size == 0 or train_size == 0:
             raise ValueError(
-                "test_size={0} or train_size={1} cannot be null (1)."
-                "".format(test_size, train_size))
+                f"test_size={test_size} or train_size={train_size} cannot be null (1).")
         return train_test_split(df, test_size=test_size,
                                 train_size=train_size,
                                 random_state=random_state)
@@ -69,8 +68,7 @@ def train_test_split_weights(df, weights=None, test_size=0.25, train_size=None,
         test_size = 1 - p
     if p is None or min(test_size, p) <= 0:
         raise ValueError(
-            "test_size={0} or train_size={1} cannot be null (2)."
-            "".format(test_size, train_size))
+            f"test_size={test_size} or train_size={train_size} cannot be null (2).")
     ratio = test_size / p
 
     if random_state is None:
@@ -330,11 +328,9 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     grsum = dfids[[name, one]].groupby(name, as_index=False).sum()
     if fLOG:
         for g in groups:
-            fLOG("[train_test_connex_split]     #nb in '{0}': {1}".format(
-                g, len(set(dfids[g]))))
+            fLOG(f"[train_test_connex_split]     #nb in '{g}': {len(set(dfids[g]))}")
         fLOG(
-            "[train_test_connex_split] #connex {0}/{1}".format(
-                grsum.shape[0], dfids.shape[0]))
+            f"[train_test_connex_split] #connex {grsum.shape[0]}/{dfids.shape[0]}")
     if grsum.shape[0] <= 1:
         raise ValueError(  # pragma: no cover
             "Every element is in the same connected components.")
@@ -358,10 +354,9 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                  "={2}/{3}".format(k, v, cum, len(elements)))
 
         # Most important component
-        fLOG('[train_test_connex_split] first row of the biggest component '
-             '{0}'.format(maxc))
+        fLOG(f'[train_test_connex_split] first row of the biggest component {maxc}')
         tdf = dfids[dfids[name] == maxc[0]]
-        fLOG('[train_test_connex_split] \n{0}'.format(tdf.head(n=10)))
+        fLOG(f'[train_test_connex_split] \n{tdf.head(n=10)}')
 
     # Splits.
     train, test = train_test_split_weights(
@@ -457,8 +452,7 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
     test_size = 1 - p
     if p is None or min(test_size, p) <= 0:
         raise ValueError(  # pragma: no cover
-            "test_size={0} or train_size={1} cannot be null".format(
-                test_size, train_size))
+            f"test_size={test_size} or train_size={train_size} cannot be null")
 
     couples = df[[group, stratify]].itertuples(name=None, index=False)
     hist = Counter(df[stratify])

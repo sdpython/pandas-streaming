@@ -20,10 +20,10 @@ def dummy_streaming_dataframe(n, chunksize=10, asfloat=False, **cols):
     """
     if asfloat:
         df = DataFrame(dict(cfloat=[_ + 0.1 for _ in range(0, n)], cstr=[
-                       "s{0}".format(i) for i in range(0, n)]))
+                       f"s{i}" for i in range(0, n)]))
     else:
         df = DataFrame(dict(cint=list(range(0, n)), cstr=[
-                       "s{0}".format(i) for i in range(0, n)]))
+                       f"s{i}" for i in range(0, n)]))
     for k, v in cols.items():
         df[k] = v
     return StreamingDataFrame.read_df(df, chunksize=chunksize)
