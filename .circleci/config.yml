@@ -20,13 +20,6 @@ jobs:
                     sudo apt-get update 
                     wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb
                     sudo dpkg -i pandoc-2.18-1-amd64.deb
-
-      - run:
-          name: Install tex
-          command: |
-                    sudo apt-get install -y texlive
-                    sudo apt-get install -y texlive-latex-extra
-                    sudo apt-get install -y dvipng
           
       - run:
           name: Install 7z, unrar
@@ -43,13 +36,6 @@ jobs:
           command: |
                     sudo apt-get install -y graphviz
           
-      - run:
-          name: install dependencies manual
-          command: |
-            pip install --upgrade pip
-            pip install numpy scipy
-            pip install scikit-learn --no-deps
-
       - run:
           name: install dependencies (2)
           command: |
@@ -78,18 +64,6 @@ jobs:
             cp dist/*.whl test-reports/dist
             mkdir -p test-reports/src
             cp -r  pandas_streaming test-reports/src
-
-#       - run:
-#           name: documentation
-#           command: |
-#             . venv/bin/activate
-#             python setup.py build_sphinx
-#             
-#       - run:
-#           name: copy documentation
-#           command: |
-#             mkdir -p test-reports/doc
-#             zip -r -9  test-reports/doc/documentation_html.zip _doc/sphinxdoc/build/html
             
       - store_artifacts:
           path: test-reports
