@@ -328,7 +328,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     grsum = dfids[[name, one]].groupby(name, as_index=False).sum()
     if fLOG:
         for g in groups:
-            fLOG(f"[train_test_connex_split]     #nb in '{g}': {len(set(dfids[g]))}")
+            fLOG(
+                f"[train_test_connex_split]     #nb in '{g}': {len(set(dfids[g]))}")
         fLOG(
             f"[train_test_connex_split] #connex {grsum.shape[0]}/{dfids.shape[0]}")
     if grsum.shape[0] <= 1:
@@ -354,7 +355,8 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                  "={2}/{3}".format(k, v, cum, len(elements)))
 
         # Most important component
-        fLOG(f'[train_test_connex_split] first row of the biggest component {maxc}')
+        fLOG(
+            f'[train_test_connex_split] first row of the biggest component {maxc}')
         tdf = dfids[dfids[name] == maxc[0]]
         fLOG(f'[train_test_connex_split] \n{tdf.head(n=10)}')
 
