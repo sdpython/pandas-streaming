@@ -7,7 +7,8 @@ import unittest
 from io import StringIO
 import pandas
 import numpy
-from pyquickhelper.pycode import ExtTestCase, get_temp_folder
+from pyquickhelper.pycode import (
+    ExtTestCase, get_temp_folder, ignore_warnings)
 from pandas_streaming.data import dummy_streaming_dataframe
 from pandas_streaming.df import StreamingDataFrame
 from pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
@@ -428,7 +429,8 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(jm.sort_values(["X", "Y"]).reset_index(drop=True),
                                   sjm.to_dataframe().sort_values(["X", "Y"]).reset_index(drop=True))
 
-    def test_schema_consistant(self):
+    @ignore_warnings(ResourceWarning)
+    def test_schema_consistent(self):
         df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"), dict(cf=1, cint=1, cstr="1"),
                                dict(cf=2, cint="s2", cstr="2"), dict(cf=3, cint=3, cstr="3")])
         temp = get_temp_folder(__file__, "temp_schema_consistant")
@@ -454,11 +456,13 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(df1[["cint"]], df2)
         self.assertRaise(lambda: sdf[:, "cint"], NotImplementedError)
 
+    @ignore_warnings(ResourceWarning)
     def test_read_csv_names(self):
         this = os.path.abspath(os.path.dirname(__file__))
         data = os.path.join(this, "data", "buggy_hash2.csv")
-        df = pandas.read_csv(data, sep="\t", names=[
-                             "A", "B", "C"], header=None)
+        df = pandas.read_csv(data, sep="\t",
+                             names=["A", "B", "C"],
+                             header=None)
         sdf = StreamingDataFrame.read_csv(
             data, sep="\t", names=["A", "B", "C"], chunksize=2, header=None)
         head = sdf.head(n=1)
@@ -512,7 +516,8 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(['X', 'Y'], list(desc.columns))
         self.assertEqual(desc.loc['min', :].tolist(), [-0.5, 0])
         self.assertEqual(desc.loc['max', :].tolist(), [0.5, 100000])
-        self.assertEqualArray(desc.loc['mean', :], numpy.array([0, 50000]))
+        self.assertEqualArray(
+            desc.loc['mean', :], numpy.array([0, 50000]), atol=1e-8)
         self.assertEqualArray(desc.loc['25%', :], numpy.array([-0.25, 25000]))
         self.assertEqualArray(desc.loc['50%', :], numpy.array([0.0, 50000]))
         self.assertEqualArray(desc.loc['75%', :], numpy.array([0.25, 75000]))
@@ -554,4 +559,4 @@ class TestStreamingDataFrame(ExtTestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
