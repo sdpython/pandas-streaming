@@ -323,7 +323,8 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
                     current[curkey] = None  # pylint: disable=E1137
                     curkey = None
             else:
-                raise ValueError(f"Unknown event '{event}'")  # pragma: no cover
+                raise ValueError(
+                    f"Unknown event '{event}'")  # pragma: no cover
 
 
 class JsonIterator2Stream:

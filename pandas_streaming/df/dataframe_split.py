@@ -41,7 +41,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
         mode *append* and allows stream.
     """
     if kwargs.get("stratify") is not None:
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             "No implementation yet for the stratified version.")
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=ImportWarning)

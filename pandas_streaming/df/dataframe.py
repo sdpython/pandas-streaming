@@ -922,7 +922,8 @@ class StreamingDataFrame:
         offers for the operator ``[]``.
         """
         if len(args) != 1:
-            raise NotImplementedError("Only a list of columns is supported.")
+            raise NotImplementedError(  # pragma: no cover
+                "Only a list of columns is supported.")
         cols = args[0]
         if isinstance(cols, str):
             # One column.
@@ -1022,7 +1023,7 @@ class StreamingDataFrame:
 
         """
         if not isinstance(col, str):
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: no cover
                 "Only a column as a string is supported.")
 
         if isfunction(value):
@@ -1144,7 +1145,7 @@ class StreamingDataFrame:
         :return: streaming database
         """
         if not isinstance(by, str):
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: no cover
                 f"Only one column can be used to sort not {by!r}.")
         keys = {}
         nans = []
@@ -1223,8 +1224,9 @@ class StreamingSeries(StreamingDataFrame):
         StreamingDataFrame.__init__(
             self, iter_creation, check_schema=check_schema, stable=stable)
         if len(self.columns) != 1:
-            raise RuntimeError(
-                f"A series can contain only one column not {len(self.columns)!r}.")
+            raise RuntimeError(  # pragma: no cover
+                f"A series can contain only one column not "
+                f"{len(self.columns)!r}.")
 
     def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
         """

@@ -166,7 +166,7 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
         elif t == object:
             df[c] = df[c].apply(hash_strl)
         else:
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: no cover
                 f"Conversion of type {t} in column '{c}' is not implemented")
 
     return df
@@ -452,10 +452,10 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                                 res.grouper.groupings[0]._cache['result_index'] = (
                                     index.__class__(new_index))
                             else:
-                                raise NotImplementedError(
+                                raise NotImplementedError(  # pragma: no cover
                                     "NaN values not implemented for multiindex.")
                     else:
-                        raise NotImplementedError(
+                        raise NotImplementedError(  # pragma: no cover
                             "Not implemented for type: {0}".format(
                                 type(res.grouper.groupings[0].grouper)))
                 res.grouper._cache['result_index'] = res.grouper.groupings[0]._group_index
