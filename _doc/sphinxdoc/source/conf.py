@@ -12,8 +12,9 @@ local_template = os.path.join(os.path.abspath(
 
 set_sphinx_variables(__file__, "pandas_streaming", "Xavier Dupré", 2022,
                      "alabaster", alabaster.get_path(),
-                     locals(), extlinks=dict(
-                         issue=('https://github.com/sdpython/pandas_streaming/issues/%s', 'issue')),
+                     locals(), extlinks=dict(issue=(
+                         'https://github.com/sdpython/pandas_streaming/issues/%s',
+                         'issue %s')),
                      title="Streaming functionalities for pandas", book=True)
 
 blog_root = "http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/"
