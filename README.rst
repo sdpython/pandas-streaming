@@ -1,5 +1,5 @@
 
-.. image:: https://github.com/sdpython/pandas_streaming/blob/master/_doc/sphinxdoc/source/phdoc_static/project_ico.png?raw=true
+.. image:: https://github.com/sdpython/pandas_streaming/blob/master/_doc/sphinxdoc/source/_static/project_ico.png?raw=true
     :target: https://github.com/sdpython/pandas_streaming/
 
 .. _l-README:
