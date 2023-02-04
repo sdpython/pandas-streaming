@@ -109,7 +109,7 @@ class TestConnexSplit(ExtTestCase):
             s1 = set(train[col])
             s2 = set(test[col])
             if s1 & s2:
-                raise Exception(
+                raise AssertionError(
                     f'Non empty intersection {s1} & {s2}\n{train}\n{test}')
 
         df['connex'] = 'ole'
@@ -149,7 +149,7 @@ class TestConnexSplit(ExtTestCase):
                 rows = []
                 for k, v in sorted(stats[0].items()):
                     rows.append(f"{k}={v}")
-                raise Exception(
+                raise AssertionError(
                     'Non empty intersection {0} & {1}\n{2}\n{3}\n{4}'.format(s1, s2, train, test, "\n".join(rows)))
 
     def test_split_connex_missing(self):
@@ -181,7 +181,7 @@ class TestConnexSplit(ExtTestCase):
                 rows = []
                 for k, v in sorted(stats[0].items()):
                     rows.append(f"{k}={v}")
-                raise Exception(
+                raise AssertionError(
                     'Non empty intersection {0} & {1}\n{2}\n{3}\n{4}'.format(s1, s2, train, test, "\n".join(rows)))
 
 

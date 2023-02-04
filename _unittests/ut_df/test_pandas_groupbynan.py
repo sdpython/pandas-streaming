@@ -48,7 +48,7 @@ class TestPandasHelper(ExtTestCase):
             try:
                 gr = pandas_groupby_nan(df, ("value", "this"))
                 t = True
-                raise Exception("---")
+                raise AssertionError("---")
             except TypeError:
                 t = False
             if t:
