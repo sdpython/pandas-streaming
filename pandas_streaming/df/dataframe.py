@@ -12,7 +12,10 @@ import numpy
 import numpy.random as nrandom
 import pandas
 from pandas.testing import assert_frame_equal
-from pandas.io.json import json_normalize
+try:
+    from pandas import json_normalize
+except ImportError:
+    from pandas.io.json import json_normalize
 from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
 from .dataframe_io_helpers import enumerate_json_items, JsonIterator2Stream
 

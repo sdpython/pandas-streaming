@@ -99,9 +99,6 @@ class TestPandasHelper(ExtTestCase):
         df = pandas.DataFrame([dict(a="a", b=1, cc=0), dict(a="a", b=2)])
         gr = df.groupby(["a", "cc"]).sum()
         self.assertEqual(len(gr), 1)
-        self.assertRaise(
-            lambda: pandas_groupby_nan(df, ["a", "cc"], nanback=True).sum(),
-            NotImplementedError)
 
     def test_pandas_groupbynan_doc(self):
         data = [dict(a=2, ind="a", n=1),
@@ -132,10 +129,9 @@ class TestPandasHelper(ExtTestCase):
                 dict(a=3, ind="b"),
                 dict(a=30)]
         df = pandas.DataFrame(data)
-        self.assertRaise(lambda: pandas_groupby_nan(df, ["ind", "n"]).sum(),
-                         NotImplementedError)
-        # ind = list(gr2['ind'])
-        # self.assertTrue(numpy.isnan(ind[-1]))
+        gr2 = pandas_groupby_nan(df, ["ind", "n"]).sum()
+        ind = list(gr2['ind'])
+        self.assertTrue(numpy.isnan(ind[-1]))
 
 
 if __name__ == "__main__":
