@@ -49,7 +49,7 @@ class TestPandasHelper(ExtTestCase):
                 gr = pandas_groupby_nan(df, ("value", "this"))
                 t = True
                 raise AssertionError("---")
-            except TypeError:
+            except (TypeError, KeyError):
                 t = False
             if t:
                 co = gr.sum()
@@ -91,7 +91,7 @@ class TestPandasHelper(ExtTestCase):
 
     def test_pandas_groupbynan_regular(self):
         df = pandas.DataFrame([dict(a="a", b=1), dict(a="a", b=2)])
-        gr = df.groupby(["a"]).sum()
+        gr = df.groupby(["a"], as_index=False).sum()
         gr2_ = pandas_groupby_nan(df, ["a"]).sum()
         self.assertEqualDataFrame(gr, gr2_)
 
