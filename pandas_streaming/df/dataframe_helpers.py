@@ -437,11 +437,6 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
                 res.grouper.groupings[0]._group_index = Index(new_val)
                 res.grouper.groupings[0].obj[b].replace(
                     fnan, numpy.nan, inplace=True)
-                print(type(res))
-                print(type(res.grouper))
-                import pprint
-                pprint.pprint(dir(res))
-                pprint.pprint(dir(res.grouper))
                 if hasattr(res.grouper, 'grouping'):
                     if isinstance(res.grouper.groupings[0].grouper, numpy.ndarray):
                         arr = numpy.array(new_val)
