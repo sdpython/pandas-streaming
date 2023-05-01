@@ -12,7 +12,10 @@ import numpy
 import numpy.random as nrandom
 import pandas
 from pandas.testing import assert_frame_equal
-from pandas.io.json import json_normalize
+try:
+    from pandas import json_normalize
+except ImportError:
+    from pandas.io.json import json_normalize
 from .dataframe_split import sklearn_train_test_split, sklearn_train_test_split_streaming
 from .dataframe_io_helpers import enumerate_json_items, JsonIterator2Stream
 
@@ -609,6 +612,22 @@ class StreamingDataFrame:
         return StreamingDataFrame(
             lambda: reservoir_iterate(sdf=self, indices=indices, chunksize=1000))
 
+    def drop(self, labels=None, *, axis=0, index=None, columns=None, level=None,
+             inplace=False, errors='raise') -> 'StreamingDataFrame':
+        """
+        Applies :epkg:`pandas:DataFrame:drop`.
+        This function returns a @see cl StreamingDataFrame.
+        """
+        if axis == 0:
+            raise NotImplementedError(f"drop is not implemented for axis={axis}.")
+        if inplace:
+            raise NotImplementedError(f"drop is not implemented for inplace={inplace}.")
+        return StreamingDataFrame(
+            lambda: map(lambda df: df.drop(
+                labels, axis=axis, index=index, columns=columns,
+                level=level, inplace=False, errors=errors), self),
+            **self.get_kwargs())
+
     def apply(self, *args, **kwargs) -> 'StreamingDataFrame':
         """
         Applies :epkg:`pandas:DataFrame:apply`.
@@ -1078,8 +1097,7 @@ class StreamingDataFrame:
         return StreamingDataFrame(
             lambda: iterate_na(self, **kwargs), **self.get_kwargs())
 
-    def describe(self, percentiles=None, include=None, exclude=None,
-                 datetime_is_numeric=False):
+    def describe(self, percentiles=None, include=None, exclude=None):
         """
         Calls :epkg:`pandas:DataFrame:describe` on every piece
         of the datasets. *percentiles* are not really accurate
@@ -1088,16 +1106,19 @@ class StreamingDataFrame:
         :param percentiles: see :epkg:`pandas:DataFrame:describe`
         :param include: see :epkg:`pandas:DataFrame:describe`
         :param exclude: see :epkg:`pandas:DataFrame:describe`
-        :param datetime_is_numeric: see :epkg:`pandas:DataFrame:describe`
         :return: :epkg:`pandas:DataFrame:describe`
+
+        .. versionchanged:: 0.3.219
+
+            Parameter *datetime_is_numeric* was removed
+            (see :epkg:`pandas:DataFrame:describe`).
         """
         merged = None
         stack = []
         notper = ['count', 'mean', 'std']
         for df in self:
             desc = df.describe(
-                percentiles=percentiles, include=include, exclude=exclude,
-                datetime_is_numeric=datetime_is_numeric)
+                percentiles=percentiles, include=include, exclude=exclude)
             count = desc.loc['count', :]
             rows = [name for name in desc.index if name not in notper]
             stack.append(desc.loc[rows, :])
@@ -1120,8 +1141,7 @@ class StreamingDataFrame:
             merged.loc['std', :] / merged.loc['count', :] -
             merged.loc['mean', :] ** 2) ** 0.5
         values = pandas.concat(stack)
-        summary = values.describe(percentiles=percentiles,
-                                  datetime_is_numeric=datetime_is_numeric)
+        summary = values.describe(percentiles=percentiles)
         merged = merged.loc[notper, :]
         rows = [name for name in summary.index if name not in notper]
         summary = summary.loc[rows, :]

@@ -7,7 +7,7 @@ import hashlib
 import struct
 import warnings
 import numpy
-from pandas import DataFrame, Index
+from pandas import DataFrame, Index, Series
 
 
 def numpy_types():
@@ -389,6 +389,18 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             gr2 = pandas_groupby_nan(df, ["ind"]).sum()
             print(gr2)
     """
+    if nanback and suffix is None:
+        try:
+            res = df.groupby(by, axis=axis, as_index=as_index,
+                             dropna=False, **kwargs)
+        except TypeError:
+            # old version of pandas
+            res = None
+        if res is not None:
+            if suffix is None:
+                return res
+            res.index = Series(res.index).replace(numpy.nan, suffix)
+            return res
     if axis != 0:
         raise NotImplementedError("axis should be 0")
     if as_index:
@@ -519,5 +531,4 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             #                 "Not implemented for type: {0}".format(type(grou.grouper)))
             #     del res.grouper._cache
         return res
-    else:
-        return df.groupby(by, axis=axis, **kwargs)
+    return df.groupby(by, axis=axis, **kwargs)
