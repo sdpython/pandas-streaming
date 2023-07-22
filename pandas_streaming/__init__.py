@@ -1,4 +1,4 @@
-__version__ = "0.4.218"
+__version__ = "0.5.0"
 __author__ = "Xavier Dupré"
 __github__ = "https://github.com/sdpython/pandas_streaming"
 __url__ = "http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html"
