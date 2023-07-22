@@ -144,7 +144,7 @@ def flatten_dictionary(dico, sep="_"):
     return flattened_dict
 
 
-def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fLOG=None):
+def enumerate_json_items(filename, encoding=None, lines=False, flatten=False):
     """
     Enumerates items from a :epkg:`JSON` file or string.
 
@@ -152,7 +152,6 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
     :param encoding: encoding
     :param lines: one record per row
     :param flatten: call @see fn flatten_dictionary
-    :param fLOG: logging function
     :return: iterator on records at first level.
 
     It assumes the syntax follows the format: ``[ {"id":1, ...}, {"id": 2, ...}, ...]``.
@@ -236,24 +235,23 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
             with open(filename, "r", encoding=encoding) as f:
                 for el in enumerate_json_items(
                         f, encoding=encoding, lines=lines,
-                        flatten=flatten, fLOG=fLOG):
+                        flatten=flatten):
                     yield el
         else:
             st = StringIO(filename)
             for el in enumerate_json_items(
                     st, encoding=encoding, lines=lines,
-                    flatten=flatten, fLOG=fLOG):
+                    flatten=flatten):
                 yield el
     elif isinstance(filename, bytes):
         st = BytesIO(filename)
         for el in enumerate_json_items(
-                st, encoding=encoding, lines=lines, flatten=flatten,
-                fLOG=fLOG):
+                st, encoding=encoding, lines=lines, flatten=flatten):
             yield el
     elif lines:
         for el in enumerate_json_items(
                 JsonPerRowsStream(filename),
-                encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
+                encoding=encoding, lines=False, flatten=flatten):
             yield el
     else:
         if hasattr(filename, 'seek'):

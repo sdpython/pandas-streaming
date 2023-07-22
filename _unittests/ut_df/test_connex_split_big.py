@@ -6,7 +6,6 @@ import os
 import unittest
 from collections import Counter
 import pandas
-from pyquickhelper.loghelper import fLOG
 from pyquickhelper.pycode import ExtTestCase
 from pandas_streaming.df import train_test_connex_split
 
@@ -14,15 +13,10 @@ from pandas_streaming.df import train_test_connex_split
 class TestConnexSplitBig(ExtTestCase):
 
     def test_connex_big(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         data = os.path.join(os.path.dirname(__file__), "data")
         name = os.path.join(data, "buggy_hash.csv")
         df = pandas.read_csv(name, sep="\t", encoding="utf-8")
-        train, test, stats = train_test_connex_split(df, fLOG=fLOG,
+        train, test, stats = train_test_connex_split(df,
                                                      groups=[
                                                          "cart_id", "mail", "product_id"],
                                                      fail_imbalanced=0.9, return_cnx=True)
@@ -36,15 +30,10 @@ class TestConnexSplitBig(ExtTestCase):
         self.assertEqual(maxi, 14181)
 
     def test_connex_big_approx(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         data = os.path.join(os.path.dirname(__file__), "data")
         name = os.path.join(data, "buggy_hash.csv")
         df = pandas.read_csv(name, sep="\t", encoding="utf-8")
-        train, test, stats = train_test_connex_split(df, fLOG=fLOG,
+        train, test, stats = train_test_connex_split(df,
                                                      groups=[
                                                          "cart_id", "mail", "product_id"],
                                                      stop_if_bigger=0.05, return_cnx=True,
@@ -59,15 +48,10 @@ class TestConnexSplitBig(ExtTestCase):
         self.assertLesser(maxi, 14181)
 
     def test_connex_big_approx_must(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         data = os.path.join(os.path.dirname(__file__), "data")
         name = os.path.join(data, "buggy_hash.csv")
         df = pandas.read_csv(name, sep="\t", encoding="utf-8")
-        train, test, stats = train_test_connex_split(df, fLOG=fLOG,
+        train, test, stats = train_test_connex_split(df,
                                                      groups=[
                                                          "cart_id", "mail", "product_id"],
                                                      stop_if_bigger=0.05, return_cnx=True,

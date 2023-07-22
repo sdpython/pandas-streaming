@@ -4,7 +4,6 @@
 """
 import unittest
 import pandas
-from pyquickhelper.loghelper import fLOG
 from pyquickhelper.pycode import ExtTestCase
 from pandas_streaming.df import dataframe_shuffle, train_test_split_weights, train_test_connex_split
 
@@ -86,11 +85,6 @@ class TestConnexSplit(ExtTestCase):
         self.assertGreater(0.4, delta)
 
     def test_split_connex(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(user="UA", prod="PA", card="C1"),
                                dict(user="UA", prod="PB", card="C1"),
                                dict(user="UB", prod="PC", card="C2"),
@@ -102,7 +96,7 @@ class TestConnexSplit(ExtTestCase):
 
         train, test = train_test_connex_split(  # pylint: disable=W0632
             df, test_size=0.5, groups=['user', 'prod', 'card'],
-            fail_imbalanced=0.4, fLOG=fLOG)
+            fail_imbalanced=0.4)
 
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
         for col in ['user', 'prod', 'card']:
@@ -115,15 +109,10 @@ class TestConnexSplit(ExtTestCase):
         df['connex'] = 'ole'
         train, test = train_test_connex_split(  # pylint: disable=W0632
             df, test_size=0.5, groups=['user', 'prod', 'card'],
-            fail_imbalanced=0.4, fLOG=fLOG)
+            fail_imbalanced=0.4)
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
 
     def test_split_connex2(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(user="UA", prod="PAA", card="C1"),
                                dict(user="UA", prod="PB", card="C1"),
                                dict(user="UB", prod="PC", card="C2"),
@@ -134,11 +123,11 @@ class TestConnexSplit(ExtTestCase):
                                ])
 
         train_test_connex_split(df, test_size=0.5, groups=['user', 'prod', 'card'],
-                                fail_imbalanced=0.5, fLOG=fLOG, return_cnx=True)
+                                fail_imbalanced=0.5, return_cnx=True)
         train, test, stats = train_test_connex_split(df, test_size=0.5,
                                                      groups=[
                                                          'user', 'prod', 'card'],
-                                                     fail_imbalanced=0.5, fLOG=fLOG,
+                                                     fail_imbalanced=0.5,
                                                      return_cnx=True, random_state=0)
 
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])
@@ -153,11 +142,6 @@ class TestConnexSplit(ExtTestCase):
                     'Non empty intersection {0} & {1}\n{2}\n{3}\n{4}'.format(s1, s2, train, test, "\n".join(rows)))
 
     def test_split_connex_missing(self):
-        fLOG(
-            __file__,
-            self._testMethodName,
-            OutputPrint=__name__ == "__main__")
-
         df = pandas.DataFrame([dict(user="UA", prod="PAA", card="C1"),
                                dict(user="UA", prod="PB", card="C1"),
                                dict(user="UB", prod="PC", card="C2"),
@@ -170,7 +154,7 @@ class TestConnexSplit(ExtTestCase):
         train, test, stats = train_test_connex_split(df, test_size=0.5,
                                                      groups=[
                                                          'user', 'prod', 'card'],
-                                                     fail_imbalanced=0.4, fLOG=fLOG,
+                                                     fail_imbalanced=0.4,
                                                      return_cnx=True, random_state=0)
 
         self.assertEqual(train.shape[0] + test.shape[0], df.shape[0])

@@ -1,11 +1,8 @@
+pandas-streaming: streaming API over pandas
+===========================================
 
 .. image:: https://github.com/sdpython/pandas_streaming/blob/master/_doc/sphinxdoc/source/_static/project_ico.png?raw=true
     :target: https://github.com/sdpython/pandas_streaming/
-
-.. _l-README:
-
-pandas_streaming: streaming API over pandas
-===========================================
 
 .. image:: https://travis-ci.com/sdpython/pandas_streaming.svg?branch=master
     :target: https://app.travis-ci.com/github/sdpython/pandas_streaming

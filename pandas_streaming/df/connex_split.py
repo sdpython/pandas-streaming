@@ -112,7 +112,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
                             stratify=None, hash_size=9, unique_rows=False,
                             shuffle=True, fail_imbalanced=0.05, keep_balance=None,
                             stop_if_bigger=None, return_cnx=False,
-                            must_groups=None, random_state=None, fLOG=None):
+                            must_groups=None, random_state=None):
     """
     This split is for a specific case where data is linked
     in many ways. Let's assume we have three ids as we have
@@ -144,7 +144,6 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
     @param  must_groups     column name for ids which must not be shared by
                             train/test partitions
     @param  random_state    seed for random generator
-    @param  fLOG            logging function
     @return                 Two @see cl StreamingDataFrame, one
                             for train, one for test.
 
@@ -384,8 +383,7 @@ def train_test_connex_split(df, groups, test_size=0.25, train_size=None,
 
 
 def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
-                              stratify=None, force=False, random_state=None,
-                              fLOG=None):
+                              stratify=None, force=False, random_state=None):
     """
     This split is for a specific case where data is linked
     in one way. Let's assume we have two ids as we have
@@ -403,7 +401,6 @@ def train_test_apart_stratify(df, group, test_size=0.25, train_size=None,
     @param  force           if True, tries to get at least one example on the test side
                             for each value of the column *stratify*
     @param  random_state    seed for random generators
-    @param  fLOG            logging function
     @return                 Two @see cl StreamingDataFrame, one
                             for train, one for test.
 

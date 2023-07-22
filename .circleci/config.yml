@@ -11,7 +11,7 @@ jobs:
 
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "requirements.txt" }}
+          - v3-dependencies-{{ checksum "requirements-dev.txt" }}
           - v3-dependencies-
 
       - run:
@@ -44,7 +44,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v3-dependencies-{{ checksum "requirements.txt" }}
+          key: v3-dependencies-{{ checksum "requirements-dev.txt" }}
         
       - run:
           name: compile and build
