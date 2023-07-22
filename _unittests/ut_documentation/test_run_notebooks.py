@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@brief      test log(time=33s)
-"""
 import os
 import unittest
 from pyquickhelper.pycode import ExtTestCase
@@ -10,17 +6,19 @@ import pandas_streaming
 
 
 class TestRunNotebooksPython(ExtTestCase):
-
     def setUp(self):
         import jyquickhelper  # pylint: disable=C0415
+
         self.assertTrue(jyquickhelper is not None)
 
     def test_notebook_artificiel(self):
         self.assertTrue(pandas_streaming is not None)
-        folder = os.path.join(os.path.dirname(__file__),
-                              "..", "..", "_doc", "notebooks")
+        folder = os.path.join(
+            os.path.dirname(__file__), "..", "..", "_doc", "notebooks"
+        )
         test_notebook_execution_coverage(
-            __file__, "first_steps", folder, 'pandas_streaming', copy_files=[])
+            __file__, "first_steps", folder, "pandas_streaming", copy_files=[]
+        )
 
 
 if __name__ == "__main__":

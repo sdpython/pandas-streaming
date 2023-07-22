@@ -1,21 +1,18 @@
-# -*- coding: utf-8 -*-
-# pylint: disable=E1101
-"""
-@brief      test log(time=4s)
-"""
 import unittest
 from io import StringIO, BytesIO
 from json import loads
 import pandas
 from pyquickhelper.pycode import ExtTestCase
 from pandas_streaming.df.dataframe_io_helpers import (
-    enumerate_json_items, JsonPerRowsStream, JsonIterator2Stream)
+    enumerate_json_items,
+    JsonPerRowsStream,
+    JsonIterator2Stream,
+)
 from pandas_streaming.df import StreamingDataFrame
 
 
 class TestDataFrameIOHelpers(ExtTestCase):
-
-    text_json = b'''
+    text_json = b"""
         [
         {
             "glossary": {
@@ -62,28 +59,30 @@ class TestDataFrameIOHelpers(ExtTestCase):
             }
         }
         ]
-    '''
+    """
     text_json_exp = [
         {
             "glossary": {
                 "title": "example glossary",
                 "GlossDiv": {
                     "title": "S",
-                    "GlossList": [{
-                        "GlossEntry": {
-                            "ID": "SGML",
-                            "SortAs": "SGML",
-                            "GlossTerm": "Standard Generalized Markup Language",
-                            "Acronym": "SGML",
-                            "Abbrev": "ISO 8879:1986",
-                            "GlossDef": {
-                                "para": "A meta-markup language, used to create markup languages such as DocBook.",
-                                "GlossSeeAlso": ["GML", "XML"]
-                            },
-                            "GlossSee": "markup"
+                    "GlossList": [
+                        {
+                            "GlossEntry": {
+                                "ID": "SGML",
+                                "SortAs": "SGML",
+                                "GlossTerm": "Standard Generalized Markup Language",
+                                "Acronym": "SGML",
+                                "Abbrev": "ISO 8879:1986",
+                                "GlossDef": {
+                                    "para": "A meta-markup language, used to create markup languages such as DocBook.",
+                                    "GlossSeeAlso": ["GML", "XML"],
+                                },
+                                "GlossSee": "markup",
+                            }
                         }
-                    }]
-                }
+                    ],
+                },
             }
         },
         {
@@ -92,56 +91,65 @@ class TestDataFrameIOHelpers(ExtTestCase):
                 "GlossDiv": {
                     "title": "X",
                     "GlossList": {
-                        "GlossEntry": [{
-                            "ID": "SGML",
-                            "SortAs": "SGML",
-                            "GlossTerm": "Standard Generalized Markup Language",
-                            "Acronym": "SGML",
-                            "Abbrev": "ISO 8879:1986",
-                            "GlossDef": {
-                                "para": "A meta-markup language, used to create markup languages such as DocBook.",
-                                "GlossSeeAlso": ["GML", "XML"]
-                            },
-                            "GlossSee": "markup"
-                        }]
-                    }
-                }
+                        "GlossEntry": [
+                            {
+                                "ID": "SGML",
+                                "SortAs": "SGML",
+                                "GlossTerm": "Standard Generalized Markup Language",
+                                "Acronym": "SGML",
+                                "Abbrev": "ISO 8879:1986",
+                                "GlossDef": {
+                                    "para": "A meta-markup language, used to create markup languages such as DocBook.",
+                                    "GlossSeeAlso": ["GML", "XML"],
+                                },
+                                "GlossSee": "markup",
+                            }
+                        ]
+                    },
+                },
             }
-        }
+        },
     ]
 
     def test_enumerate_json_items(self):
         items = list(enumerate_json_items(TestDataFrameIOHelpers.text_json))
         self.assertEqual(TestDataFrameIOHelpers.text_json_exp, items)
-        items = list(enumerate_json_items(
-            BytesIO(TestDataFrameIOHelpers.text_json)))
+        items = list(enumerate_json_items(BytesIO(TestDataFrameIOHelpers.text_json)))
         self.assertEqual(TestDataFrameIOHelpers.text_json_exp, items)
-        items = list(enumerate_json_items(
-            BytesIO(TestDataFrameIOHelpers.text_json)))
+        items = list(enumerate_json_items(BytesIO(TestDataFrameIOHelpers.text_json)))
         self.assertEqual(TestDataFrameIOHelpers.text_json_exp, items)
 
     def test_read_json_raw(self):
-        data = [{'id': 1, 'name': {'first': 'Coleen', 'last': 'Volk'}},
-                {'name': {'given': 'Mose', 'family': 'Regner'}},
-                {'id': 2, 'name': 'FayeRaker'}]
+        data = [
+            {"id": 1, "name": {"first": "Coleen", "last": "Volk"}},
+            {"name": {"given": "Mose", "family": "Regner"}},
+            {"id": 2, "name": "FayeRaker"},
+        ]
         exp = """[{"id":1.0,"name":null,"name.family":null,"name.first":"Coleen","name.given":null,"name.last":"Volk"},
                 {"id":null,"name":null,"name.family":"Regner","name.first":null,"name.given":"Mose","name.last":null},
                 {"id":2.0,"name":"FayeRaker","name.family":null,"name.first":null,
-                "name.given":null,"name.last":null}]""".replace(" ", "").replace("\n", "")
-        self.assertRaise(lambda: StreamingDataFrame.read_json(
-            data), NotImplementedError)
+                "name.given":null,"name.last":null}]""".replace(
+            " ", ""
+        ).replace(
+            "\n", ""
+        )
+        self.assertRaise(
+            lambda: StreamingDataFrame.read_json(data), NotImplementedError
+        )
         it = StreamingDataFrame.read_json(data, flatten=True)
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
-        js = dfs[0].to_json(orient='records')
+        js = dfs[0].to_json(orient="records")
         js_read = loads(js)
         js_exp = loads(exp)
         self.assertEqual(js_exp, js_read)
 
     def test_read_json_raw_head(self):
-        data = [{'id': 1, 'name': {'first': 'Coleen', 'last': 'Volk'}},
-                {'name': {'given': 'Mose', 'family': 'Regner'}},
-                {'id': 2, 'name': 'FayeRaker'}]
+        data = [
+            {"id": 1, "name": {"first": "Coleen", "last": "Volk"}},
+            {"name": {"given": "Mose", "family": "Regner"}},
+            {"id": 2, "name": "FayeRaker"},
+        ]
         it = StreamingDataFrame.read_json(data, flatten=True, chunksize=1)
         h1 = it.head()
         h2 = it.head()
@@ -150,36 +158,36 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertGreater(h2.shape[0], 1)
 
     def test_pandas_json_chunksize(self):
-        jsonl = '''{"a": 1, "b": 2}
-                   {"a": 3, "b": 4}'''
+        jsonl = """{"a": 1, "b": 2}
+                   {"a": 3, "b": 4}"""
         df = pandas.read_json(jsonl, lines=True)
         idf = pandas.read_json(jsonl, lines=True, chunksize=2)
         ldf = list(idf)
         self.assertEqualDataFrame(df, ldf[0])
 
     def test_read_json_rows(self):
-        data = '''{"a": 1, "b": 2}
-                  {"a": 3, "b": 4}'''
+        data = """{"a": 1, "b": 2}
+                  {"a": 3, "b": 4}"""
         it = StreamingDataFrame.read_json(StringIO(data), lines=True)
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
-        js = dfs[0].to_json(orient='records')
+        js = dfs[0].to_json(orient="records")
         self.assertEqual(js, '[{"a":1,"b":2},{"a":3,"b":4}]')
 
     def test_read_json_rows2(self):
-        data = b'''{"a": 1, "b": 2}
-                  {"a": 3, "b": 4}'''
+        data = b"""{"a": 1, "b": 2}
+                  {"a": 3, "b": 4}"""
         dfs = pandas.read_json(BytesIO(data), lines=True)
         self.assertEqual(dfs.shape, (2, 2))
         it = StreamingDataFrame.read_json(BytesIO(data), lines="stream")
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
-        js = dfs[0].to_json(orient='records')
+        js = dfs[0].to_json(orient="records")
         self.assertEqual('[{"a":1,"b":2},{"a":3,"b":4}]', js)
 
     def test_read_json_rows2_head(self):
-        data = b'''{"a": 1, "b": 2}
-                  {"a": 3, "b": 4}'''
+        data = b"""{"a": 1, "b": 2}
+                  {"a": 3, "b": 4}"""
         dfs = pandas.read_json(BytesIO(data), lines=True)
         self.assertEqual(dfs.shape, (2, 2))
         it = StreamingDataFrame.read_json(BytesIO(data), lines="stream")
@@ -190,8 +198,8 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqualDataFrame(h1, h2)
 
     def test_read_json_rows_file_head(self):
-        data = self.abs_path_join(__file__, 'data', 'example2.json')
-        dfs = pandas.read_json(data, orient='records')
+        data = self.abs_path_join(__file__, "data", "example2.json")
+        dfs = pandas.read_json(data, orient="records")
         self.assertEqual(dfs.shape, (2, 2))
         it = StreamingDataFrame.read_json(data)
         h1 = it.head()
@@ -201,8 +209,8 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqualDataFrame(h1, h2)
 
     def test_read_json_rows_file_lines_head(self):
-        data = self.abs_path_join(__file__, 'data', 'example.json')
-        dfs = pandas.read_json(data, orient='records', lines=True)
+        data = self.abs_path_join(__file__, "data", "example.json")
+        dfs = pandas.read_json(data, orient="records", lines=True)
         self.assertEqual(dfs.shape, (2, 2))
         it = StreamingDataFrame.read_json(data, lines="stream")
         h1 = it.head()
@@ -212,12 +220,11 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqualDataFrame(h1, h2)
 
     def test_read_json_ijson(self):
-        it = StreamingDataFrame.read_json(
-            BytesIO(TestDataFrameIOHelpers.text_json))
+        it = StreamingDataFrame.read_json(BytesIO(TestDataFrameIOHelpers.text_json))
         dfs = list(it)
         self.assertEqual(len(dfs), 1)
-        js = dfs[0].to_json(orient='records', lines=True)
-        jsjson = loads('[' + js.replace("\n", ",").strip(',') + ']')
+        js = dfs[0].to_json(orient="records", lines=True)
+        jsjson = loads("[" + js.replace("\n", ",").strip(",") + "]")
         self.assertEqual(jsjson, TestDataFrameIOHelpers.text_json_exp)
 
     def test_read_json_stream(self):
@@ -239,33 +246,39 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqual(val, exp)
 
     def test_enumerate_json_items_lines(self):
-        data = b'''{"a": 1, "b": 2}
-                   {"a": 3, "b": 4}'''
+        data = b"""{"a": 1, "b": 2}
+                   {"a": 3, "b": 4}"""
         items = list(enumerate_json_items(data, lines=True))
-        self.assertEqual(items, [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}])
+        self.assertEqual(items, [{"a": 1, "b": 2}, {"a": 3, "b": 4}])
 
     def test_read_json_file2(self):
-        data = b'''{"a": {"c": 1}, "b": [2, 3]}
-                   {"a": {"a": 3}, "b": [4, 5, "r"]}'''
+        data = b"""{"a": {"c": 1}, "b": [2, 3]}
+                   {"a": {"a": 3}, "b": [4, 5, "r"]}"""
 
-        obj1 = list(enumerate_json_items(
-            BytesIO(data), flatten=False, lines=True))
-        obj2 = list(enumerate_json_items(
-            BytesIO(data), flatten=True, lines=True))
+        obj1 = list(enumerate_json_items(BytesIO(data), flatten=False, lines=True))
+        obj2 = list(enumerate_json_items(BytesIO(data), flatten=True, lines=True))
         self.assertNotEqual(obj1, obj2)
-        self.assertEqual(obj2, [{'a_c': 1, 'b_0': 2, 'b_1': 3},
-                                {'a_a': 3, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}])
+        self.assertEqual(
+            obj2,
+            [
+                {"a_c": 1, "b_0": 2, "b_1": 3},
+                {"a_a": 3, "b_0": 4, "b_1": 5, "b_2": "r"},
+            ],
+        )
 
-        it = StreamingDataFrame.read_json(
-            BytesIO(data), lines="stream", flatten=True)
+        it = StreamingDataFrame.read_json(BytesIO(data), lines="stream", flatten=True)
         dfs = list(it)
-        self.assertEqual(['a_a', 'a_c', 'b_0', 'b_1', 'b_2'],
-                         list(sorted(dfs[0].columns)), )
+        self.assertEqual(
+            ["a_a", "a_c", "b_0", "b_1", "b_2"],
+            list(sorted(dfs[0].columns)),
+        )
         self.assertEqual(len(dfs), 1)
-        js = dfs[0].to_json(orient='records', lines=True)
-        jsjson = loads('[' + js.replace("\n", ",").strip(',') + ']')
-        exp = [{'a_a': None, 'a_c': 1.0, 'b_0': 2, 'b_1': 3, 'b_2': None},
-               {'a_a': 3.0, 'a_c': None, 'b_0': 4, 'b_1': 5, 'b_2': 'r'}]
+        js = dfs[0].to_json(orient="records", lines=True)
+        jsjson = loads("[" + js.replace("\n", ",").strip(",") + "]")
+        exp = [
+            {"a_a": None, "a_c": 1.0, "b_0": 2, "b_1": 3, "b_2": None},
+            {"a_a": 3.0, "a_c": None, "b_0": 4, "b_1": 5, "b_2": "r"},
+        ]
         self.assertEqual(exp, jsjson)
 
     def test_read_json_item(self):
@@ -282,18 +295,19 @@ class TestDataFrameIOHelpers(ExtTestCase):
     def test_bug_documentation(self):
         items = []
         for item in JsonIterator2Stream(
-                lambda: enumerate_json_items(TestDataFrameIOHelpers.text_json)):
+            lambda: enumerate_json_items(TestDataFrameIOHelpers.text_json)
+        ):
             items.append(item)
         self.assertEqual(len(items), 2)
 
     def test_read_json_classic(self):
-        data = self.abs_path_join(__file__, 'data', 'classic.json')
-        dfs = pandas.read_json(data, orient='records')
-        dfs['ts2'] = dfs['ts'].apply(lambda t: t / 1e9)
+        data = self.abs_path_join(__file__, "data", "classic.json")
+        dfs = pandas.read_json(data, orient="records")
+        dfs["ts2"] = dfs["ts"].apply(lambda t: t / 1e9)
         self.assertEqual(dfs.shape[1], 9)
         self.assertGreater(dfs.shape[0], 2)
         it = StreamingDataFrame.read_json(data)
-        it['ts2'] = it['ts'].apply(lambda t: t / 1e9)
+        it["ts2"] = it["ts"].apply(lambda t: t / 1e9)
         h1 = it.to_df()
         h2 = it.to_df()
         self.assertNotEmpty(h1)
@@ -302,12 +316,12 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqual(h1.shape[1], 9)
 
     def test_read_json_classic_file(self):
-        data = self.abs_path_join(__file__, 'data', 'classic.json')
-        dfs = pandas.read_json(data, orient='records')
+        data = self.abs_path_join(__file__, "data", "classic.json")
+        dfs = pandas.read_json(data, orient="records")
         self.assertEqual(dfs.shape[1], 8)
         self.assertGreater(dfs.shape[0], 2)
         with open(data, "r", encoding="utf-8") as f:
-            it = StreamingDataFrame.read_json(f, orient='records')
+            it = StreamingDataFrame.read_json(f, orient="records")
             h1 = it.to_df()
             h2 = it.to_df()
         self.assertNotEmpty(h1)
@@ -316,14 +330,14 @@ class TestDataFrameIOHelpers(ExtTestCase):
         self.assertEqual(h1.shape[1], 8)
 
     def test_read_json_classic_file_formula(self):
-        data = self.abs_path_join(__file__, 'data', 'classic.json')
-        dfs = pandas.read_json(data, orient='records')
-        dfs['ts2'] = dfs['ts'].apply(lambda t: t / 1e9)
+        data = self.abs_path_join(__file__, "data", "classic.json")
+        dfs = pandas.read_json(data, orient="records")
+        dfs["ts2"] = dfs["ts"].apply(lambda t: t / 1e9)
         self.assertEqual(dfs.shape[1], 9)
         self.assertGreater(dfs.shape[0], 2)
         with open(data, "r", encoding="utf-8") as f:
             it = StreamingDataFrame.read_json(f)
-            it['ts2'] = it['ts'].apply(lambda t: t / 1e9)
+            it["ts2"] = it["ts"].apply(lambda t: t / 1e9)
             h1 = it.to_df()
             h2 = it.to_df()
         self.assertNotEmpty(h1)

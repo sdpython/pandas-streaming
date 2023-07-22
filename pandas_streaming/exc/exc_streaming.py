@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@file
-@brief Defines a streming dataframe.
-"""
-
-
 class StreamingInefficientException(Exception):
     """
     Kind of operations doable with a :epkg:`pandas:DataFrame`
@@ -18,5 +11,4 @@ class StreamingInefficientException(Exception):
 
         :param meth: inefficient method
         """
-        Exception.__init__(
-            self, f"{meth} should not be done in streaming mode.")
+        Exception.__init__(self, f"{meth} should not be done in streaming mode.")

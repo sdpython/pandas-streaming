@@ -1,7 +1,3 @@
-# coding: utf-8
-"""
-@brief      test log(time=1s)
-"""
 import unittest
 import pandas
 import numpy
@@ -11,19 +7,18 @@ from pandas_streaming.df import pandas_groupby_nan, numpy_types
 
 
 class TestPandasHelper(ExtTestCase):
-
     def test_pandas_groupbynan(self):
         self.assertTrue(sparse_lsqr is not None)
-        types = [(int, -10), (float, -20.2), (str, "e"),
-                 (bytes, bytes("a", "ascii"))]
+        types = [(int, -10), (float, -20.2), (str, "e"), (bytes, bytes("a", "ascii"))]
         skip = (numpy.bool_, numpy.complex64, numpy.complex128)
         types += [(_, _(5)) for _ in numpy_types() if _ not in skip]
 
         for ty in types:
-            data = [{"this": "cst", "type": "tt1=" + str(ty[0]), "value": ty[1]},
-                    {"this": "cst", "type": "tt2=" +
-                        str(ty[0]), "value": ty[1]},
-                    {"this": "cst", "type": "row_for_nan"}]
+            data = [
+                {"this": "cst", "type": "tt1=" + str(ty[0]), "value": ty[1]},
+                {"this": "cst", "type": "tt2=" + str(ty[0]), "value": ty[1]},
+                {"this": "cst", "type": "row_for_nan"},
+            ]
             df = pandas.DataFrame(data)
             gr = pandas_groupby_nan(df, "value")
             co = gr.sum()
@@ -37,13 +32,16 @@ class TestPandasHelper(ExtTestCase):
             except AssertionError as e:
                 raise AssertionError(
                     "Issue with value {}\n--df--\n{}\n--gr--\n{}\n--co--\n{}".format(
-                        li, df, gr.count(), co)) from e
+                        li, df, gr.count(), co
+                    )
+                ) from e
 
         for ty in types:
-            data = [{"this": "cst", "type": "tt1=" + str(ty[0]), "value": ty[1]},
-                    {"this": "cst", "type": "tt2=" +
-                        str(ty[0]), "value": ty[1]},
-                    {"this": "cst", "type": "row_for_nan"}]
+            data = [
+                {"this": "cst", "type": "tt1=" + str(ty[0]), "value": ty[1]},
+                {"this": "cst", "type": "tt2=" + str(ty[0]), "value": ty[1]},
+                {"this": "cst", "type": "row_for_nan"},
+            ]
             df = pandas.DataFrame(data)
             try:
                 gr = pandas_groupby_nan(df, ("value", "this"))
@@ -68,8 +66,12 @@ class TestPandasHelper(ExtTestCase):
                 self.assertEqual(len(li), 2)
 
     def test_pandas_groupbynan_tuple(self):
-        data = [dict(a="a", b="b", c="c", n=1), dict(
-            b="b", n=2), dict(a="a", n=3), dict(c="c", n=4)]
+        data = [
+            dict(a="a", b="b", c="c", n=1),
+            dict(b="b", n=2),
+            dict(a="a", n=3),
+            dict(c="c", n=4),
+        ]
         df = pandas.DataFrame(data)
         gr = df.groupby(["a", "b", "c"]).sum()
         self.assertEqual(gr.shape, (1, 1))
@@ -77,7 +79,8 @@ class TestPandasHelper(ExtTestCase):
         for nanback in [True, False]:
             try:
                 gr2_ = pandas_groupby_nan(
-                    df, ["a", "b", "c"], nanback=nanback, suffix="NAN")
+                    df, ["a", "b", "c"], nanback=nanback, suffix="NAN"
+                )
             except NotImplementedError:
                 continue
             gr2 = gr2_.sum().sort_values("n")
@@ -101,36 +104,42 @@ class TestPandasHelper(ExtTestCase):
         self.assertEqual(len(gr), 1)
 
     def test_pandas_groupbynan_doc(self):
-        data = [dict(a=2, ind="a", n=1),
-                dict(a=2, ind="a"),
-                dict(a=3, ind="b"),
-                dict(a=30)]
+        data = [
+            dict(a=2, ind="a", n=1),
+            dict(a=2, ind="a"),
+            dict(a=3, ind="b"),
+            dict(a=30),
+        ]
         df = pandas.DataFrame(data)
         gr2 = pandas_groupby_nan(df, ["ind"]).sum()
-        ind = list(gr2['ind'])
+        ind = list(gr2["ind"])
         self.assertTrue(numpy.isnan(ind[-1]))
-        val = list(gr2['a'])
+        val = list(gr2["a"])
         self.assertEqual(val[-1], 30)
 
     @ignore_warnings(UserWarning)
     def test_pandas_groupbynan_doc2(self):
-        data = [dict(a=2, ind="a", n=1),
-                dict(a=2, ind="a"),
-                dict(a=3, ind="b"),
-                dict(a=30)]
+        data = [
+            dict(a=2, ind="a", n=1),
+            dict(a=2, ind="a"),
+            dict(a=3, ind="b"),
+            dict(a=30),
+        ]
         df = pandas.DataFrame(data)
         gr2 = pandas_groupby_nan(df, ["ind", "a"], nanback=False).sum()
-        ind = list(gr2['ind'])
+        ind = list(gr2["ind"])
         self.assertEqual(ind[-1], "²nan")
 
     def test_pandas_groupbynan_doc3(self):
-        data = [dict(a=2, ind="a", n=1),
-                dict(a=2, ind="a"),
-                dict(a=3, ind="b"),
-                dict(a=30)]
+        data = [
+            dict(a=2, ind="a", n=1),
+            dict(a=2, ind="a"),
+            dict(a=3, ind="b"),
+            dict(a=30),
+        ]
         df = pandas.DataFrame(data)
         gr2 = pandas_groupby_nan(df, ["ind", "n"]).sum()
-        ind = list(gr2['ind'])
+        ind = list(gr2["ind"])
         self.assertTrue(numpy.isnan(ind[-1]))
 
 

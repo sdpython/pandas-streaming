@@ -1,5 +1,6 @@
 autopep8
 coverage
+furo
 ijson
 jupyter_sphinx
 jyquickhelper
@@ -10,10 +11,10 @@ Pillow
 pycodestyle
 pylint>=2.14.0
 pyquickhelper>=1.10
-pyquicksetup
 scikit-learn
 scipy
 sphinx
+sphinx-runpython
 sphinxcontrib.imagesvg
 sphinx_gallery
 ujson

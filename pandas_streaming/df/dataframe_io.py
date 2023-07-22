@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@file
-@brief Saves and reads a :epkg:`dataframe` into a :epkg:`zip` file.
-"""
 import io
 import os
 import zipfile
@@ -66,35 +61,38 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     if isinstance(df, pandas.DataFrame):
         stb = io.StringIO()
         ext = os.path.splitext(zname)[-1]
-        if ext == '.npy':
+        if ext == ".npy":
             raise ValueError(  # pragma: no cover
-                "Extension '.npy' cannot be used to save a dataframe.")
+                "Extension '.npy' cannot be used to save a dataframe."
+            )
         df.to_csv(stb, **kwargs)
     elif isinstance(df, numpy.ndarray):
         stb = io.BytesIO()
         ext = os.path.splitext(zname)[-1]
-        if ext != '.npy':
+        if ext != ".npy":
             raise ValueError(  # pragma: no cover
-                "Extension '.npy' is required when saving a numpy array.")
+                "Extension '.npy' is required when saving a numpy array."
+            )
         numpy.save(stb, df, **kwargs)
     else:
-        raise TypeError(  # pragma: no cover
-            f"Type not handled {type(df)}")
+        raise TypeError(f"Type not handled {type(df)}")  # pragma: no cover
     text = stb.getvalue()
 
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
-        if ext != '.zip':
+        if ext != ".zip":
             raise NotImplementedError(  # pragma: no cover
-                f"Only zip file are implemented not '{ext}'.")
-        zf = zipfile.ZipFile(zipfilename, 'w')  # pylint: disable=R1732
+                f"Only zip file are implemented not '{ext}'."
+            )
+        zf = zipfile.ZipFile(zipfilename, "w")  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
         zf = zipfilename
         close = False
     else:
         raise TypeError(  # pragma: no cover
-            f"No implementation for type '{type(zipfilename)}'")
+            f"No implementation for type '{type(zipfilename)}'"
+        )
 
     zf.writestr(zname, text)
     if close:
@@ -113,24 +111,26 @@ def read_zip(zipfilename, zname=None, **kwargs):
     """
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
-        if ext != '.zip':
+        if ext != ".zip":
             raise NotImplementedError(  # pragma: no cover
-                f"Only zip files are supported not '{ext}'.")
-        zf = zipfile.ZipFile(zipfilename, 'r')  # pylint: disable=R1732
+                f"Only zip files are supported not '{ext}'."
+            )
+        zf = zipfile.ZipFile(zipfilename, "r")  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
         zf = zipfilename
         close = False
     else:
         raise TypeError(  # pragma: no cover
-            f"No implementation for type '{type(zipfilename)}'")
+            f"No implementation for type '{type(zipfilename)}'"
+        )
 
     if zname is None:
         zname = zf.namelist()[0]
     content = zf.read(zname)
     stb = io.BytesIO(content)
     ext = os.path.splitext(zname)[-1]
-    if ext == '.npy':
+    if ext == ".npy":
         df = numpy.load(stb, **kwargs)
     else:
         df = pandas.read_csv(stb, **kwargs)

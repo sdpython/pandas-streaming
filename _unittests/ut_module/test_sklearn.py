@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@brief      test log(time=2s)
-"""
 import unittest
 import numpy
 import pandas
@@ -10,12 +6,12 @@ from pyquickhelper.pycode import ExtTestCase
 
 
 class TestScikitLearn(ExtTestCase):
-
     def test_logistic_regression_check(self):
         X = pandas.DataFrame(numpy.array([[0.1, 0.2], [-0.2, 0.3]]))
         Y = numpy.array([0, 1])
-        clq = LogisticRegression(fit_intercept=False, solver="liblinear",
-                                 random_state=42)
+        clq = LogisticRegression(
+            fit_intercept=False, solver="liblinear", random_state=42
+        )
         clq.fit(X, Y)
         pred2 = clq.predict(X)
         self.assertEqual(numpy.array([0, 1]), pred2)
