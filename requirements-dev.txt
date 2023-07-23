@@ -1,4 +1,5 @@
 autopep8
+black
 coverage
 furo
 ijson
@@ -11,13 +12,16 @@ pandocfilters
 Pillow
 pycodestyle
 pylint>=2.14.0
+pytest
+pytest-cov
 pyquickhelper>=1.10
+rstcheck[sphinx,toml]
+ruff
 scikit-learn
 scipy
 sphinx
 sphinx-issues 
 git+https://github.com/sdpython/sphinx-runpython.git
-sphinxcontrib.imagesvg
 sphinx_gallery
 ujson
 wheel
