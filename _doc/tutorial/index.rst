@@ -28,9 +28,6 @@ when it does not fit into memory.
 
     >>> ['dataset_split_train.txt', 'dataset_split_test.txt']
 
-.. contents::
-    :local:
-
 Objectives and Competitors
 ++++++++++++++++++++++++++
 
@@ -109,7 +106,7 @@ A user can either choose to draw the same sample every time he is going
 through the data. He could also choose that a different sample should be
 drawn each time. The following method indicates which kinds of sample
 the :class:`StreamingDataFrame <pandas_streaming.df.dataframe.StreamingDataFrame>`
-is producing (see :meth:`pandas_streaming.df.dataframe.StreamingDataFrame.is_table`).
+is producing.
 
 Check the schema consistency of a large file
 ++++++++++++++++++++++++++++++++++++++++++++
@@ -138,7 +135,8 @@ an idea of where we could find the error.
     except Exception as e:
         print("ERROR:", e)
 
-The method :py:meth:`__iter__ <pandas_streaming.df.dataframe.StreamingDataFrame.__iter__>`
+The method :meth:`__iter__
+<pandas_streaming.df.dataframe.StreamingDataFrame.__iter__>`
 checks that the schema does not change between two iterations.
 It can be disabled by adding *check_schema=False* when
 the constructor is called.

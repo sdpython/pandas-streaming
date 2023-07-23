@@ -15,18 +15,21 @@ def sklearn_train_test_split(
     The function relies on :func:`sklearn.model_selection.train_test_split`.
     It does not handle stratified version of it.
 
-    @param  self            see :class:`StreamingDataFrame`
-    @param  path_or_buf     a string, a list of strings or buffers, if it is a
-                            string, it must contain ``{}`` like ``partition{}.txt``
-    @param  export_method   method used to store the partitions, by default
-                            :epkg:`pandas:DataFrame:to_csv`
-    @param  names           partitions names, by default ``('train', 'test')``
-    @param  kwargs          parameters for the export function and
-                            :fund:`sklearn.model_selection.train_test_split`.
-    @return                 outputs of the exports functions
+    :param self: see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`
+    :param path_or_buf: a string, a list of strings or buffers, if it is a
+        string, it must contain ``{}`` like ``partition{}.txt``
+    :param export_method: method used to store the partitions, by default
+        :meth:`pandas.DataFrame.to_csv`
+    :param names: partitions names, by default ``('train', 'test')``
+    :param kwargs: parameters for the export function and
+        :func:`sklearn.model_selection.train_test_split`.
+    :return: outputs of the exports functions
 
     The function cannot return two iterators or two
-    see :class:`StreamingDataFrame` because running through one
+    see :class:`StreamingDataFrame
+    <pandas_streaming.df.dataframe.StreamingDataFrame>`
+    because running through one
     means running through the other. We can assume both
     splits do not hold in memory and we cannot run through
     the same iterator again as random draws would be different.
@@ -114,18 +117,21 @@ def sklearn_train_test_split_streaming(
     The function relies on :func:`sklearn.model_selection.train_test_split`.
     It handles the stratified version of it.
 
-    :param self: see :class:`StreamingDataFrame`
+    :param self: see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`
     :param test_size: ratio for the test partition
         (if *train_size* is not specified)
     :param train_size: ratio for the train partition
     :param stratify: column holding the stratification
     :param hash_size: size of the hash to cache information about partition
     :param unique_rows: ensures that rows are unique
-    :return: Two see :class:`StreamingDataFrame`, one
-                            for train, one for test.
+    :return: Two see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`,
+        one for train, one for test.
 
     The function returns two iterators or two
-    see :class:`StreamingDataFrame`. It
+    see :class:`StreamingDataFrame
+    <pandas_streaming.df.dataframe.StreamingDataFrame>`. It
     tries to do everything without writing anything on disk
     but it requires to store the repartition somehow.
     This function hashes every row and maps the hash with a part

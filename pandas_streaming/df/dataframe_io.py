@@ -8,13 +8,13 @@ import numpy
 def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     """
     Saves a :epkg:`Dataframe` into a :epkg:`zip` file.
-    It can be read by @see fn to_zip.
+    It can be read by :meth:`read_zip`.
 
-    :param df: :epkg:`dataframe` or :epkg:`numpy:array`
-    :param zipfilename: a :class:`zipfile:ZipFile` or a filename
-    :param zname: a filename in th zipfile
-    :param kwargs: parameters for :epkg:`pandas:to_csv` or
-        :epkg:`numpy:save`
+    :param df: :epkg:`dataframe` or :class:`numpy.ndarray`
+    :param zipfilename: a :class:`zipfile.ZipFile` or a filename
+    :param zname: a filename in the zipfile
+    :param kwargs: parameters for :meth:`pandas.DataFrame.to_csv` or
+        :func:`numpy.save`
     :return: zipfilename
 
     .. exref::
@@ -22,7 +22,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         :tag: dataframe
 
         This shows an example on how to save and read a
-        :epkg:`pandas:dataframe` directly into a zip file.
+        :class:`pandas.DataFrame` directly into a zip file.
 
         .. runpython::
             :showcode:
@@ -43,7 +43,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         :tag: array
 
         This shows an example on how to save and read a
-        :epkg:`numpy:ndarray` directly into a zip file.
+        :class:`numpy.ndarray` directly into a zip file.
 
         .. runpython::
             :showcode:
@@ -102,12 +102,12 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
 def read_zip(zipfilename, zname=None, **kwargs):
     """
     Reads a :epkg:`dataframe` from a :epkg:`zip` file.
-    It can be saved by @see fn read_zip.
+    It can be saved by :meth:`to_zip`.
 
     :param zipfilename: a :class:`zipfile.ZipFile` or a filename
     :param zname: a filename in zipfile, if None, takes the first one
     :param kwargs: parameters for :func:`pandas.read_csv`
-    :return: :func:`pandas.DataFrame` or :epkg:`numpy:array`
+    :return: :class:`pandas.DataFrame` or :class:`numpy.ndarray`
     """
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]

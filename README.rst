@@ -32,10 +32,6 @@ pandas-streaming: streaming API over pandas
     :alt: GitHub Issues
     :target: https://github.com/sdpython/pandas_streaming/issues
 
-.. image:: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/_images/nbcov.png
-    :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
-    :alt: Notebook Coverage
-
 .. image:: https://pepy.tech/badge/pandas_streaming/month
     :target: https://pepy.tech/project/pandas_streaming/month
     :alt: Downloads

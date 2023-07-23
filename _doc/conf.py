@@ -178,10 +178,12 @@ epkg_dictionary = {
     "dataframes": "https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html",
     "dill": "https://dill.readthedocs.io/en/latest/dill.html",
     "groupby and missing values": "https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html",
+    "Jupyter": "https://jupyter.org/",
     "Hadoop": "http://hadoop.apache.org/",
     "ijson": "https://github.com/ICRAR/ijson",
     "json": "https://docs.python.org/3/library/json.html",
     "nan": "https://numpy.org/doc/stable/reference/constants.html#numpy.NAN",
+    "numpy": "https://numpy.org/",
     "pandas": (
         "http://pandas.pydata.org/pandas-docs/stable/",
         (
@@ -195,12 +197,15 @@ epkg_dictionary = {
     ),
     "pyarrow": "https://arrow.apache.org/docs/python/",
     "pyspark": "http://spark.apache.org/docs/2.1.1/api/python/index.html",
+    "Python": "https://www.python.org/",
+    "scikit-learn": "https://scikit-learn.org/stable/",
     "scikit-multiflow": "https://scikit-multiflow.github.io/",
     "sklearn": (
-        "http://scikit-learn.org/stable/",
+        "https://scikit-learn.org/stable/",
         ("https://scikit-learn.org/stable/modules/generated/{0}.html", 1),
         ("https://scikit-learn.org/stable/modules/generated/{0}.{1}.html", 2),
     ),
     "streamz": "https://streamz.readthedocs.io/en/latest/index.html",
     "tornado": "https://www.tornadoweb.org/en/stable/",
+    "zip": "https://en.wikipedia.org/wiki/ZIP_(file_format)",
 }

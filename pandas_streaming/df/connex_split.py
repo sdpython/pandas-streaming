@@ -29,16 +29,17 @@ def train_test_split_weights(
     Splits a database in train/test given, every row
     can have a different weight.
 
-    @param  df              :epkg:`pandas:DataFrame` or see :class:`StreamingDataFrame`
-    @param  weights         None or weights or weights column name
-    @param  test_size       ratio for the test partition
-                            (if *train_size* is not specified)
-    @param  train_size      ratio for the train partition
-    @param  shuffle         shuffles before the split
-    @param  fail_imbalanced raises an exception if relative weights
-                            difference is higher than this value
-    @param  random_state    seed for random generators
-    @return                 train and test :epkg:`pandas:DataFrame`
+    :param df: :class:`pandas.DataFrame` or see
+        :class:`StreamingDataFrame <pandas_streaming.df.dataframe.StreamingDataFrame>`
+    :param weights: None or weights or weights column name
+    :param test_size: ratio for the test partition
+        (if *train_size* is not specified)
+    :param train_size: ratio for the train partition
+    :param shuffle: shuffles before the split
+    :param fail_imbalanced: raises an exception if relative weights
+        difference is higher than this value
+    :param random_state: seed for random generators
+    :return: train and test :class:`pandas.DataFrame`
 
     If the dataframe is not shuffled first, the function
     will produce two datasets which are unlikely to be randomized
@@ -171,7 +172,8 @@ def train_test_connex_split(
         train/test partitions
     :param random_state: seed for random generator
     :param verbose: verbosity (uses logging)
-    :return: Two see :class:`StreamingDataFrame`, one
+    :return: Two see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`, one
         for train, one for test.
 
     The list of ids must hold in memory.
@@ -471,10 +473,9 @@ def train_test_apart_stratify(
     :param force: if True, tries to get at least one example on the test side
         for each value of the column *stratify*
     :param random_state: seed for random generators
-    :return: Two see :class:`StreamingDataFrame`, one
+    :return: Two see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`, one
         for train, one for test.
-
-    .. index:: multi-label
 
     The list of ids must hold in memory.
     There is no streaming implementation for the ids.

@@ -2,9 +2,6 @@
 Examples
 ========
 
-.. contents::
-    :local:
-
 About array
 +++++++++++
 

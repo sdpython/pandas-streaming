@@ -36,10 +36,6 @@ pandas-streaming: streaming API over pandas
     :alt: GitHub Issues
     :target: https://github.com/sdpython/pandas_streaming/issues
 
-.. image:: nbcov.png
-    :target: http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/all_notebooks_coverage.html
-    :alt: Notebook Coverage
-
 .. image:: https://pepy.tech/badge/pandas_streaming
     :target: https://pypi.org/project/pandas_streaming/
     :alt: Downloads
@@ -68,17 +64,4 @@ and implements other functionalities for machine learning.
     auto_examples/index
     api/index
     i_ex
-
-
-**Links:** `github <https://github.com/sdpython/pandas_streaming/>`_,
-`documentation <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_,
-:ref:`l-README`,
-:ref:`blog <ap-main-0>`
-
-+----------------------+---------------------+---------------------+--------------------+------------------------+------------------------------------------------+
-| :ref:`l-modules`     |  :ref:`l-functions` | :ref:`l-classes`    | :ref:`l-methods`   | :ref:`l-staticmethods` | :ref:`l-properties`                            |
-+----------------------+---------------------+---------------------+--------------------+------------------------+------------------------------------------------+
-| :ref:`modindex`      |  :ref:`l-EX2`       | :ref:`search`       | :ref:`l-license`   | :ref:`l-changes`       | :ref:`l-README`                                |
-+----------------------+---------------------+---------------------+--------------------+------------------------+------------------------------------------------+
-| :ref:`genindex`      |  :ref:`l-FAQ2`      | :ref:`l-notebooks`  |                    | :ref:`l-statcode`      | `Unit Test Coverage <coverage/index.html>`_    |
-+----------------------+---------------------+---------------------+--------------------+------------------------+------------------------------------------------+
+    license

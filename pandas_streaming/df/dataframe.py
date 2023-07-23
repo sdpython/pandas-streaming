@@ -49,7 +49,8 @@ class StreamingDataFrame:
     Instead, the class takes a function which generates
     an iterator on :epkg:`DataFrame`.
     Most of the methods returns either a :epkg:`DataFrame`
-    either a see :class:`StreamingDataFrame`. In the second case,
+    either a see :class:`StreamingDataFrame
+    <pandas_streaming.df.dataframe.StreamingDataFrame>`. In the second case,
     methods can be chained.
 
     By default, the object checks that the schema remains
@@ -63,7 +64,8 @@ class StreamingDataFrame:
     is one of these cases.
 
     :param iter_creation: function which creates an iterator or an
-        instance of see :class:`StreamingDataFrame`
+        instance of see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`
     :param check_schema: checks that the schema is the same
         for every :epkg:`dataframe`
     :param stable: indicates if the :epkg:`dataframe` remains the same
@@ -134,7 +136,7 @@ class StreamingDataFrame:
             string, it must contain ``{}`` like ``partition{}.txt``,
             if None, the function returns strings.
         :param export_method: method used to store the partitions, by default
-            :epkg:`pandas:DataFrame:to_csv`, additional parameters
+            :meth:`pandas.DataFrame.to_csv`, additional parameters
             will be given to that function
         :param names: partitions names, by default ``('train', 'test')``
         :param kwargs: parameters for the export function and
@@ -143,12 +145,14 @@ class StreamingDataFrame:
             streaming version of the algorithm.
         :param partitions: splitting partitions
         :return: outputs of the exports functions or two
-            see :class:`StreamingDataFrame` if *path_or_buf* is None.
+            see class `StreamingDataFrame`
+            if *path_or_buf* is None.
 
         The streaming version of this algorithm is implemented by function
-        :func:`sklearn_train_test_split_streaming`. Its documentation
-        indicates the limitation of the streaming version and gives some
-        insights about the additional parameters.
+        :func:`sklearn_train_test_split_streaming
+        <pandas_streaming.df.dataframe_split.sklearn_train_test_split_streaming>`.
+        Its documentation indicates the limitation of the streaming version
+        and gives some insights about the additional parameters.
         """
         if streaming:
             if partitions is not None:
@@ -376,10 +380,11 @@ class StreamingDataFrame:
         Splits a :epkg:`DataFrame` into small chunks mostly for
         unit testing purposes.
 
-        @param      df              :epkg:`DataFrame`
-        @param      chunksize       number rows per chunks (// 10 by default)
-        @param      check_schema    check schema between two iterations
-        @return                     iterator on see :class:`StreamingDataFrame`
+        :param df: :class:`pandas.DataFrame`
+        :param chunksize: number rows per chunks (// 10 by default)
+        :param check_schema: check schema between two iterations
+        :return: iterator on see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`
         """
         if chunksize is None:
             if hasattr(df, "shape"):
@@ -569,7 +574,8 @@ class StreamingDataFrame:
         """
         Applies :epkg:`pandas:DataFrame:where`.
         *inplace* must be False.
-        This function returns a see :class:`StreamingDataFrame`.
+        This function returns a see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`.
         """
         kwargs["inplace"] = False
         return StreamingDataFrame(
@@ -578,15 +584,15 @@ class StreamingDataFrame:
 
     def sample(self, reservoir=False, cache=False, **kwargs) -> "StreamingDataFrame":
         """
-        See :epkg:`pandas:DataFrame:sample`.
-        Only *frac* is available, otherwise choose
-        @see me reservoir_sampling.
-        This function returns a see :class:`StreamingDataFrame`.
+        See :meth:`pandas.DataFrame.sample`.
+        Only *frac* is available, otherwise choose :meth`reservoir_sampling`.
+        This function returns a see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`.
 
         :param reservoir: use
             `reservoir sampling <https://en.wikipedia.org/wiki/Reservoir_sampling>`_
         :param cache: cache the sample
-        :param kwargs: additional parameters for :epkg:`pandas:DataFrame:sample`
+        :param kwargs: additional parameters for :meth:`pandas.DataFrame.sample`
 
         If *cache* is True, the sample is cached (assuming it holds in memory).
         The second time an iterator walks through the
@@ -614,10 +620,11 @@ class StreamingDataFrame:
         Uses the `reservoir sampling <https://en.wikipedia.org/wiki/Reservoir_sampling>`_
         algorithm to draw a random sample with exactly *n* samples.
 
-        @param      cache           cache the sample
-        @param      n               number of observations to keep
-        @param      random_state    sets the random_state
-        @return                     see :class:`StreamingDataFrame`
+        :param cache: cache the sample
+        :param n: number of observations to keep
+        :param random_state: sets the random_state
+        :return: see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`
 
         .. warning::
             The sample is split by chunks of size 1000.
@@ -669,7 +676,8 @@ class StreamingDataFrame:
     ) -> "StreamingDataFrame":
         """
         Applies :epkg:`pandas:DataFrame:drop`.
-        This function returns a see :class:`StreamingDataFrame`.
+        This function returns a see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`.
         """
         if axis == 0:
             raise NotImplementedError(f"drop is not implemented for axis={axis}.")
@@ -694,7 +702,8 @@ class StreamingDataFrame:
     def apply(self, *args, **kwargs) -> "StreamingDataFrame":
         """
         Applies :epkg:`pandas:DataFrame:apply`.
-        This function returns a see :class:`StreamingDataFrame`.
+        This function returns a see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`.
         """
         return StreamingDataFrame(
             lambda: map(lambda df: df.apply(*args, **kwargs), self), **self.get_kwargs()
@@ -703,7 +712,8 @@ class StreamingDataFrame:
     def applymap(self, *args, **kwargs) -> "StreamingDataFrame":
         """
         Applies :epkg:`pandas:DataFrame:applymap`.
-        This function returns a see :class:`StreamingDataFrame`.
+        This function returns a see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`.
         """
         return StreamingDataFrame(
             lambda: map(lambda df: df.applymap(*args, **kwargs), self),
@@ -712,9 +722,12 @@ class StreamingDataFrame:
 
     def merge(self, right, **kwargs) -> "StreamingDataFrame":
         """
-        Merges two see :class:`StreamingDataFrame`
-        and returns see :class:`StreamingDataFrame`.
-        *right* can be either a see :class:`StreamingDataFrame` or simply
+        Merges two see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`
+        and returns see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`.
+        *right* can be either a see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>` or simply
         a :epkg:`pandas:DataFrame`. It calls :epkg:`pandas:DataFrame:merge` in
         a double loop, loop on *self*, loop on *right*.
         """
@@ -738,13 +751,16 @@ class StreamingDataFrame:
         """
         Concatenates :epkg:`dataframes`.
         The function ensures all :epkg:`pandas:DataFrame`
-        or see :class:`StreamingDataFrame` share the same columns (name and type).
+        or see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`
+        share the same columns (name and type).
         Otherwise, the function fails as it cannot guess the schema without
         walking through all :epkg:`dataframes`.
 
         :param others: list, enumeration, :epkg:`pandas:DataFrame`
         :param axis: concatenate by rows (0) or by columns (1)
-        :return: see :class:`StreamingDataFrame`
+        :return: see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`
         """
         if axis == 1:
             return self._concath(others)
@@ -827,7 +843,8 @@ class StreamingDataFrame:
         :param kwargs: additional parameters for :epkg:`pandas:DataFrame:groupby`
         :return: :epkg:`pandas:DataFrame`
 
-        As the input see :class:`StreamingDataFrame` does not necessarily hold
+        As the input see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>` does not necessarily hold
         in memory, the aggregation must be done at every iteration.
         There are two levels of aggregation: one to reduce every iterated
         :epkg:`dataframe`, another one to combine all the reduced :epkg:`dataframes`.
@@ -847,7 +864,8 @@ class StreamingDataFrame:
             :tag: streaming
 
             Here is an example which shows how to write a simple *groupby*
-            with :epkg:`pandas` and see :class:`StreamingDataFrame`.
+            with :epkg:`pandas` and see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`.
 
             .. runpython::
                 :showcode:
@@ -912,7 +930,8 @@ class StreamingDataFrame:
         :param strategy: ``'cum'``, or ``'streaming'``, see below
         :return: :epkg:`pandas:DataFrame`
 
-        As the input see :class:`StreamingDataFrame` does not necessarily hold
+        As the input see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>` does not necessarily hold
         in memory, the aggregation must be done at every iteration.
         There are two levels of aggregation: one to reduce every iterated
         :epkg:`dataframe`, another one to combine all the reduced :epkg:`dataframes`.
@@ -931,7 +950,9 @@ class StreamingDataFrame:
         First one if ``strategy is None`` goes through
         the whole datasets to produce a final :epkg:`DataFrame`.
         Second if ``strategy=='cum'`` returns a
-        see :class:`StreamingDataFrame`, each iteration produces
+        see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`,
+        each iteration produces
         the current status of the *group by*. Last case,
         ``strategy=='streaming'`` produces :epkg:`DataFrame`
         which must be concatenated into a single :epkg:`DataFrame`
@@ -942,7 +963,8 @@ class StreamingDataFrame:
             :tag: streaming
 
             Here is an example which shows how to write a simple *groupby*
-            with :epkg:`pandas` and see :class:`StreamingDataFrame`.
+            with :epkg:`pandas` and see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`.
 
             .. runpython::
                 :showcode:
@@ -1107,13 +1129,16 @@ class StreamingDataFrame:
         Implements some of the functionalities :epkg:`pandas`
         offers for the operator ``[]``.
 
-        @param      col             new column
-        @param      value           see :class:`StreamingDataFrame` or a lambda function
-        @return                     see :class:`StreamingDataFrame`
+        :param col: new column
+        :param value: see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>` or a lambda function
+        :return: see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`
 
         ..note::
 
-            If value is a see :class:`StreamingDataFrame`,
+            If value is a see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`,
             *chunksize* must be the same for both.
 
         .. exref::
@@ -1172,8 +1197,9 @@ class StreamingDataFrame:
         Replaces the missing values, calls
         :epkg:`pandas:DataFrame:fillna`.
 
-        @param      kwargs      see :epkg:`pandas:DataFrame:fillna`
-        @return                 see :class:`StreamingDataFrame`
+        :param kwargs: see :meth:`pandas.DataFrame.fillna`
+        :return: see :class:`StreamingDataFrame
+            <pandas_streaming.df.dataframe.StreamingDataFrame>`
 
         .. warning::
             The function does not check what happens at the
@@ -1346,7 +1372,8 @@ class StreamingDataFrame:
 
 class StreamingSeries(StreamingDataFrame):
     """
-    Seens as a see :class:`StreamingDataFrame` of one column.
+    Seens as a see :class:`StreamingDataFrame
+    <pandas_streaming.df.dataframe.StreamingDataFrame>` of one column.
     """
 
     def __init__(self, iter_creation, check_schema=True, stable=True):

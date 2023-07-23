@@ -2,14 +2,11 @@
 pandas_streaming.df
 ===================
 
-.. contents::
-    :local:
-
 Streaming
 +++++++++
 
 The main class is an interface which mimic
-:epkg:`pandas:DataFrame` interface to offer
+:class:`pandas.DataFrame` interface to offer
 a short list of methods which apply on an
 iterator of dataframes. This provides somehow
 a streaming version of it. As a result, the creation
@@ -17,22 +14,18 @@ of an instance is fast as long as the data is not
 processed. Iterators can be chained as many map reduce
 framework does.
 
-.. autoclass:: pandas_streaming.df.dataframe.StreamingDataFrame
-    :members:
+.. toctree::
+    :maxdepth: 2
+
+    dataframe
 
 The module implements additional and useful functions
 not necessarily for the streaming version of the dataframes.
 Many methods have been rewritten to support
 streaming. Among them, IO methods:
-
-.. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_csv
-    :noindex:
-
-.. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_df
-    :noindex:
-
-.. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_json
-    :noindex:
+:meth:`read_csv <pandas_streaming.df.dataframe.StreamingDataFrame.read_csv>`,
+:meth:`read_df <pandas_streaming.df.dataframe.StreamingDataFrame.read_df>`,
+:meth:`read_json <pandas_streaming.df.dataframe.StreamingDataFrame.read_json>`.
 
 Data Manipulation
 +++++++++++++++++
@@ -51,10 +44,17 @@ Complex splits
 Splitting a database into train and test is usually simple except
 if rows are not independant and share some ids. In that case,
 the following functions will try to build two partitions keeping
-ids separate or separate as much as possible.
+ids separate or separate as much as possible:
+:func:`train_test_apart_stratify <pandas_streaming.df.connex_split.train_test_apart_stratify>`,
+:func:`train_test_connex_split <pandas_streaming.df.connex_split.train_test_connex_split>`,
+:func:`train_test_split_weights <pandas_streaming.df.connex_split.train_test_split_weights>`.
 
-.. autofunction:: pandas_streaming.df.connex_split.train_test_apart_stratify
+Extensions
+++++++++++
 
-.. autofunction:: pandas_streaming.df.connex_split.train_test_connex_split
+.. toctree::
+    :maxdepth: 1
 
-.. autofunction:: pandas_streaming.df.connex_split.train_test_split_weights
+    connex_split
+    dataframe_io
+    dataframe_split
