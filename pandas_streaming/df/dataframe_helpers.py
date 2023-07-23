@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@file
-@brief Helpers for dataframes.
-"""
 import hashlib
 import struct
 import warnings
@@ -17,25 +12,27 @@ def numpy_types():
     :return: list of types
     """
 
-    return [numpy.bool_,
-            numpy.int_,
-            numpy.intc,
-            numpy.intp,
-            numpy.int8,
-            numpy.int16,
-            numpy.int32,
-            numpy.int64,
-            numpy.uint8,
-            numpy.uint16,
-            numpy.uint32,
-            numpy.uint64,
-            numpy.float_,
-            numpy.float16,
-            numpy.float32,
-            numpy.float64,
-            numpy.complex_,
-            numpy.complex64,
-            numpy.complex128]
+    return [
+        numpy.bool_,
+        numpy.int_,
+        numpy.intc,
+        numpy.intp,
+        numpy.int8,
+        numpy.int16,
+        numpy.int32,
+        numpy.int64,
+        numpy.uint8,
+        numpy.uint16,
+        numpy.uint32,
+        numpy.uint64,
+        numpy.float_,
+        numpy.float16,
+        numpy.float32,
+        numpy.float64,
+        numpy.complex_,
+        numpy.complex64,
+        numpy.complex128,
+    ]
 
 
 def hash_str(c, hash_length):
@@ -78,7 +75,7 @@ def hash_int(c, hash_length):
         r = m.hexdigest()
         if len(r) >= hash_length:
             r = r[:hash_length]
-        return int(r, 16) % (10 ** 8)
+        return int(r, 16) % (10**8)
 
 
 def hash_float(c, hash_length):
@@ -98,7 +95,7 @@ def hash_float(c, hash_length):
         r = m.hexdigest()
         if len(r) >= hash_length:
             r = r[:hash_length]
-        i = int(r, 16) % (2 ** 53)
+        i = int(r, 16) % (2**53)
         return float(i)
 
 
@@ -153,8 +150,9 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
         "hash float"
         return hash_float(c, hash_length)
 
-    coltype = {n: t for n, t in zip(  # pylint: disable=R1721
-        df.columns, df.dtypes)}  # pylint: disable=R1721
+    coltype = {
+        n: t for n, t in zip(df.columns, df.dtypes)  # pylint: disable=R1721
+    }  # pylint: disable=R1721
     for c in cols:
         t = coltype[c]
         if t == int:
@@ -167,7 +165,8 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
             df[c] = df[c].apply(hash_strl)
         else:
             raise NotImplementedError(  # pragma: no cover
-                f"Conversion of type {t} in column '{c}' is not implemented")
+                f"Conversion of type {t} in column '{c}' is not implemented"
+            )
 
     return df
 
@@ -204,8 +203,9 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
             print(df2)
 
             # To fold:
-            folded = df2.groupby('a').apply(lambda row: ','.join(row['b_unfold'].dropna()) \\
-                                            if len(row['b_unfold'].dropna()) > 0 else numpy.nan)
+            folded = df2.groupby('a').apply(
+                lambda row: ','.join(row['b_unfold'].dropna())
+                        if len(row['b_unfold'].dropna()) > 0 else numpy.nan)
             print('----------')
             print(folded)
     """
@@ -213,7 +213,7 @@ def dataframe_unfold(df, col, new_col=None, sep=","):
         col_name = col + "_unfold"
     else:
         col_name = new_col
-    temp_col = '__index__'
+    temp_col = "__index__"
     while temp_col in df.columns:
         temp_col += "_"
     rows = []
@@ -306,7 +306,9 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
             else:
                 raise TypeError(  # pragma: no cover
                     "Unable to determine a constant for type='{0}' dtype='{1}'".format(
-                        val, df[c].dtype))
+                        val, df[c].dtype
+                    )
+                )
             val += cst
             while val in se:
                 val += suffix
@@ -318,17 +320,20 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
             ma = abs(dr.max())
             val = ma + mi
             if val == ma and not isinstance(val, str):
-                val += ma + 1.
+                val += ma + 1.0
             if val <= ma:
                 raise ValueError(  # pragma: no cover
                     "Unable to find a different value for column '{}' v='{}: "
-                    "min={} max={}".format(c, val, mi, ma))
+                    "min={} max={}".format(c, val, mi, ma)
+                )
             df[c].fillna(val, inplace=True)
             rep[c] = val
     return rep, df
 
 
-def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True, **kwargs):
+def pandas_groupby_nan(
+    df, by, axis=0, as_index=False, suffix=None, nanback=True, **kwargs
+):
     """
     Does a *groupby* including keeping missing values (:epkg:`nan`).
 
@@ -345,8 +350,7 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
         generated/pandas.DataFrame.groupby.html>`_
     :return: groupby results
 
-    See `groupby and missing values <http://pandas-docs.github.io/
-    pandas-docs-travis/groupby.html#na-and-nat-group-handling>`_.
+    See :epkg:`groupby and missing values`.
     If no :epkg:`nan` is detected, the function falls back in regular
     :epkg:`pandas:DataFrame:groupby` which has the following
     behavior.
@@ -391,8 +395,7 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
     """
     if nanback and suffix is None:
         try:
-            res = df.groupby(by, axis=axis, as_index=as_index,
-                             dropna=False, **kwargs)
+            res = df.groupby(by, axis=axis, as_index=as_index, dropna=False, **kwargs)
         except TypeError:
             # old version of pandas
             res = None
@@ -421,71 +424,91 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             if not nanback:
                 dummy = DataFrame([{"a": "a"}])
                 do = dummy.dtypes[0]
-                typ = {c: t for c, t in zip(  # pylint: disable=R1721
-                    df.columns, df.dtypes)}  # pylint: disable=R1721
+                typ = {
+                    c: t for c, t in zip(df.columns, df.dtypes)  # pylint: disable=R1721
+                }  # pylint: disable=R1721
                 if typ[by[0]] != do:
                     warnings.warn(  # pragma: no cover
-                        f"[pandas_groupby_nan] NaN value: {rep}")
+                        f"[pandas_groupby_nan] NaN value: {rep}"
+                    )
                 return res
             for b in by:
                 fnan = rep[b]
                 if fnan in res.grouper.groups:
                     res.grouper.groups[numpy.nan] = res.grouper.groups[fnan]
                     del res.grouper.groups[fnan]
-                new_val = list((numpy.nan if b == fnan else b)
-                               for b in res.grouper.result_index)
+                new_val = list(
+                    (numpy.nan if b == fnan else b) for b in res.grouper.result_index
+                )
                 res.grouper.groupings[0]._group_index = Index(new_val)
-                res.grouper.groupings[0].obj[b].replace(
-                    fnan, numpy.nan, inplace=True)
-                if hasattr(res.grouper, 'grouping'):
+                res.grouper.groupings[0].obj[b].replace(fnan, numpy.nan, inplace=True)
+                if hasattr(res.grouper, "grouping"):
                     if isinstance(res.grouper.groupings[0].grouper, numpy.ndarray):
                         arr = numpy.array(new_val)
                         res.grouper.groupings[0].grouper = arr
-                        if (hasattr(res.grouper.groupings[0], '_cache') and
-                                'result_index' in res.grouper.groupings[0]._cache):
-                            del res.grouper.groupings[0]._cache['result_index']
+                        if (
+                            hasattr(res.grouper.groupings[0], "_cache")
+                            and "result_index" in res.grouper.groupings[0]._cache
+                        ):
+                            del res.grouper.groupings[0]._cache["result_index"]
                     else:
-                        raise NotImplementedError("Not implemented for type: {0}".format(
-                            type(res.grouper.groupings[0].grouper)))
+                        raise NotImplementedError(
+                            "Not implemented for type: {0}".format(
+                                type(res.grouper.groupings[0].grouper)
+                            )
+                        )
                 else:
                     grouper = res.grouper._get_grouper()
                     if isinstance(grouper, numpy.ndarray):
                         arr = numpy.array(new_val)
                         res.grouper.groupings[0].grouping_vector = arr
-                        if (hasattr(res.grouper.groupings[0], '_cache') and
-                                'result_index' in res.grouper.groupings[0]._cache):
-                            index = res.grouper.groupings[0]._cache['result_index']
+                        if (
+                            hasattr(res.grouper.groupings[0], "_cache")
+                            and "result_index" in res.grouper.groupings[0]._cache
+                        ):
+                            index = res.grouper.groupings[0]._cache["result_index"]
                             if len(rep) == 1:
                                 key = list(rep.values())[0]
                                 new_index = numpy.array(index)
-                                for i in range(0, len(new_index)):  # pylint: disable=C0200
+                                for i in range(
+                                    0, len(new_index)
+                                ):  # pylint: disable=C0200
                                     if new_index[i] == key:
                                         new_index[i] = numpy.nan
-                                res.grouper.groupings[0]._cache['result_index'] = (
-                                    index.__class__(new_index))
+                                res.grouper.groupings[0]._cache[
+                                    "result_index"
+                                ] = index.__class__(new_index)
                             else:
                                 raise NotImplementedError(  # pragma: no cover
-                                    "NaN values not implemented for multiindex.")
+                                    "NaN values not implemented for multiindex."
+                                )
                     else:
                         raise NotImplementedError(  # pragma: no cover
                             "Not implemented for type: {0}".format(
-                                type(res.grouper.groupings[0].grouper)))
-                res.grouper._cache['result_index'] = res.grouper.groupings[0]._group_index
+                                type(res.grouper.groupings[0].grouper)
+                            )
+                        )
+                res.grouper._cache["result_index"] = res.grouper.groupings[
+                    0
+                ]._group_index
         else:
             if not nanback:
                 dummy = DataFrame([{"a": "a"}])
                 do = dummy.dtypes[0]
-                typ = {c: t for c, t in zip(  # pylint: disable=R1721
-                    df.columns, df.dtypes)}  # pylint: disable=R1721
+                typ = {
+                    c: t for c, t in zip(df.columns, df.dtypes)  # pylint: disable=R1721
+                }  # pylint: disable=R1721
                 for b in by:
                     if typ[b] != do:
                         warnings.warn(  # pragma: no cover
-                            f"[pandas_groupby_nan] NaN values: {rep}")
+                            f"[pandas_groupby_nan] NaN values: {rep}"
+                        )
                         break
                 return res
             raise NotImplementedError(
                 "Not yet implemented. Replacing pseudo nan values by real nan "
-                "values is not as easy as it looks. Use nanback=False")
+                "values is not as easy as it looks. Use nanback=False"
+            )
 
             # keys = list(res.grouper.groups.keys())
             # didit = False
@@ -528,7 +551,8 @@ def pandas_groupby_nan(df, by, axis=0, as_index=False, suffix=None, nanback=True
             #             grou.grouper = numpy.array(new_val)
             #         else:
             #             raise NotImplementedError(
-            #                 "Not implemented for type: {0}".format(type(grou.grouper)))
+            #                 "Not implemented for type: {0}".format(
+            #                       type(grou.grouper)))
             #     del res.grouper._cache
         return res
     return df.groupby(by, axis=axis, **kwargs)

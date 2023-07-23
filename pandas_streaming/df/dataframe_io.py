@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@file
-@brief Saves and reads a :epkg:`dataframe` into a :epkg:`zip` file.
-"""
 import io
 import os
 import zipfile
@@ -13,13 +8,13 @@ import numpy
 def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     """
     Saves a :epkg:`Dataframe` into a :epkg:`zip` file.
-    It can be read by @see fn to_zip.
+    It can be read by :meth:`read_zip`.
 
-    :param df: :epkg:`dataframe` or :epkg:`numpy:array`
-    :param zipfilename: a :epkg:`*py:zipfile:ZipFile` or a filename
-    :param zname: a filename in th zipfile
-    :param kwargs: parameters for :epkg:`pandas:to_csv` or
-        :epkg:`numpy:save`
+    :param df: :epkg:`dataframe` or :class:`numpy.ndarray`
+    :param zipfilename: a :class:`zipfile.ZipFile` or a filename
+    :param zname: a filename in the zipfile
+    :param kwargs: parameters for :meth:`pandas.DataFrame.to_csv` or
+        :func:`numpy.save`
     :return: zipfilename
 
     .. exref::
@@ -27,7 +22,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         :tag: dataframe
 
         This shows an example on how to save and read a
-        :epkg:`pandas:dataframe` directly into a zip file.
+        :class:`pandas.DataFrame` directly into a zip file.
 
         .. runpython::
             :showcode:
@@ -48,7 +43,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
         :tag: array
 
         This shows an example on how to save and read a
-        :epkg:`numpy:ndarray` directly into a zip file.
+        :class:`numpy.ndarray` directly into a zip file.
 
         .. runpython::
             :showcode:
@@ -66,35 +61,38 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     if isinstance(df, pandas.DataFrame):
         stb = io.StringIO()
         ext = os.path.splitext(zname)[-1]
-        if ext == '.npy':
+        if ext == ".npy":
             raise ValueError(  # pragma: no cover
-                "Extension '.npy' cannot be used to save a dataframe.")
+                "Extension '.npy' cannot be used to save a dataframe."
+            )
         df.to_csv(stb, **kwargs)
     elif isinstance(df, numpy.ndarray):
         stb = io.BytesIO()
         ext = os.path.splitext(zname)[-1]
-        if ext != '.npy':
+        if ext != ".npy":
             raise ValueError(  # pragma: no cover
-                "Extension '.npy' is required when saving a numpy array.")
+                "Extension '.npy' is required when saving a numpy array."
+            )
         numpy.save(stb, df, **kwargs)
     else:
-        raise TypeError(  # pragma: no cover
-            f"Type not handled {type(df)}")
+        raise TypeError(f"Type not handled {type(df)}")  # pragma: no cover
     text = stb.getvalue()
 
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
-        if ext != '.zip':
+        if ext != ".zip":
             raise NotImplementedError(  # pragma: no cover
-                f"Only zip file are implemented not '{ext}'.")
-        zf = zipfile.ZipFile(zipfilename, 'w')  # pylint: disable=R1732
+                f"Only zip file are implemented not '{ext}'."
+            )
+        zf = zipfile.ZipFile(zipfilename, "w")  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
         zf = zipfilename
         close = False
     else:
         raise TypeError(  # pragma: no cover
-            f"No implementation for type '{type(zipfilename)}'")
+            f"No implementation for type '{type(zipfilename)}'"
+        )
 
     zf.writestr(zname, text)
     if close:
@@ -104,33 +102,35 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
 def read_zip(zipfilename, zname=None, **kwargs):
     """
     Reads a :epkg:`dataframe` from a :epkg:`zip` file.
-    It can be saved by @see fn read_zip.
+    It can be saved by :meth:`to_zip`.
 
-    :param zipfilename: a :epkg:`*py:zipfile:ZipFile` or a filename
+    :param zipfilename: a :class:`zipfile.ZipFile` or a filename
     :param zname: a filename in zipfile, if None, takes the first one
     :param kwargs: parameters for :func:`pandas.read_csv`
-    :return: :func:`pandas.DataFrame` or :epkg:`numpy:array`
+    :return: :class:`pandas.DataFrame` or :class:`numpy.ndarray`
     """
     if isinstance(zipfilename, str):
         ext = os.path.splitext(zipfilename)[-1]
-        if ext != '.zip':
+        if ext != ".zip":
             raise NotImplementedError(  # pragma: no cover
-                f"Only zip files are supported not '{ext}'.")
-        zf = zipfile.ZipFile(zipfilename, 'r')  # pylint: disable=R1732
+                f"Only zip files are supported not '{ext}'."
+            )
+        zf = zipfile.ZipFile(zipfilename, "r")  # pylint: disable=R1732
         close = True
     elif isinstance(zipfilename, zipfile.ZipFile):
         zf = zipfilename
         close = False
     else:
         raise TypeError(  # pragma: no cover
-            f"No implementation for type '{type(zipfilename)}'")
+            f"No implementation for type '{type(zipfilename)}'"
+        )
 
     if zname is None:
         zname = zf.namelist()[0]
     content = zf.read(zname)
     stb = io.BytesIO(content)
     ext = os.path.splitext(zname)[-1]
-    if ext == '.npy':
+    if ext == ".npy":
         df = numpy.load(stb, **kwargs)
     else:
         df = pandas.read_csv(stb, **kwargs)

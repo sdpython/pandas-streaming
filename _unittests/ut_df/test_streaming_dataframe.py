@@ -1,21 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-@brief      test log(time=4s)
-"""
 import os
 import unittest
 from io import StringIO
 import pandas
 import numpy
-from pyquickhelper.pycode import (
-    ExtTestCase, get_temp_folder, ignore_warnings)
+from pyquickhelper.pycode import ExtTestCase, get_temp_folder, ignore_warnings
 from pandas_streaming.data import dummy_streaming_dataframe
 from pandas_streaming.df import StreamingDataFrame
 from pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
 
 
 class TestStreamingDataFrame(ExtTestCase):
-
     def test_shape(self):
         sdf = dummy_streaming_dataframe(100)
         dfs = list(sdf)
@@ -34,11 +28,9 @@ class TestStreamingDataFrame(ExtTestCase):
     def test_to_csv(self):
         sdf = dummy_streaming_dataframe(100)
         st = sdf.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,0,s0",
-                              st.replace('\r', ''))
+        self.assertStartsWith(",cint,cstr\n0,0,s0", st.replace("\r", ""))
         st = sdf.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,0,s0",
-                              st.replace('\r', ''))
+        self.assertStartsWith(",cint,cstr\n0,0,s0", st.replace("\r", ""))
 
     def test_iterrows(self):
         sdf = dummy_streaming_dataframe(100)
@@ -74,43 +66,42 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = StreamingDataFrame.read_csv(name)
         text = sdf.to_csv(index=False)
         self.assertRaise(
-            lambda: StreamingDataFrame.read_csv(
-                name2, index_col=0, chunksize=None),
-            ValueError)
+            lambda: StreamingDataFrame.read_csv(name2, index_col=0, chunksize=None),
+            ValueError,
+        )
         self.assertRaise(
-            lambda: StreamingDataFrame.read_csv(
-                name2, index_col=0, iterator=False),
-            ValueError)
+            lambda: StreamingDataFrame.read_csv(name2, index_col=0, iterator=False),
+            ValueError,
+        )
         sdf2 = StreamingDataFrame.read_csv(name2, index_col=0)
         text2 = sdf2.to_csv(index=True)
         sdf2.to_csv(name3, index=True)
-        with open(name, "r", encoding='utf-8') as f:
+        with open(name, "r", encoding="utf-8") as f:
             exp = f.read()
-        with open(name2, "r", encoding='utf-8') as f:
+        with open(name2, "r", encoding="utf-8") as f:
             exp2 = f.read()
-        with open(name3, "r", encoding='utf-8') as f:
+        with open(name3, "r", encoding="utf-8") as f:
             text3 = f.read()
-        self.assertEqual(text.replace('\r', ''), exp)
+        self.assertEqual(text.replace("\r", ""), exp)
         sdf2 = StreamingDataFrame.read_df(df)
         self.assertEqualDataFrame(sdf.to_dataframe(), sdf2.to_dataframe())
-        self.assertEqual(text2.replace('\r', ''), exp2)
-        self.assertEqual(text3.replace('\r', '').replace('\n\n', '\n'),
-                         exp2.replace('\r', ''))
+        self.assertEqual(text2.replace("\r", ""), exp2)
+        self.assertEqual(
+            text3.replace("\r", "").replace("\n\n", "\n"), exp2.replace("\r", "")
+        )
 
     def test_where(self):
         sdf = dummy_streaming_dataframe(100)
         cols = sdf.columns
-        self.assertEqual(list(cols), ['cint', 'cstr'])
+        self.assertEqual(list(cols), ["cint", "cstr"])
         dts = sdf.dtypes
         self.assertEqual(len(dts), 2)
         res = sdf.where(lambda row: row["cint"] == 1)
         st = res.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1",
-                              st.replace('\r', ''))
+        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1", st.replace("\r", ""))
         res = sdf.where(lambda row: row["cint"] == 1)
         st = res.to_csv()
-        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1",
-                              st.replace('\r', ''))
+        self.assertStartsWith(",cint,cstr\n0,,\n1,1.0,s1", st.replace("\r", ""))
 
     def test_dataframe(self):
         sdf = dummy_streaming_dataframe(100)
@@ -144,10 +135,12 @@ class TestStreamingDataFrame(ExtTestCase):
         df2 = res.to_df()
         self.assertEqualDataFrame(df1, df2)
         self.assertEqual(df1.shape, (10, res.shape[1]))
-        self.assertRaise(lambda: sdf.sample(n=10, cache=False, reservoir=True),
-                         ValueError)
-        self.assertRaise(lambda: sdf.sample(frac=0.1, cache=True, reservoir=True),
-                         ValueError)
+        self.assertRaise(
+            lambda: sdf.sample(n=10, cache=False, reservoir=True), ValueError
+        )
+        self.assertRaise(
+            lambda: sdf.sample(frac=0.1, cache=True, reservoir=True), ValueError
+        )
 
     def test_apply(self):
         sdf = dummy_streaming_dataframe(100)
@@ -157,19 +150,18 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = sdf.apply(lambda row: row[["cint"]] + "r", axis=1)
         self.assertNotEmpty(list(sdf))
         text = sdf.to_csv(header=False)
-        self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r",
-                              text.replace('\r', ''))
+        self.assertStartsWith("0,0r\n1,1r\n2,2r\n3,3r", text.replace("\r", ""))
 
     def test_train_test_split(self):
         sdf = dummy_streaming_dataframe(100)
         tr, te = sdf.train_test_split(index=False, streaming=False)
         self.assertRaise(
-            lambda: StreamingDataFrame.read_str(tr, chunksize=None),
-            ValueError)
+            lambda: StreamingDataFrame.read_str(tr, chunksize=None), ValueError
+        )
         self.assertRaise(
-            lambda: StreamingDataFrame.read_str(tr, iterator=False),
-            ValueError)
-        StreamingDataFrame.read_str(tr.encode('utf-8'))
+            lambda: StreamingDataFrame.read_str(tr, iterator=False), ValueError
+        )
+        StreamingDataFrame.read_str(tr.encode("utf-8"))
         trsdf = StreamingDataFrame.read_str(tr)
         tesdf = StreamingDataFrame.read_str(te)
         trdf = trsdf.to_dataframe()
@@ -183,7 +175,8 @@ class TestStreamingDataFrame(ExtTestCase):
     def test_train_test_split_streaming(self):
         sdf = dummy_streaming_dataframe(100, asfloat=True)
         trsdf, tesdf = sdf.train_test_split(
-            streaming=True, unique_rows=True, partitions=[0.7, 0.3])
+            streaming=True, unique_rows=True, partitions=[0.7, 0.3]
+        )
         trdf = trsdf.to_dataframe()
         tedf = tesdf.to_dataframe()
         df_exp = sdf.to_dataframe()
@@ -228,10 +221,12 @@ class TestStreamingDataFrame(ExtTestCase):
             self.assertEqualDataFrame(df1, df2)
 
     def test_train_test_split_streaming_strat(self):
-        sdf = dummy_streaming_dataframe(100, asfloat=True,
-                                        tify=["t1" if i % 3 else "t0" for i in range(0, 100)])
+        sdf = dummy_streaming_dataframe(
+            100, asfloat=True, tify=["t1" if i % 3 else "t0" for i in range(0, 100)]
+        )
         trsdf, tesdf = sdf.train_test_split(
-            streaming=True, unique_rows=True, stratify="tify")
+            streaming=True, unique_rows=True, stratify="tify"
+        )
         trdf = trsdf.to_dataframe()
         tedf = tesdf.to_dataframe()
         df_exp = sdf.to_dataframe()
@@ -250,12 +245,11 @@ class TestStreamingDataFrame(ExtTestCase):
         tegr = tedf.groupby("tify").count()
         tegr["part"] = 1
         gr = pandas.concat([trgr, tegr])
-        self.assertGreater(gr['cfloat'].min(), 4)
+        self.assertGreater(gr["cfloat"].min(), 4)
 
     def test_train_test_split_file(self):
         temp = get_temp_folder(__file__, "temp_train_test_split_file")
-        names = [os.path.join(temp, "train.txt"),
-                 os.path.join(temp, "test.txt")]
+        names = [os.path.join(temp, "train.txt"), os.path.join(temp, "test.txt")]
         sdf = dummy_streaming_dataframe(100)
         sdf.train_test_split(names, index=False, streaming=False)
         trsdf = StreamingDataFrame.read_csv(names[0])
@@ -276,8 +270,10 @@ class TestStreamingDataFrame(ExtTestCase):
         temp = get_temp_folder(__file__, "temp_train_test_split_file_pattern")
         sdf = dummy_streaming_dataframe(100)
         names = os.path.join(temp, "spl_{0}.txt")
-        self.assertRaise(lambda: sdf.train_test_split(
-            names, index=False, streaming=False), ValueError)
+        self.assertRaise(
+            lambda: sdf.train_test_split(names, index=False, streaming=False),
+            ValueError,
+        )
         names = os.path.join(temp, "spl_{}.txt")
         tr, te = sdf.train_test_split(names, index=False, streaming=False)
         trsdf = StreamingDataFrame.read_csv(tr)
@@ -297,8 +293,9 @@ class TestStreamingDataFrame(ExtTestCase):
             da = a.to_dataframe()
             db = b.to_dataframe()
             exp = da.merge(db, on="cint", indicator=True)
-            self.assertEqualDataFrame(dm.reset_index(drop=True),
-                                      exp.reset_index(drop=True))
+            self.assertEqualDataFrame(
+                dm.reset_index(drop=True), exp.reset_index(drop=True)
+            )
 
         sdf20 = dummy_streaming_dataframe(20)
         sdf30 = dummy_streaming_dataframe(30)
@@ -332,11 +329,17 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(m1.to_dataframe(), df)
 
         df30["g"] = 4
-        self.assertRaise(lambda: sdf20.concat(df30).to_dataframe(),
-                         ValueError, "Frame others[0] do not have the same column names")
+        self.assertRaise(
+            lambda: sdf20.concat(df30).to_dataframe(),
+            ValueError,
+            "Frame others[0] do not have the same column names",
+        )
         df20["cint"] = df20["cint"].astype(float)
-        self.assertRaise(lambda: sdf20.concat(df20).to_dataframe(),
-                         ValueError, "Frame others[0] do not have the same column types")
+        self.assertRaise(
+            lambda: sdf20.concat(df20).to_dataframe(),
+            ValueError,
+            "Frame others[0] do not have the same column types",
+        )
 
     def test_concath(self):
         sdf20 = dummy_streaming_dataframe(20)
@@ -349,8 +352,9 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(m1.to_dataframe(), df)
         sdf22 = dummy_streaming_dataframe(22)
         sdf25 = dummy_streaming_dataframe(25)
-        self.assertRaise(lambda: sdf22.concat(sdf25, axis=1).to_dataframe(),
-                         RuntimeError)
+        self.assertRaise(
+            lambda: sdf22.concat(sdf25, axis=1).to_dataframe(), RuntimeError
+        )
 
     def test_groupby(self):
         df20 = dummy_streaming_dataframe(20).to_dataframe()
@@ -359,14 +363,19 @@ class TestStreamingDataFrame(ExtTestCase):
         gr = sdf20.groupby("key", lambda gr: gr.sum())
         gr2 = df20.groupby("key").sum()
         self.assertEqualDataFrame(gr, gr2)
-        self.assertRaise(lambda: sdf20.groupby(
-            "key", in_memory=False), NotImplementedError)
+        self.assertRaise(
+            lambda: sdf20.groupby("key", in_memory=False), NotImplementedError
+        )
 
         # Do not replace lambda c:sum(c) by sum or...
-        # pandas.core.base.SpecificationError: Function names must be unique, found multiple named sum
-        gr2 = df20.drop("cstr", axis=1).groupby("key").agg([numpy.sum, lambda c:sum(c)])
-        gr = sdf20.drop("cstr", axis=1).groupby("key", lambda gr: gr.agg(
-            [numpy.sum, lambda c:sum(c)]))
+        # pandas.core.base.SpecificationError: Function names
+        # must be unique, found multiple named sum
+        gr2 = (
+            df20.drop("cstr", axis=1).groupby("key").agg([numpy.sum, lambda c: sum(c)])
+        )
+        gr = sdf20.drop("cstr", axis=1).groupby(
+            "key", lambda gr: gr.agg([numpy.sum, lambda c: sum(c)])
+        )
         self.assertEqualDataFrame(gr, gr2)
 
         gr = sdf20.groupby("key", lambda gr: gr.count())
@@ -384,7 +393,8 @@ class TestStreamingDataFrame(ExtTestCase):
         df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
         sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
         sgr = sdf20.groupby_streaming(
-            "key", lambda gr: gr.sum(), strategy='cum', as_index=False)
+            "key", lambda gr: gr.sum(), strategy="cum", as_index=False
+        )
         gr2 = df20.groupby("key", as_index=False).sum()
         lastgr = None
         for gr in sgr:
@@ -397,7 +407,8 @@ class TestStreamingDataFrame(ExtTestCase):
         df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
         sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
         sgr = sdf20.groupby_streaming(
-            "key", lambda gr: gr.sum(), strategy='streaming', as_index=False)
+            "key", lambda gr: gr.sum(), strategy="streaming", as_index=False
+        )
         gr2 = df20.groupby("key", as_index=False).sum()
         grs = list(sgr)
         gr = pandas.concat(grs).groupby("key", as_index=False).sum()
@@ -408,7 +419,8 @@ class TestStreamingDataFrame(ExtTestCase):
         df20["key"] = df20["cint"].apply(lambda i: i % 3 == 0)
         sdf20 = StreamingDataFrame.read_df(df20, chunksize=5)
         sgr = sdf20.groupby_streaming(
-            "key", lambda gr: gr.sum(), strategy='cum', as_index=True)
+            "key", lambda gr: gr.sum(), strategy="cum", as_index=True
+        )
         gr2 = df20.groupby("key", as_index=True).sum()
         lastgr = None
         for gr in sgr:
@@ -426,13 +438,21 @@ class TestStreamingDataFrame(ExtTestCase):
         m = pandas.DataFrame(dict(Y=["a", "b"], Z=[10, 20]))
         jm = df2.merge(m, left_on="Y", right_on="Y", how="outer")
         sjm = sdf2.merge(m, left_on="Y", right_on="Y", how="outer")
-        self.assertEqualDataFrame(jm.sort_values(["X", "Y"]).reset_index(drop=True),
-                                  sjm.to_dataframe().sort_values(["X", "Y"]).reset_index(drop=True))
+        self.assertEqualDataFrame(
+            jm.sort_values(["X", "Y"]).reset_index(drop=True),
+            sjm.to_dataframe().sort_values(["X", "Y"]).reset_index(drop=True),
+        )
 
     @ignore_warnings(ResourceWarning)
     def test_schema_consistent(self):
-        df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"), dict(cf=1, cint=1, cstr="1"),
-                               dict(cf=2, cint="s2", cstr="2"), dict(cf=3, cint=3, cstr="3")])
+        df = pandas.DataFrame(
+            [
+                dict(cf=0, cint=0, cstr="0"),
+                dict(cf=1, cint=1, cstr="1"),
+                dict(cf=2, cint="s2", cstr="2"),
+                dict(cf=3, cint=3, cstr="3"),
+            ]
+        )
         temp = get_temp_folder(__file__, "temp_schema_consistant")
         name = os.path.join(temp, "df.csv")
         stio = StringIO()
@@ -442,8 +462,7 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(df.shape, (4, 3))
         sdf = StreamingDataFrame.read_csv(name, chunksize=2)
         self.assertRaise(lambda: list(sdf), StreamingDataFrameSchemaError)
-        sdf = StreamingDataFrame.read_csv(
-            name, chunksize=2, check_schema=False)
+        sdf = StreamingDataFrame.read_csv(name, chunksize=2, check_schema=False)
         pieces = list(sdf)
         self.assertEqual(len(pieces), 2)
 
@@ -460,11 +479,10 @@ class TestStreamingDataFrame(ExtTestCase):
     def test_read_csv_names(self):
         this = os.path.abspath(os.path.dirname(__file__))
         data = os.path.join(this, "data", "buggy_hash2.csv")
-        df = pandas.read_csv(data, sep="\t",
-                             names=["A", "B", "C"],
-                             header=None)
+        df = pandas.read_csv(data, sep="\t", names=["A", "B", "C"], header=None)
         sdf = StreamingDataFrame.read_csv(
-            data, sep="\t", names=["A", "B", "C"], chunksize=2, header=None)
+            data, sep="\t", names=["A", "B", "C"], chunksize=2, header=None
+        )
         head = sdf.head(n=1)
         self.assertEqualDataFrame(df.head(n=1), head)
 
@@ -489,18 +507,15 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(df, dfB)
 
     def test_fillna(self):
-        df = pandas.DataFrame(
-            data=dict(X=[4.5, numpy.nan, 7], Y=["a", "b", numpy.nan]))
+        df = pandas.DataFrame(data=dict(X=[4.5, numpy.nan, 7], Y=["a", "b", numpy.nan]))
         sdf = StreamingDataFrame.read_df(df)
 
-        df2 = pandas.DataFrame(
-            data=dict(X=[4.5, 10.0, 7], Y=["a", "b", "NAN"]))
+        df2 = pandas.DataFrame(data=dict(X=[4.5, 10.0, 7], Y=["a", "b", "NAN"]))
         na = sdf.fillna(value=dict(X=10.0, Y="NAN"))
         ndf = na.to_df()
         self.assertEqual(ndf, df2)
 
-        df3 = pandas.DataFrame(
-            data=dict(X=[4.5, 10.0, 7], Y=["a", "b", numpy.nan]))
+        df3 = pandas.DataFrame(data=dict(X=[4.5, 10.0, 7], Y=["a", "b", numpy.nan]))
         na = sdf.fillna(value=dict(X=10.0))
         ndf = na.to_df()
         self.assertEqual(ndf, df3)
@@ -513,16 +528,16 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = StreamingDataFrame.read_df(df)
 
         desc = sdf.describe()
-        self.assertEqual(['X', 'Y'], list(desc.columns))
-        self.assertEqual(desc.loc['min', :].tolist(), [-0.5, 0])
-        self.assertEqual(desc.loc['max', :].tolist(), [0.5, 100000])
+        self.assertEqual(["X", "Y"], list(desc.columns))
+        self.assertEqual(desc.loc["min", :].tolist(), [-0.5, 0])
+        self.assertEqual(desc.loc["max", :].tolist(), [0.5, 100000])
+        self.assertEqualArray(desc.loc["mean", :], numpy.array([0, 50000]), atol=1e-8)
+        self.assertEqualArray(desc.loc["25%", :], numpy.array([-0.25, 25000]))
+        self.assertEqualArray(desc.loc["50%", :], numpy.array([0.0, 50000]))
+        self.assertEqualArray(desc.loc["75%", :], numpy.array([0.25, 75000]))
         self.assertEqualArray(
-            desc.loc['mean', :], numpy.array([0, 50000]), atol=1e-8)
-        self.assertEqualArray(desc.loc['25%', :], numpy.array([-0.25, 25000]))
-        self.assertEqualArray(desc.loc['50%', :], numpy.array([0.0, 50000]))
-        self.assertEqualArray(desc.loc['75%', :], numpy.array([0.25, 75000]))
-        self.assertEqualArray(desc.loc['std', :], numpy.array(
-            [2.886795e-01, 28867.946472]), decimal=4)
+            desc.loc["std", :], numpy.array([2.886795e-01, 28867.946472]), decimal=4
+        )
 
     def test_set_item(self):
         df = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7]))
@@ -530,31 +545,31 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf = StreamingDataFrame.read_df(df)
 
         def f():
-            sdf[['a']] = 10
+            sdf[["a"]] = 10
+
         self.assertRaise(f, ValueError)
 
         def g():
-            sdf['a'] = [10]
+            sdf["a"] = [10]
+
         self.assertRaise(g, NotImplementedError)
 
-        sdf['aa'] = 10
+        sdf["aa"] = 10
         df = sdf.to_df()
         ddf = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7], aa=[10]))
         self.assertEqualDataFrame(df, ddf)
-        sdf['bb'] = sdf['b'] + 10
+        sdf["bb"] = sdf["b"] + 10
         df = sdf.to_df()
-        ddf = ddf = pandas.DataFrame(
-            data=dict(a=[4.5], b=[6], c=[7], aa=[10], bb=[16]))
+        ddf = ddf = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7], aa=[10], bb=[16]))
         self.assertEqualDataFrame(df, ddf)
 
     def test_set_item_function(self):
         df = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7]))
         self.assertRaise(lambda: StreamingDataFrame(df), TypeError)
         sdf = StreamingDataFrame.read_df(df)
-        sdf['bb'] = sdf['b'].apply(lambda x: x + 11)
+        sdf["bb"] = sdf["b"].apply(lambda x: x + 11)
         df = sdf.to_df()
-        ddf = ddf = pandas.DataFrame(
-            data=dict(a=[4.5], b=[6], c=[7], bb=[17]))
+        ddf = ddf = pandas.DataFrame(data=dict(a=[4.5], b=[6], c=[7], bb=[17]))
         self.assertEqualDataFrame(df, ddf)
 
 

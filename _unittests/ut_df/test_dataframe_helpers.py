@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@brief      test log(time=4s)
-"""
 import os
 import unittest
 import numpy
@@ -11,13 +7,16 @@ from pandas_streaming.df import dataframe_hash_columns
 
 
 class TestDataFrameHelpers(ExtTestCase):
-
     def test_hash_columns(self):
-        df = pandas.DataFrame([dict(a=1, b="e", c=5.6, ind="a1", ai=1),
-                               dict(b="f", c=5.7, ind="a2", ai=2),
-                               dict(a=4, b="g", ind="a3", ai=3),
-                               dict(a=8, b="h", c=5.9, ai=4),
-                               dict(a=16, b="i", c=6.2, ind="a5", ai=5)])
+        df = pandas.DataFrame(
+            [
+                dict(a=1, b="e", c=5.6, ind="a1", ai=1),
+                dict(b="f", c=5.7, ind="a2", ai=2),
+                dict(a=4, b="g", ind="a3", ai=3),
+                dict(a=8, b="h", c=5.9, ai=4),
+                dict(a=16, b="i", c=6.2, ind="a5", ai=5),
+            ]
+        )
         df2 = dataframe_hash_columns(df)
         self.assertEqual(df2.shape, df.shape)
         for j in range(df.shape[1]):

@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-@file
-@brief Saves and reads a :epkg:`dataframe` into a :epkg:`zip` file.
-"""
 import os
 from io import StringIO, BytesIO
+
 try:
     from ujson import dumps
 except ImportError:  # pragma: no cover
@@ -46,10 +42,10 @@ class JsonPerRowsStream:
         if size == 0:
             return text
         if self.newline:
-            text = ',' + text
+            text = "," + text
             self.newline = False
         elif self.begin:
-            text = '[' + text
+            text = "[" + text
             self.begin = False
 
         if text.endswith("\n"):
@@ -58,7 +54,7 @@ class JsonPerRowsStream:
         if len(text) == 0 or len(text) < size:
             if self.end:
                 self.end = False
-                return text + ']'
+                return text + "]"
             return text
         return text
 
@@ -76,7 +72,7 @@ class JsonPerRowsStream:
         if size == 0:
             return text
         if len(text) > 1:
-            t1, t2 = text[:len(text) - 1], text[len(text) - 1:]
+            t1, t2 = text[: len(text) - 1], text[len(text) - 1 :]
             t1 = t1.replace(cst[0], cst[1])
             text = t1 + t2
 
@@ -101,11 +97,13 @@ class JsonPerRowsStream:
         """
         Returns the whole stream content.
         """
+
         def byline():
             line = self.readline()
             while line:
                 yield line
                 line = self.readline()
+
         return "".join(byline())
 
 
@@ -119,7 +117,7 @@ def flatten_dictionary(dico, sep="_"):
     :return: flattened dictionary
 
     Inspired from `flatten_json
-    <https://github.com/amirziai/flatten/blob/master/flatten_json.py>`_.
+    <https://github.com/amirziai/flatten/blob/master/flatten_json/__init__.py>`_.
     """
     flattened_dict = {}
 
@@ -129,8 +127,7 @@ def flatten_dictionary(dico, sep="_"):
         elif isinstance(obj, dict):
             for k, v in obj.items():
                 if not isinstance(k, str):
-                    raise TypeError(
-                        "All keys must a string.")  # pragma: no cover
+                    raise TypeError("All keys must a string.")  # pragma: no cover
                 k2 = k if key is None else f"{key}{sep}{k}"
                 _flatten(v, k2)
         elif isinstance(obj, (list, set)):
@@ -144,7 +141,9 @@ def flatten_dictionary(dico, sep="_"):
     return flattened_dict
 
 
-def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fLOG=None):
+def enumerate_json_items(
+    filename, encoding=None, lines=False, flatten=False, verbose=0
+):
     """
     Enumerates items from a :epkg:`JSON` file or string.
 
@@ -152,7 +151,7 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
     :param encoding: encoding
     :param lines: one record per row
     :param flatten: call @see fn flatten_dictionary
-    :param fLOG: logging function
+    :param verbose: verbosity (based on :epkg:`tqdm`)
     :return: iterator on records at first level.
 
     It assumes the syntax follows the format: ``[ {"id":1, ...}, {"id": 2, ...}, ...]``.
@@ -235,45 +234,51 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
         if "{" not in filename and os.path.exists(filename):
             with open(filename, "r", encoding=encoding) as f:
                 for el in enumerate_json_items(
-                        f, encoding=encoding, lines=lines,
-                        flatten=flatten, fLOG=fLOG):
+                    f, encoding=encoding, lines=lines, flatten=flatten
+                ):
                     yield el
         else:
             st = StringIO(filename)
             for el in enumerate_json_items(
-                    st, encoding=encoding, lines=lines,
-                    flatten=flatten, fLOG=fLOG):
+                st, encoding=encoding, lines=lines, flatten=flatten
+            ):
                 yield el
     elif isinstance(filename, bytes):
         st = BytesIO(filename)
         for el in enumerate_json_items(
-                st, encoding=encoding, lines=lines, flatten=flatten,
-                fLOG=fLOG):
+            st, encoding=encoding, lines=lines, flatten=flatten
+        ):
             yield el
     elif lines:
         for el in enumerate_json_items(
-                JsonPerRowsStream(filename),
-                encoding=encoding, lines=False, flatten=flatten, fLOG=fLOG):
+            JsonPerRowsStream(filename), encoding=encoding, lines=False, flatten=flatten
+        ):
             yield el
     else:
-        if hasattr(filename, 'seek'):
+        if hasattr(filename, "seek"):
             filename.seek(0)
         parser = ijson.parse(filename)
         current = None
         curkey = None
         stack = []
         nbyield = 0
-        for i, (_, event, value) in enumerate(parser):
-            if i % 1000000 == 0 and fLOG is not None:
-                fLOG(  # pragma: no cover
-                    f"[enumerate_json_items] i={i} yielded={nbyield}")
+        if verbose:
+            from tqdm import tqdm
+
+            loop = tqdm(enumerate(parser))
+        else:
+            loop = enumerate(parser)
+        for i, (_, event, value) in loop:
+            if verbose:
+                loop.set_description(f"process row {i}-event={event!r}")
             if event == "start_array":
                 if curkey is None:
                     current = []
                 else:
                     if not isinstance(current, dict):
                         raise RuntimeError(  # pragma: no cover
-                            f"Type issue {type(current)}")
+                            f"Type issue {type(current)}"
+                        )
                     c = []
                     current[curkey] = c  # pylint: disable=E1137
                     current = c
@@ -323,8 +328,7 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False, fL
                     current[curkey] = None  # pylint: disable=E1137
                     curkey = None
             else:
-                raise ValueError(
-                    f"Unknown event '{event}'")  # pragma: no cover
+                raise ValueError(f"Unknown event '{event}'")  # pragma: no cover
 
 
 class JsonIterator2Stream:
@@ -335,7 +339,7 @@ class JsonIterator2Stream:
     The iterator could be one returned by @see fn enumerate_json_items.
 
     :param it: iterator
-    :param kwargs: arguments to :epkg:`*py:json:dumps`
+    :param kwargs: arguments to :class:`json.dumps`
 
     .. exref::
         :title: Reshape a json file
@@ -420,8 +424,7 @@ class JsonIterator2Stream:
         :param offset: offset, only 0 is implemented
         """
         if offset != 0:
-            raise NotImplementedError(
-                "The iterator can only return at the beginning.")
+            raise NotImplementedError("The iterator can only return at the beginning.")
         self.it0 = self.it()
 
     def write(self):

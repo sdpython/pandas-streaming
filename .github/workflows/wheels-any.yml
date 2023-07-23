@@ -1,0 +1,29 @@
+name: Build Any Wheel
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: build wheel
+        run: python -m pip wheel .
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./pandas_streaming*.whl

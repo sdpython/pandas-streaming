@@ -1,3 +1,7 @@
+
+.. |gitlogo| image:: _static/git_logo.png
+             :height: 20
+
 pandas-streaming: streaming API over pandas
 ===========================================
 
@@ -19,7 +23,7 @@ pandas-streaming: streaming API over pandas
     :target: https://dev.azure.com/xavierdupre3/pandas_streaming/
 
 .. image:: https://badge.fury.io/py/pandas_streaming.svg
-    :target: http://badge.fury.io/py/pandas_streaming
+    :target: http://badge.fury.io/py/pandas-streaming
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :alt: MIT License
@@ -32,8 +36,8 @@ pandas-streaming: streaming API over pandas
     :alt: GitHub Issues
     :target: https://github.com/sdpython/pandas_streaming/issues
 
-.. image:: https://pepy.tech/badge/pandas_streaming/month
-    :target: https://pepy.tech/project/pandas_streaming/month
+.. image:: https://pepy.tech/badge/pandas_streaming
+    :target: https://pypi.org/project/pandas_streaming/
     :alt: Downloads
 
 .. image:: https://img.shields.io/github/forks/sdpython/pandas_streaming.svg
@@ -48,44 +52,17 @@ pandas-streaming: streaming API over pandas
     :target: https://github.com/sdpython/pandas_streaming/
     :alt: size
 
-`pandas_streaming <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_
-aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
+*pandas_streaming* aims at processing big files with :epkg:`pandas`,
 too big to hold in memory, too small to be parallelized with a significant gain.
-The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API
+The module replicates a subset of :epkg:`pandas` API
 and implements other functionalities for machine learning.
 
-::
+.. toctree::
+    :maxdepth: 1
 
-    from pandas_streaming.df import StreamingDataFrame
-    sdf = StreamingDataFrame.read_csv("filename", sep="\t", encoding="utf-8")
-
-    for df in sdf:
-        # process this chunk of data
-        # df is a dataframe
-        print(df)
-
-The module can also stream an existing dataframe.
-
-::
-
-    import pandas
-    df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"),
-                           dict(cf=1, cint=1, cstr="1"),
-                           dict(cf=3, cint=3, cstr="3")])
-
-    from pandas_streaming.df import StreamingDataFrame
-    sdf = StreamingDataFrame.read_df(df)
-
-    for df in sdf:
-        # process this chunk of data
-        # df is a dataframe
-        print(df)
-
-It contains other helpers to split datasets into
-train and test with some weird constraints.
-
-**Links:**
-
-* `GitHub/pandas_streaming <https://github.com/sdpython/pandas_streaming/>`_
-* `documentation <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_
-* `Blog <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/blog/main_0000.html#ap-main-0>`_
+    tutorial/index
+    auto_examples/index
+    api/index
+    i_ex
+    CHANGELOGS
+    license

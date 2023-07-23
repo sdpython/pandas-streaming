@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@file
-@brief Implements different methods to split a dataframe.
-"""
 import hashlib
 import pickle
 import random
@@ -11,26 +6,30 @@ from io import StringIO
 import pandas
 
 
-def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
-                             names=None, **kwargs):
+def sklearn_train_test_split(
+    self, path_or_buf=None, export_method="to_csv", names=None, **kwargs
+):
     """
     Randomly splits a dataframe into smaller pieces.
     The function returns streams of file names.
-    The function relies on :epkg:`sklearn:model_selection:train_test_split`.
+    The function relies on :func:`sklearn.model_selection.train_test_split`.
     It does not handle stratified version of it.
 
-    @param  self            @see cl StreamingDataFrame
-    @param  path_or_buf     a string, a list of strings or buffers, if it is a
-                            string, it must contain ``{}`` like ``partition{}.txt``
-    @param  export_method   method used to store the partitions, by default
-                            :epkg:`pandas:DataFrame:to_csv`
-    @param  names           partitions names, by default ``('train', 'test')``
-    @param  kwargs          parameters for the export function and
-                            :epkg:`sklearn:model_selection:train_test_split`.
-    @return                 outputs of the exports functions
+    :param self: see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`
+    :param path_or_buf: a string, a list of strings or buffers, if it is a
+        string, it must contain ``{}`` like ``partition{}.txt``
+    :param export_method: method used to store the partitions, by default
+        :meth:`pandas.DataFrame.to_csv`
+    :param names: partitions names, by default ``('train', 'test')``
+    :param kwargs: parameters for the export function and
+        :func:`sklearn.model_selection.train_test_split`.
+    :return: outputs of the exports functions
 
     The function cannot return two iterators or two
-    @see cl StreamingDataFrame because running through one
+    see :class:`StreamingDataFrame
+    <pandas_streaming.df.dataframe.StreamingDataFrame>`
+    because running through one
     means running through the other. We can assume both
     splits do not hold in memory and we cannot run through
     the same iterator again as random draws would be different.
@@ -42,13 +41,13 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
     """
     if kwargs.get("stratify") is not None:
         raise NotImplementedError(  # pragma: no cover
-            "No implementation yet for the stratified version.")
+            "No implementation yet for the stratified version."
+        )
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=ImportWarning)
         from sklearn.model_selection import train_test_split  # pylint: disable=C0415
 
-    opts = ['test_size', 'train_size',
-            'random_state', 'shuffle', 'stratify']
+    opts = ["test_size", "train_size", "random_state", "shuffle", "stratify"]
     split_ops = {}
     for o in opts:
         if o in kwargs:
@@ -56,27 +55,28 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
             del kwargs[o]
 
     exportf_ = getattr(pandas.DataFrame, export_method)
-    if export_method == 'to_csv' and 'mode' not in kwargs:
-        exportf = lambda *a, **kw: exportf_(*a, mode='a', **kw)
+    if export_method == "to_csv" and "mode" not in kwargs:
+        exportf = lambda *a, **kw: exportf_(*a, mode="a", **kw)  # noqa: E731
     else:
         exportf = exportf_
 
     if isinstance(path_or_buf, str):
         if "{}" not in path_or_buf:
-            raise ValueError(
-                "path_or_buf must contain {} to insert the partition name")
+            raise ValueError("path_or_buf must contain {} to insert the partition name")
         if names is None:
-            names = ['train', 'test']
+            names = ["train", "test"]
         elif len(names) != len(path_or_buf):
             raise ValueError(  # pragma: no cover
-                'names and path_or_buf must have the same length')
+                "names and path_or_buf must have the same length"
+            )
         path_or_buf = [path_or_buf.format(n) for n in names]
     elif path_or_buf is None:
         path_or_buf = [None, None]
     else:
         if not isinstance(path_or_buf, list):
             raise TypeError(  # pragma: no cover
-                'path_or_buf must be a list or a string')
+                "path_or_buf must be a list or a string"
+            )
 
     bufs = []
     close = []
@@ -85,8 +85,7 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
             st = StringIO()
             cl = False
         elif isinstance(p, str):
-            st = open(  # pylint: disable=R1732
-                p, "w", encoding=kwargs.get('encoding'))
+            st = open(p, "w", encoding=kwargs.get("encoding"))  # pylint: disable=R1732
             cl = True
         else:
             st = p
@@ -98,34 +97,41 @@ def sklearn_train_test_split(self, path_or_buf=None, export_method="to_csv",
         train, test = train_test_split(df, **split_ops)
         exportf(train, bufs[0], **kwargs)
         exportf(test, bufs[1], **kwargs)
-        kwargs['header'] = False
+        kwargs["header"] = False
 
     for b, c in zip(bufs, close):
         if c:
             b.close()
-    return [st.getvalue() if isinstance(st, StringIO) else p
-            for st, p in zip(bufs, path_or_buf)]
+    return [
+        st.getvalue() if isinstance(st, StringIO) else p
+        for st, p in zip(bufs, path_or_buf)
+    ]
 
 
-def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
-                                       stratify=None, hash_size=9, unique_rows=False):
+def sklearn_train_test_split_streaming(
+    self, test_size=0.25, train_size=None, stratify=None, hash_size=9, unique_rows=False
+):
     """
     Randomly splits a dataframe into smaller pieces.
     The function returns streams of file names.
-    The function relies on :epkg:`sklearn:model_selection:train_test_split`.
+    The function relies on :func:`sklearn.model_selection.train_test_split`.
     It handles the stratified version of it.
 
-    @param  self            @see cl StreamingDataFrame
-    @param  test_size       ratio for the test partition (if *train_size* is not specified)
-    @param  train_size      ratio for the train partition
-    @param  stratify        column holding the stratification
-    @param  hash_size       size of the hash to cache information about partition
-    @param  unique_rows     ensures that rows are unique
-    @return                 Two @see cl StreamingDataFrame, one
-                            for train, one for test.
+    :param self: see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`
+    :param test_size: ratio for the test partition
+        (if *train_size* is not specified)
+    :param train_size: ratio for the train partition
+    :param stratify: column holding the stratification
+    :param hash_size: size of the hash to cache information about partition
+    :param unique_rows: ensures that rows are unique
+    :return: Two see :class:`StreamingDataFrame
+        <pandas_streaming.df.dataframe.StreamingDataFrame>`,
+        one for train, one for test.
 
     The function returns two iterators or two
-    @see cl StreamingDataFrame. It
+    see :class:`StreamingDataFrame
+    <pandas_streaming.df.dataframe.StreamingDataFrame>`. It
     tries to do everything without writing anything on disk
     but it requires to store the repartition somehow.
     This function hashes every row and maps the hash with a part
@@ -173,7 +179,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                         random.shuffle(vr)
                         if (0, k) in counts:
                             tt = counts[1, k] + counts[0, k]
-                            delta = - int(counts[0, k] - tt * p + 0.5)
+                            delta = -int(counts[0, k] - tt * p + 0.5)
                         else:
                             delta = 0
                         i = int(len(v) * p + 0.5)
@@ -199,7 +205,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
             random.shuffle(vr)
             if (0, k) in counts:
                 tt = counts[1, k] + counts[0, k]
-                delta = - int(counts[0, k] - tt * p + 0.5)
+                delta = -int(counts[0, k] - tt * p + 0.5)
             else:
                 delta = 0
             i = int(len(v) * p + 0.5)
@@ -234,7 +240,8 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                     raise ValueError(  # pragma: no cover
                         "A row or at least its hash is already cached. "
                         "Increase hash_size or check for duplicates "
-                        "('{0}')\n{1}.".format(h, obs))
+                        "('{0}')\n{1}.".format(h, obs)
+                    )
                 if h not in cache:
                     cache[h] = part
                 else:
@@ -242,8 +249,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                 if part == part_requested:
                     accumul.append(obs)
                     if len(accumul) >= static_schema[2]:
-                        dfo = pandas.DataFrame(
-                            accumul, columns=static_schema[0])
+                        dfo = pandas.DataFrame(accumul, columns=static_schema[0])
                         self.ensure_dtype(dfo, static_schema[1])
                         iy += dfo.shape[0]
                         accumul.clear()
@@ -255,12 +261,13 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
                     part = cache.get(h)
                     if part is None:
                         raise ValueError(  # pragma: no cover
-                            f"Second iteration. A row was never met in the first one\n{obs}")
+                            f"Second iteration. A row was "
+                            f"never met in the first one\n{obs}"
+                        )
                     if part == part_requested:
                         accumul.append(obs)
                         if len(accumul) >= static_schema[2]:
-                            dfo = pandas.DataFrame(
-                                accumul, columns=static_schema[0])
+                            dfo = pandas.DataFrame(accumul, columns=static_schema[0])
                             self.ensure_dtype(dfo, static_schema[1])
                             iy += dfo.shape[0]
                             accumul.clear()
@@ -271,5 +278,7 @@ def sklearn_train_test_split_streaming(self, test_size=0.25, train_size=None,
             iy += dfo.shape[0]
             yield dfo
 
-    return (self.__class__(lambda: iterator_internal(0)),
-            self.__class__(lambda: iterator_internal(1)))
+    return (
+        self.__class__(lambda: iterator_internal(0)),
+        self.__class__(lambda: iterator_internal(1)),
+    )

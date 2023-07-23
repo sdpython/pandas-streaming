@@ -11,7 +11,7 @@ jobs:
 
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "requirements.txt" }}
+          - v3-dependencies-{{ checksum "requirements-dev.txt" }}
           - v3-dependencies-
 
       - run:
@@ -39,12 +39,12 @@ jobs:
       - run:
           name: install dependencies (2)
           command: |
-            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
 
       - save_cache:
           paths:
             - ./venv
-          key: v3-dependencies-{{ checksum "requirements.txt" }}
+          key: v3-dependencies-{{ checksum "requirements-dev.txt" }}
         
       - run:
           name: compile and build
@@ -54,7 +54,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            python setup.py unittests
+            python -m pytest
 
       - run:
           name: wheel

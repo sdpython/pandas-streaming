@@ -1,6 +1,1 @@
-"""
-@file
-@brief Shortcuts to *exc*.
-"""
-
-from .exc_streaming import StreamingInefficientException
+from .exc_streaming import StreamingInefficientException  # noqa: F401

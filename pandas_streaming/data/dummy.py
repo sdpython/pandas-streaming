@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@file
-@brief Dummy datasets.
-"""
 from pandas import DataFrame
 from ..df import StreamingDataFrame
 
@@ -19,11 +14,16 @@ def dummy_streaming_dataframe(n, chunksize=10, asfloat=False, **cols):
     :return: a @see cl StreamingDataFrame
     """
     if asfloat:
-        df = DataFrame(dict(cfloat=[_ + 0.1 for _ in range(0, n)], cstr=[
-                       f"s{i}" for i in range(0, n)]))
+        df = DataFrame(
+            dict(
+                cfloat=[_ + 0.1 for _ in range(0, n)],
+                cstr=[f"s{i}" for i in range(0, n)],
+            )
+        )
     else:
-        df = DataFrame(dict(cint=list(range(0, n)), cstr=[
-                       f"s{i}" for i in range(0, n)]))
+        df = DataFrame(
+            dict(cint=list(range(0, n)), cstr=[f"s{i}" for i in range(0, n)])
+        )
     for k, v in cols.items():
         df[k] = v
     return StreamingDataFrame.read_df(df, chunksize=chunksize)
