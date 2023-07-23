@@ -117,7 +117,7 @@ def flatten_dictionary(dico, sep="_"):
     :return: flattened dictionary
 
     Inspired from `flatten_json
-    <https://github.com/amirziai/flatten/blob/master/flatten_json.py>`_.
+    <https://github.com/amirziai/flatten/blob/master/flatten_json/__init__.py>`_.
     """
     flattened_dict = {}
 

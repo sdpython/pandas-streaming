@@ -5,10 +5,10 @@
 pandas-streaming: streaming API over pandas
 ===========================================
 
-.. image:: https://github.com/sdpython/pandas_streaming/blob/master/_doc/sphinxdoc/source/_static/project_ico.png?raw=true
+.. image:: https://github.com/sdpython/pandas_streaming/blob/main/_doc/sphinxdoc/source/_static/project_ico.png?raw=true
     :target: https://github.com/sdpython/pandas_streaming/
 
-.. image:: https://travis-ci.com/sdpython/pandas_streaming.svg?branch=master
+.. image:: https://travis-ci.com/sdpython/pandas_streaming.svg?branch=main
     :target: https://app.travis-ci.com/github/sdpython/pandas_streaming
     :alt: Build status
 
@@ -16,8 +16,8 @@ pandas-streaming: streaming API over pandas
     :target: https://ci.appveyor.com/project/sdpython/pandas-streaming
     :alt: Build Status Windows
 
-.. image:: https://circleci.com/gh/sdpython/pandas_streaming/tree/master.svg?style=svg
-    :target: https://circleci.com/gh/sdpython/pandas_streaming/tree/master
+.. image:: https://circleci.com/gh/sdpython/pandas_streaming/tree/main.svg?style=svg
+    :target: https://circleci.com/gh/sdpython/pandas_streaming/tree/main
 
 .. image:: https://dev.azure.com/xavierdupre3/pandas_streaming/_apis/build/status/sdpython.pandas_streaming
     :target: https://dev.azure.com/xavierdupre3/pandas_streaming/
@@ -29,8 +29,8 @@ pandas-streaming: streaming API over pandas
     :alt: MIT License
     :target: http://opensource.org/licenses/MIT
 
-.. image:: https://codecov.io/github/sdpython/pandas_streaming/coverage.svg?branch=master
-    :target: https://codecov.io/github/sdpython/pandas_streaming?branch=master
+.. image:: https://codecov.io/github/sdpython/pandas_streaming/coverage.svg?branch=main
+    :target: https://codecov.io/github/sdpython/pandas_streaming?branch=main
 
 .. image:: http://img.shields.io/github/issues/sdpython/pandas_streaming.png
     :alt: GitHub Issues

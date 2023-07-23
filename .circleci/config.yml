@@ -54,7 +54,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            python setup.py unittests
+            python -m pytest
 
       - run:
           name: wheel

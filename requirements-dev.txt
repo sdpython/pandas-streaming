@@ -14,7 +14,7 @@ pyquickhelper>=1.10
 scikit-learn
 scipy
 sphinx
-sphinx-runpython
+git+https://github.com/sdpython/sphinx-runpython.git
 sphinxcontrib.imagesvg
 sphinx_gallery
 ujson
