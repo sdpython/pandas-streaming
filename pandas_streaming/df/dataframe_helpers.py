@@ -350,8 +350,7 @@ def pandas_groupby_nan(
         generated/pandas.DataFrame.groupby.html>`_
     :return: groupby results
 
-    See `groupby and missing values <http://pandas-docs.github.io/
-    pandas-docs-travis/groupby.html#na-and-nat-group-handling>`_.
+    See :epkg:`groupby and missing values`.
     If no :epkg:`nan` is detected, the function falls back in regular
     :epkg:`pandas:DataFrame:groupby` which has the following
     behavior.

@@ -12,7 +12,7 @@ def sklearn_train_test_split(
     """
     Randomly splits a dataframe into smaller pieces.
     The function returns streams of file names.
-    The function relies on :epkg:`sklearn:model_selection:train_test_split`.
+    The function relies on :func:`sklearn.model_selection.train_test_split`.
     It does not handle stratified version of it.
 
     @param  self            see :class:`StreamingDataFrame`
@@ -22,7 +22,7 @@ def sklearn_train_test_split(
                             :epkg:`pandas:DataFrame:to_csv`
     @param  names           partitions names, by default ``('train', 'test')``
     @param  kwargs          parameters for the export function and
-                            :epkg:`sklearn:model_selection:train_test_split`.
+                            :fund:`sklearn.model_selection.train_test_split`.
     @return                 outputs of the exports functions
 
     The function cannot return two iterators or two
@@ -111,7 +111,7 @@ def sklearn_train_test_split_streaming(
     """
     Randomly splits a dataframe into smaller pieces.
     The function returns streams of file names.
-    The function relies on :epkg:`sklearn:model_selection:train_test_split`.
+    The function relies on :func:`sklearn.model_selection.train_test_split`.
     It handles the stratified version of it.
 
     :param self: see :class:`StreamingDataFrame`

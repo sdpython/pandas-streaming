@@ -177,6 +177,7 @@ epkg_dictionary = {
     "DataFrame": "https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html",
     "dataframes": "https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html",
     "dill": "https://dill.readthedocs.io/en/latest/dill.html",
+    "groupby and missing values": "https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html",
     "Hadoop": "http://hadoop.apache.org/",
     "ijson": "https://github.com/ICRAR/ijson",
     "nan": "https://numpy.org/doc/stable/reference/constants.html#numpy.NAN",
@@ -196,8 +197,8 @@ epkg_dictionary = {
     "scikit-multiflow": "https://scikit-multiflow.github.io/",
     "sklearn": (
         "http://scikit-learn.org/stable/",
-        ("http://scikit-learn.org/stable/modules/generated/{0}.html", 1),
-        ("http://scikit-learn.org/stable/modules/generated/{0}.{1}.html", 2),
+        ("https://scikit-learn.org/stable/modules/generated/{0}.html", 1),
+        ("https://scikit-learn.org/stable/modules/generated/{0}.{1}.html", 2),
     ),
     "streamz": "https://streamz.readthedocs.io/en/latest/index.html",
     "tornado": "https://www.tornadoweb.org/en/stable/",

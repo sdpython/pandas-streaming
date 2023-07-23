@@ -138,7 +138,7 @@ class StreamingDataFrame:
                                 will be given to that function
         @param  names           partitions names, by default ``('train', 'test')``
         @param  kwargs          parameters for the export function and
-                                :epkg:`sklearn:model_selection:train_test_split`.
+                                :func:`sklearn.model_selection.train_test_split`.
         @param  streaming       the function switches to a
                                 streaming version of the algorithm.
         @param  partitions      splitting partitions

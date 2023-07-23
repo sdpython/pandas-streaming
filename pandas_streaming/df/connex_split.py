@@ -1,8 +1,11 @@
 from collections import Counter
+from logging import getLogger
 import pandas
 import numpy
 from sklearn.model_selection import train_test_split
 from .dataframe_helpers import dataframe_shuffle
+
+logger = getLogger("pandas-streaming")
 
 
 class ImbalancedSplitException(Exception):
@@ -133,6 +136,7 @@ def train_test_connex_split(
     return_cnx=False,
     must_groups=None,
     random_state=None,
+    verbose=0,
 ):
     """
     This split is for a specific case where data is linked
@@ -166,6 +170,7 @@ def train_test_connex_split(
     @param  must_groups     column name for ids which must not be shared by
                             train/test partitions
     @param  random_state    seed for random generator
+    @param  verbose         verbosity (uses logging)
     @return                 Two see :class:`StreamingDataFrame`, one
                             for train, one for test.
 
@@ -275,11 +280,15 @@ def train_test_connex_split(
         modif = 1
 
         while modif > 0 and itern < len(elements):
-            if fLOG and df.shape[0] > 10000:
-                fLOG(
-                    "[train_test_connex_split] iteration={0}-#nb connect={1} - "
-                    "modif={2}".format(iter, len(set(elements)), modif)
+            if df.shape[0] > 10000:
+                logger.info(
+                    "[train_test_connex_split] iteration=%d-#nb connect=%d - "
+                    "modif=%s",
+                    itern,
+                    len(set(elements)),
+                    modif,
                 )
+
             modif = 0
             itern += 1
             for i, row in enumerate(dfrows.itertuples(index=False, name=None)):
@@ -310,19 +319,18 @@ def train_test_connex_split(
                             diff = len(counts_cnx[new_c]) + len(counts_cnx[c]) - maxi
                             r = diff / float(maxi)
                             if r > kb:
-                                if fLOG:  # pragma: no cover
-                                    fLOG(
+                                if verbose:  # pragma: no cover
+                                    logger.info(
                                         "[train_test_connex_split]    balance "
-                                        "r={0:0.00000}>{1:0.00}, #[{2}]={3}, "
-                                        "#[{4}]={5}".format(
-                                            r,
-                                            kb,
-                                            new_c,
-                                            len(counts_cnx[new_c]),
-                                            c,
-                                            len(counts_cnx[c]),
-                                        )
+                                        "r=%1.4f>%1.2f, #[%d]=%d, #[%d]=%d",
+                                        r,
+                                        kb,
+                                        new_c,
+                                        len(counts_cnx[new_c]),
+                                        c,
+                                        len(counts_cnx[c]),
                                     )
+
                                 continue
 
                     if sib is not None:
@@ -330,19 +338,16 @@ def train_test_connex_split(
                             len(elements)
                         )
                         if r > sib:
-                            if fLOG:  # pragma: no cover
-                                fLOG(
-                                    "[train_test_connex_split]    no merge "
-                                    "r={0:0.00000}>{1:0.00}, #[{2}]={3}, #[{4}]={5}"
-                                    "".format(
-                                        r,
-                                        sib,
-                                        new_c,
-                                        len(counts_cnx[new_c]),
-                                        c,
-                                        len(counts_cnx[c]),
-                                    )
-                                )
+                            logger.info(
+                                "[train_test_connex_split]    "
+                                "no merge r=%1.4f>%1.2f, #[%d]=%d, #[%d]=%d",
+                                r,
+                                sib,
+                                new_c,
+                                len(counts_cnx[new_c]),
+                                c,
+                                len(counts_cnx[c]),
+                            )
                             avoids_merge[new_c, c] = i
                             continue
 
@@ -370,25 +375,26 @@ def train_test_connex_split(
     dfids[name] = elements
     dfids[one] = 1
     grsum = dfids[[name, one]].groupby(name, as_index=False).sum()
-    if fLOG:
-        for g in groups:
-            fLOG(f"[train_test_connex_split]     #nb in '{g}': {len(set(dfids[g]))}")
-        fLOG(f"[train_test_connex_split] #connex {grsum.shape[0]}/{dfids.shape[0]}")
+    for g in groups:
+        logger.info("[train_test_connex_split]     #nb in '%d':", len(set(dfids[g])))
+    logger.info(
+        "[train_test_connex_split] #connex %d/%d", grsum.shape[0], dfids.shape[0]
+    )
     if grsum.shape[0] <= 1:
         raise ValueError(  # pragma: no cover
             "Every element is in the same connected components."
         )
 
     # Statistics: top connected components
-    if fLOG:
+    if verbose:
         # Global statistics
         counts = Counter(elements)
         cl = [(v, k) for k, v in counts.items()]
         cum = 0
         maxc = None
-        fLOG(
-            "[train_test_connex_split] number of connected components: {0}"
-            "".format(len(set(elements)))
+        logger.info(
+            "[train_test_connex_split] number of connected components: %d",
+            len(set(elements)),
         )
         for i, (v, k) in enumerate(sorted(cl, reverse=True)):
             if i == 0:
@@ -396,15 +402,20 @@ def train_test_connex_split(
             if i >= 10:
                 break
             cum += v
-            fLOG(
-                "[train_test_connex_split]     c={0} #elements={1} cumulated"
-                "={2}/{3}".format(k, v, cum, len(elements))
+            logger.info(
+                "[train_test_connex_split]     c=%s #elements=%s cumulated=%d/%d",
+                k,
+                v,
+                cum,
+                len(elements),
             )
 
         # Most important component
-        fLOG(f"[train_test_connex_split] first row of the biggest component {maxc}")
+        logger.info(
+            "[train_test_connex_split] first row of the biggest component %d", maxc
+        )
         tdf = dfids[dfids[name] == maxc[0]]
-        fLOG(f"[train_test_connex_split] \n{tdf.head(n=10)}")
+        logger.info("[train_test_connex_split] % s", tdf.head(n=10))
 
     # Splits.
     train, test = train_test_split_weights(
@@ -471,8 +482,7 @@ def train_test_apart_stratify(
     classification. A category (*stratify*) is not exclusive
     and an observation can be assigned to multiple
     categories. In that particular case, the method
-    `train_test_split <http://scikit-learn.org/stable/modules/generated/
-    sklearn.model_selection.train_test_split.html>`_
+    :func:`sklearn.model_selection.train_test_split`
     can not directly be used.
 
     .. runpython::

@@ -141,7 +141,9 @@ def flatten_dictionary(dico, sep="_"):
     return flattened_dict
 
 
-def enumerate_json_items(filename, encoding=None, lines=False, flatten=False):
+def enumerate_json_items(
+    filename, encoding=None, lines=False, flatten=False, verbose=0
+):
     """
     Enumerates items from a :epkg:`JSON` file or string.
 
@@ -149,6 +151,7 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False):
     :param encoding: encoding
     :param lines: one record per row
     :param flatten: call @see fn flatten_dictionary
+    :param verbose: verbosity (based on :epkg:`tqdm`)
     :return: iterator on records at first level.
 
     It assumes the syntax follows the format: ``[ {"id":1, ...}, {"id": 2, ...}, ...]``.
@@ -259,11 +262,15 @@ def enumerate_json_items(filename, encoding=None, lines=False, flatten=False):
         curkey = None
         stack = []
         nbyield = 0
-        for i, (_, event, value) in enumerate(parser):
-            if i % 1000000 == 0 and fLOG is not None:
-                fLOG(  # pragma: no cover
-                    f"[enumerate_json_items] i={i} yielded={nbyield}"
-                )
+        if verbose:
+            from tqdm import tqdm
+
+            loop = tqdm(enumerate(parser))
+        else:
+            loop = enumerate(parser)
+        for i, (_, event, value) in loop:
+            if verbose:
+                loop.set_description(f"process row {i}-event={event!r}")
             if event == "start_array":
                 if curkey is None:
                     current = []

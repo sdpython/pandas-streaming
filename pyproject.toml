@@ -4,6 +4,7 @@ ignore_directives = [
     "autoclass",
     "autofunction",
     "automodule",
+    "exreflist",
     "gdot",
     "image-sg",
     "runpython",
