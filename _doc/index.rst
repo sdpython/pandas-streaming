@@ -64,4 +64,5 @@ and implements other functionalities for machine learning.
     auto_examples/index
     api/index
     i_ex
+    CHANGELOGS
     license
