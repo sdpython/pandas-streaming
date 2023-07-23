@@ -1358,7 +1358,7 @@ class StreamingDataFrame:
                         sub = dfs[numpy.isnan(dfs[by])]
                         yield sub
 
-        res = StreamingDataFrame(lambda: iterate(), **self.get_kwargs())
+        res = StreamingDataFrame(iterate, **self.get_kwargs())
         res._delete_.append(lambda: os.remove(temp_file))
         return res
 
