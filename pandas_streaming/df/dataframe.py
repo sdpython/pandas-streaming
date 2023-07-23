@@ -44,7 +44,7 @@ class StreamingDataFrame:
     The constructor cannot receive an iterator otherwise
     this class would be able to walk through the data
     only once. The main reason is it is impossible to
-    :epkg:`*py:pickle` (or :epkg:`dill`)
+    :mod:`pickle` (or :epkg:`dill`)
     an iterator: it cannot be replicated.
     Instead, the class takes a function which generates
     an iterator on :epkg:`DataFrame`.
@@ -89,10 +89,10 @@ class StreamingDataFrame:
         """
         Tells if the :epkg:`dataframe` is supposed to be stable.
 
-        @param      do_check    do not trust the value sent to the constructor
-        @param      n           number of rows used to check the stability,
-                                None for all rows
-        @return                 boolean
+        :param do_check: do not trust the value sent to the constructor
+        :param n: number of rows used to check the stability,
+            None for all rows
+        :return: boolean
 
         *do_check=True* means the methods checks the first
         *n* rows remains the same for two iterations.
@@ -130,23 +130,23 @@ class StreamingDataFrame:
         It chooses one of the options from module
         :mod:`dataframe_split <pandas_streaming.df.dataframe_split>`.
 
-        @param  path_or_buf     a string, a list of strings or buffers, if it is a
-                                string, it must contain ``{}`` like ``partition{}.txt``,
-                                if None, the function returns strings.
-        @param  export_method   method used to store the partitions, by default
-                                :epkg:`pandas:DataFrame:to_csv`, additional parameters
-                                will be given to that function
-        @param  names           partitions names, by default ``('train', 'test')``
-        @param  kwargs          parameters for the export function and
-                                :func:`sklearn.model_selection.train_test_split`.
-        @param  streaming       the function switches to a
-                                streaming version of the algorithm.
-        @param  partitions      splitting partitions
-        @return                 outputs of the exports functions or two
-                                see :class:`StreamingDataFrame` if path_or_buf is None.
+        :param path_or_buf: a string, a list of strings or buffers, if it is a
+            string, it must contain ``{}`` like ``partition{}.txt``,
+            if None, the function returns strings.
+        :param export_method: method used to store the partitions, by default
+            :epkg:`pandas:DataFrame:to_csv`, additional parameters
+            will be given to that function
+        :param names: partitions names, by default ``('train', 'test')``
+        :param kwargs: parameters for the export function and
+            :func:`sklearn.model_selection.train_test_split`.
+        :param streaming: the function switches to a
+            streaming version of the algorithm.
+        :param partitions: splitting partitions
+        :return: outputs of the exports functions or two
+            see :class:`StreamingDataFrame` if *path_or_buf* is None.
 
         The streaming version of this algorithm is implemented by function
-        @see fn sklearn_train_test_split_streaming. Its documentation
+        :func:`sklearn_train_test_split_streaming`. Its documentation
         indicates the limitation of the streaming version and gives some
         insights about the additional parameters.
         """
@@ -229,11 +229,9 @@ class StreamingDataFrame:
             dfs = list(it)
             print(dfs)
 
-        .. index:: IncompleteJSONError
-
         The parsed json must have an empty line at the end otherwise
         the following exception is raised:
-        `ijson.common.IncompleteJSONError: `
+        `ijson.common.IncompleteJSONError`:
         `parse error: unallowed token at this point in JSON text`.
         """
         if not isinstance(chunksize, int) or chunksize <= 0:

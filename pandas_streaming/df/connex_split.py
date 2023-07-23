@@ -147,32 +147,32 @@ def train_test_connex_split(
     test set. The function computes the connected components
     and breaks each of them in two parts for train and test.
 
-    @param  df              :epkg:`pandas:DataFrame`
-    @param  groups          columns name for the ids
-    @param  test_size       ratio for the test partition
-                            (if *train_size* is not specified)
-    @param  train_size      ratio for the train partition
-    @param  stratify        column holding the stratification
-    @param  hash_size       size of the hash to cache information about partition
-    @param  unique_rows     ensures that rows are unique
-    @param  shuffle         shuffles before the split
-    @param  fail_imbalanced raises an exception if relative weights difference
-                            is higher than this value
-    @param  stop_if_bigger  (float) stops a connected components from being
-                            bigger than this ratio of elements, this should not be used
-                            unless a big components emerges, the algorithm stops merging
-                            but does not guarantee it returns the best cut,
-                            the value should be close to 0
-    @param  keep_balance    (float), if not None, does not merge connected components
-                            if their relative sizes are too different,
-                            the value should be close to 1
-    @param  return_cnx      returns connected components as a third results
-    @param  must_groups     column name for ids which must not be shared by
-                            train/test partitions
-    @param  random_state    seed for random generator
-    @param  verbose         verbosity (uses logging)
-    @return                 Two see :class:`StreamingDataFrame`, one
-                            for train, one for test.
+    :param df: :epkg:`pandas:DataFrame`
+    :param groups: columns name for the ids
+    :param test_size: ratio for the test partition
+        (if *train_size* is not specified)
+    :param train_size: ratio for the train partition
+    :param stratify: column holding the stratification
+    :param hash_size: size of the hash to cache information about partition
+    :param unique_rows: ensures that rows are unique
+    :param shuffle: shuffles before the split
+    :param fail_imbalanced: raises an exception if relative weights difference
+        is higher than this value
+    :param stop_if_bigger: (float) stops a connected components from being
+        bigger than this ratio of elements, this should not be used
+        unless a big components emerges, the algorithm stops merging
+        but does not guarantee it returns the best cut,
+        the value should be close to 0
+    :param keep_balance: (float), if not None, does not merge connected components
+        if their relative sizes are too different,
+        the value should be close to 1
+    :param return_cnx: returns connected components as a third results
+    :param must_groups: column name for ids which must not be shared by
+        train/test partitions
+    :param random_state: seed for random generator
+    :param verbose: verbosity (uses logging)
+    :return: Two see :class:`StreamingDataFrame`, one
+        for train, one for test.
 
     The list of ids must hold in memory.
     There is no streaming implementation for the ids.
@@ -462,17 +462,17 @@ def train_test_apart_stratify(
     distinct products on train and test but common categories
     on both sides.
 
-    @param  df              :epkg:`pandas:DataFrame`
-    @param  group           columns name for the ids
-    @param  test_size       ratio for the test partition
-                            (if *train_size* is not specified)
-    @param  train_size      ratio for the train partition
-    @param  stratify        column holding the stratification
-    @param  force           if True, tries to get at least one example on the test side
-                            for each value of the column *stratify*
-    @param  random_state    seed for random generators
-    @return                 Two see :class:`StreamingDataFrame`, one
-                            for train, one for test.
+    :param df: :epkg:`pandas:DataFrame`
+    :param group: columns name for the ids
+    :param test_size: ratio for the test partition
+        (if *train_size* is not specified)
+    :param train_size: ratio for the train partition
+    :param stratify: column holding the stratification
+    :param force: if True, tries to get at least one example on the test side
+        for each value of the column *stratify*
+    :param random_state: seed for random generators
+    :return: Two see :class:`StreamingDataFrame`, one
+        for train, one for test.
 
     .. index:: multi-label
 
@@ -501,6 +501,7 @@ def train_test_apart_stratify(
         print(train)
         print('-----------')
         print(test)
+
     """
     if stratify is None:
         raise ValueError("stratify must be specified.")  # pragma: no cover

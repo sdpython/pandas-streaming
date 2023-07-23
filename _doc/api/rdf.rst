@@ -26,10 +26,13 @@ Many methods have been rewritten to support
 streaming. Among them, IO methods:
 
 .. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_csv
+    :noindex:
 
 .. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_df
+    :noindex:
 
 .. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_json
+    :noindex:
 
 Data Manipulation
 +++++++++++++++++

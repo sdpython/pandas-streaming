@@ -7,8 +7,10 @@ A few difference between :epkg:`pandas` and *pandas_streaming*.
 pandas to pandas_streaming
 ++++++++++++++++++++++++++
 """
-
+import glob
 from pandas import DataFrame
+from pandas_streaming.df import StreamingDataFrame
+
 
 df = DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
 df
@@ -17,8 +19,6 @@ df
 #############################
 # We create a streaming dataframe:
 
-
-from pandas_streaming.df import StreamingDataFrame
 
 sdf = StreamingDataFrame.read_df(df)
 sdf
@@ -94,7 +94,5 @@ new_sdf.train_test_split("example.{}.txt", streaming=False)
 
 ############################################
 #
-
-import glob
 
 glob.glob("ex*.txt")

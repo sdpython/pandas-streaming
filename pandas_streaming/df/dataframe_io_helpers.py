@@ -339,7 +339,7 @@ class JsonIterator2Stream:
     The iterator could be one returned by @see fn enumerate_json_items.
 
     :param it: iterator
-    :param kwargs: arguments to :epkg:`*py:json:dumps`
+    :param kwargs: arguments to :class:`json.dumps`
 
     .. exref::
         :title: Reshape a json file

@@ -11,7 +11,7 @@ def to_zip(df, zipfilename, zname="df.csv", **kwargs):
     It can be read by @see fn to_zip.
 
     :param df: :epkg:`dataframe` or :epkg:`numpy:array`
-    :param zipfilename: a :epkg:`*py:zipfile:ZipFile` or a filename
+    :param zipfilename: a :class:`zipfile:ZipFile` or a filename
     :param zname: a filename in th zipfile
     :param kwargs: parameters for :epkg:`pandas:to_csv` or
         :epkg:`numpy:save`
@@ -104,7 +104,7 @@ def read_zip(zipfilename, zname=None, **kwargs):
     Reads a :epkg:`dataframe` from a :epkg:`zip` file.
     It can be saved by @see fn read_zip.
 
-    :param zipfilename: a :epkg:`*py:zipfile:ZipFile` or a filename
+    :param zipfilename: a :class:`zipfile.ZipFile` or a filename
     :param zname: a filename in zipfile, if None, takes the first one
     :param kwargs: parameters for :func:`pandas.read_csv`
     :return: :func:`pandas.DataFrame` or :epkg:`numpy:array`

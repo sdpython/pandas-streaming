@@ -180,6 +180,7 @@ epkg_dictionary = {
     "groupby and missing values": "https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html",
     "Hadoop": "http://hadoop.apache.org/",
     "ijson": "https://github.com/ICRAR/ijson",
+    "json": "https://docs.python.org/3/library/json.html",
     "nan": "https://numpy.org/doc/stable/reference/constants.html#numpy.NAN",
     "pandas": (
         "http://pandas.pydata.org/pandas-docs/stable/",
