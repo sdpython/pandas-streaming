@@ -31,8 +31,6 @@ when it does not fit into memory.
 .. contents::
     :local:
 
-.. _l-objective:
-
 Objectives and Competitors
 ++++++++++++++++++++++++++
 
@@ -111,10 +109,7 @@ A user can either choose to draw the same sample every time he is going
 through the data. He could also choose that a different sample should be
 drawn each time. The following method indicates which kinds of sample
 the :class:`StreamingDataFrame <pandas_streaming.df.dataframe.StreamingDataFrame>`
-is producing.
-
-.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame
-    :members: is_table
+is producing (see :meth:`pandas_streaming.df.dataframe.StreamingDataFrame.is_table`).
 
 Check the schema consistency of a large file
 ++++++++++++++++++++++++++++++++++++++++++++

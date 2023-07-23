@@ -7,6 +7,7 @@ ignore_directives = [
     "exreflist",
     "gdot",
     "image-sg",
+    "pr",
     "runpython",
 ]
 ignore_roles = ["epkg"]

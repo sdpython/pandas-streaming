@@ -2,7 +2,7 @@
 .. |gitlogo| image:: _static/git_logo.png
              :height: 20
 
-pandas_streaming: streaming API over pandas
+pandas-streaming: streaming API over pandas
 ===========================================
 
 .. image:: https://github.com/sdpython/pandas_streaming/blob/master/_doc/sphinxdoc/source/_static/project_ico.png?raw=true
@@ -56,20 +56,19 @@ pandas_streaming: streaming API over pandas
     :target: https://github.com/sdpython/pandas_streaming/
     :alt: size
 
-*pandas_streaming* aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
+*pandas_streaming* aims at processing big files with :epkg:`pandas`,
 too big to hold in memory, too small to be parallelized with a significant gain.
-The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API
+The module replicates a subset of :epkg:`pandas` API
 and implements other functionalities for machine learning.
 
 .. toctree::
     :maxdepth: 1
 
     tutorial/index
+    auto_examples/index
     api/index
-    i_examples
-    blog/blogindex
-    index_modules
-    i_index
+    i_ex
+
 
 **Links:** `github <https://github.com/sdpython/pandas_streaming/>`_,
 `documentation <http://www.xavierdupre.fr/app/pandas_streaming/helpsphinx/index.html>`_,

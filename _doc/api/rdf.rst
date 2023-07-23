@@ -17,29 +17,30 @@ of an instance is fast as long as the data is not
 processed. Iterators can be chained as many map reduce
 framework does.
 
-.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame
+.. autoclass:: pandas_streaming.df.dataframe.StreamingDataFrame
+    :members:
 
 The module implements additional and useful functions
 not necessarily for the streaming version of the dataframes.
 Many methods have been rewritten to support
 streaming. Among them, IO methods:
 
-.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame.read_csv
+.. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_csv
 
-.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame.read_df
+.. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_df
 
-.. autosignature:: pandas_streaming.df.dataframe.StreamingDataFrame.read_json
+.. autofunction:: pandas_streaming.df.dataframe.StreamingDataFrame.read_json
 
 Data Manipulation
 +++++++++++++++++
 
-.. autosignature:: pandas_streaming.df.dataframe_helpers.dataframe_hash_columns
+.. autofunction:: pandas_streaming.df.dataframe_helpers.dataframe_hash_columns
 
-.. autosignature:: pandas_streaming.df.connex_split.dataframe_shuffle
+.. autofunction:: pandas_streaming.df.connex_split.dataframe_shuffle
 
-.. autosignature:: pandas_streaming.df.dataframe_helpers.dataframe_unfold
+.. autofunction:: pandas_streaming.df.dataframe_helpers.dataframe_unfold
 
-.. autosignature:: pandas_streaming.df.dataframe_helpers.pandas_groupby_nan
+.. autofunction:: pandas_streaming.df.dataframe_helpers.pandas_groupby_nan
 
 Complex splits
 ++++++++++++++
@@ -49,8 +50,8 @@ if rows are not independant and share some ids. In that case,
 the following functions will try to build two partitions keeping
 ids separate or separate as much as possible.
 
-.. autosignature:: pandas_streaming.df.connex_split.train_test_apart_stratify
+.. autofunction:: pandas_streaming.df.connex_split.train_test_apart_stratify
 
-.. autosignature:: pandas_streaming.df.connex_split.train_test_connex_split
+.. autofunction:: pandas_streaming.df.connex_split.train_test_connex_split
 
-.. autosignature:: pandas_streaming.df.connex_split.train_test_split_weights
+.. autofunction:: pandas_streaming.df.connex_split.train_test_split_weights
