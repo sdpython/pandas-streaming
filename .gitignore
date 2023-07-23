@@ -12,6 +12,8 @@ build/*
 .hypothesis/*
 *egg-info/*
 prof
+_doc/CHANGELOGS.rst
+_doc/LICENSE.txt
 _doc/auto_examples/*
 _doc/examples/_cache/*
 _doc/examples/plot_*.png
