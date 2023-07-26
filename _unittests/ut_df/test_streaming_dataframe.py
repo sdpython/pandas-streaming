@@ -329,17 +329,17 @@ class TestStreamingDataFrame(ExtTestCase):
         m1 = sdf20.concat(map(lambda x: x, [df30]), axis=0)
         self.assertEqualDataFrame(m1.to_dataframe(), df)
 
-        df30["g"] = 4
-        self.assertRaise(
-            lambda: sdf20.concat(df30).to_dataframe(),
-            ValueError,
-            "Frame others[0] do not have the same column names",
-        )
         df20["cint"] = df20["cint"].astype(float)
         self.assertRaise(
             lambda: sdf20.concat(df20).to_dataframe(),
             ValueError,
             "Frame others[0] do not have the same column types",
+        )
+        df30["g"] = 4
+        self.assertRaise(
+            lambda: sdf20.concat(df30).to_dataframe(),
+            ValueError,
+            "Frame others[0] do not have the same column names",
         )
 
     def test_concath(self):
@@ -514,12 +514,12 @@ class TestStreamingDataFrame(ExtTestCase):
         df2 = pandas.DataFrame(data=dict(X=[4.5, 10.0, 7], Y=["a", "b", "NAN"]))
         na = sdf.fillna(value=dict(X=10.0, Y="NAN"))
         ndf = na.to_df()
-        self.assertEqual(ndf, df2)
+        self.assertEqualDataFrame(ndf, df2)
 
         df3 = pandas.DataFrame(data=dict(X=[4.5, 10.0, 7], Y=["a", "b", numpy.nan]))
         na = sdf.fillna(value=dict(X=10.0))
         ndf = na.to_df()
-        self.assertEqual(ndf, df3)
+        self.assertEqualDataFrame(ndf, df3)
 
     def test_describe(self):
         x = numpy.arange(100001).astype(numpy.float64) / 100000 - 0.5
@@ -532,12 +532,14 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(["X", "Y"], list(desc.columns))
         self.assertEqual(desc.loc["min", :].tolist(), [-0.5, 0])
         self.assertEqual(desc.loc["max", :].tolist(), [0.5, 100000])
-        self.assertEqualArray(desc.loc["mean", :], numpy.array([0, 50000]), atol=1e-8)
+        self.assertEqualArray(
+            desc.loc["mean", :], numpy.array([0, 50000], dtype=numpy.float64), atol=1e-8
+        )
         self.assertEqualArray(desc.loc["25%", :], numpy.array([-0.25, 25000]))
         self.assertEqualArray(desc.loc["50%", :], numpy.array([0.0, 50000]))
         self.assertEqualArray(desc.loc["75%", :], numpy.array([0.25, 75000]))
         self.assertEqualArray(
-            desc.loc["std", :], numpy.array([2.886795e-01, 28867.946472]), decimal=4
+            desc.loc["std", :], numpy.array([2.886795e-01, 28867.946472]), atol=1e-4
         )
 
     def test_set_item(self):

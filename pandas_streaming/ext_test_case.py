@@ -4,7 +4,7 @@ import unittest
 import warnings
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 
 import numpy
 from numpy.testing import assert_allclose
@@ -112,12 +112,18 @@ class ExtTestCase(unittest.TestCase):
             value = numpy.array(value).astype(expected.dtype)
         self.assertEqualArray(expected, value, atol=atol, rtol=rtol)
 
-    def assertRaise(self, fct: Callable, exc_type: Exception):
+    def assertRaise(
+        self, fct: Callable, exc_type: Exception, msg: Optional[str] = None
+    ):
         try:
             fct()
         except exc_type as e:
             if not isinstance(e, exc_type):
                 raise AssertionError(f"Unexpected exception {type(e)!r}.")
+            if msg is None:
+                return
+            if msg not in str(e):
+                raise AssertionError(f"Unexpected error message {e!r}.")
             return
         raise AssertionError("No exception was raised.")
 
@@ -138,6 +144,32 @@ class ExtTestCase(unittest.TestCase):
     def assertStartsWith(self, prefix: str, full: str):
         if not full.startswith(prefix):
             raise AssertionError(f"prefix={prefix!r} does not start string  {full!r}.")
+
+    def assertLesser(self, x, y, strict=False):
+        """
+        Checks that ``x <= y``.
+        """
+        if x > y or (strict and x == y):
+            raise AssertionError(
+                "x >{2} y with x={0} and y={1}".format(
+                    ExtTestCase._format_str(x),
+                    ExtTestCase._format_str(y),
+                    "" if strict else "=",
+                )
+            )
+
+    @staticmethod
+    def abs_path_join(filename: str, *args: List[str]):
+        """
+        Returns an absolute and normalized path from this location.
+
+        :param filename: filename, the folder which contains it
+            is used as the base
+        :param args: list of subpaths to the previous path
+        :return: absolute and normalized path
+        """
+        dirname = os.path.join(os.path.dirname(filename), *args)
+        return os.path.normpath(os.path.abspath(dirname))
 
     @classmethod
     def tearDownClass(cls):
