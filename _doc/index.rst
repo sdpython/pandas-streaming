@@ -16,8 +16,8 @@ pandas-streaming: streaming API over pandas
     :target: https://ci.appveyor.com/project/sdpython/pandas-streaming
     :alt: Build Status Windows
 
-.. image:: https://circleci.com/gh/sdpython/pandas_streaming/tree/main.svg?style=svg
-    :target: https://circleci.com/gh/sdpython/pandas_streaming/tree/main
+.. image:: https://dl.circleci.com/status-badge/img/gh/sdpython/pandas-streaming/tree/main.svg?style=svg
+    :target: https://dl.circleci.com/status-badge/redirect/gh/sdpython/pandas-streaming/tree/main
 
 .. image:: https://dev.azure.com/xavierdupre3/pandas_streaming/_apis/build/status/sdpython.pandas_streaming
     :target: https://dev.azure.com/xavierdupre3/pandas_streaming/
