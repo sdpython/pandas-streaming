@@ -4,7 +4,7 @@ import io
 import zipfile
 import numpy
 import pandas
-from pyquickhelper.pycode import ExtTestCase, get_temp_folder
+from pandas_streaming.ext_test_case import ExtTestCase
 from pandas_streaming.df import to_zip, read_zip
 
 

@@ -2,7 +2,7 @@ import unittest
 import numpy
 import pandas
 from sklearn.linear_model import LogisticRegression
-from pyquickhelper.pycode import ExtTestCase
+from pandas_streaming.ext_test_case import ExtTestCase
 
 
 class TestScikitLearn(ExtTestCase):

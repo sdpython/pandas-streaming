@@ -1,7 +1,7 @@
 import unittest
 import pandas
 import numpy
-from pyquickhelper.pycode import ExtTestCase
+from pandas_streaming.ext_test_case import ExtTestCase
 from pandas_streaming.df import dataframe_unfold
 from pandas_streaming.df.dataframe_helpers import hash_int, hash_str, hash_float
 

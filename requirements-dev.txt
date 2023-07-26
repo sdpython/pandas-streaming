@@ -14,7 +14,6 @@ pycodestyle
 pylint>=2.14.0
 pytest
 pytest-cov
-pyquickhelper>=1.10
 rstcheck[sphinx,toml]
 ruff
 scikit-learn

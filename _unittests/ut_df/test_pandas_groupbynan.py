@@ -2,7 +2,7 @@ import unittest
 import pandas
 import numpy
 from scipy.sparse.linalg import lsqr as sparse_lsqr
-from pyquickhelper.pycode import ExtTestCase, ignore_warnings
+from pandas_streaming.ext_test_case import ExtTestCase, ignore_warnings
 from pandas_streaming.df import pandas_groupby_nan, numpy_types
 
 

@@ -3,7 +3,7 @@ import unittest
 from io import StringIO
 import pandas
 import numpy
-from pyquickhelper.pycode import ExtTestCase, get_temp_folder, ignore_warnings
+from pandas_streaming.ext_test_case import ExtTestCase, ignore_warnings
 from pandas_streaming.data import dummy_streaming_dataframe
 from pandas_streaming.df import StreamingDataFrame
 from pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
