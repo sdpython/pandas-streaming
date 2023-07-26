@@ -14,7 +14,7 @@ class TestScikitLearn(ExtTestCase):
         )
         clq.fit(X, Y)
         pred2 = clq.predict(X)
-        self.assertEqual(numpy.array([0, 1]), pred2)
+        self.assertEqualArray(numpy.array([0, 1]), pred2)
 
 
 if __name__ == "__main__":
