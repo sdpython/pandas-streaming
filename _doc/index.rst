@@ -5,13 +5,6 @@
 pandas-streaming: streaming API over pandas
 ===========================================
 
-.. image:: https://github.com/sdpython/pandas_streaming/blob/main/_doc/_static/project_ico.png?raw=true
-    :target: https://github.com/sdpython/pandas_streaming/
-
-.. image:: https://travis-ci.com/sdpython/pandas_streaming.svg?branch=main
-    :target: https://app.travis-ci.com/github/sdpython/pandas_streaming
-    :alt: Build status
-
 .. image:: https://ci.appveyor.com/api/projects/status/4te066r8ne1ymmhy?svg=true
     :target: https://ci.appveyor.com/project/sdpython/pandas-streaming
     :alt: Build Status Windows
@@ -27,10 +20,10 @@ pandas-streaming: streaming API over pandas
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :alt: MIT License
-    :target: http://opensource.org/licenses/MIT
+    :target: https://opensource.org/license/MIT/
 
-.. image:: https://codecov.io/github/sdpython/pandas_streaming/coverage.svg?branch=main
-    :target: https://codecov.io/github/sdpython/pandas_streaming?branch=main
+.. image:: https://codecov.io/gh/sdpython/pandas-streaming/branch/main/graph/badge.svg?token=0caHX1rhr8 
+    :target: https://codecov.io/gh/sdpython/pandas-streaming
 
 .. image:: http://img.shields.io/github/issues/sdpython/pandas_streaming.png
     :alt: GitHub Issues
@@ -66,3 +59,8 @@ and implements other functionalities for machine learning.
     i_ex
     CHANGELOGS
     license
+
+**Links:**
+
+* `GitHub/pandas_streaming <https://github.com/sdpython/pandas_streaming/>`_
+* `documentation <https://sdpython.github.io/doc/pandas-streaming/dev/>`_
