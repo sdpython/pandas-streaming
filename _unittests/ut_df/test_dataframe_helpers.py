@@ -2,7 +2,7 @@ import os
 import unittest
 import numpy
 import pandas
-from pyquickhelper.pycode import ExtTestCase
+from pandas_streaming.ext_test_case import ExtTestCase
 from pandas_streaming.df import dataframe_hash_columns
 
 

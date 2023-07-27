@@ -61,7 +61,7 @@ issues_github_path = "sdpython/pandas-streaming"
 
 # The following is used by sphinx.ext.linkcode to provide links to github
 linkcode_resolve = make_linkcode_resolve(
-    "pandas_streaming",
+    "pandas-streaming",
     (
         "https://github.com/sdpython/pandas-streaming/"
         "blob/{revision}/{package}/"

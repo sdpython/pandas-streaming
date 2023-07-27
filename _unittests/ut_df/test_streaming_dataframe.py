@@ -1,9 +1,10 @@
 import os
+import tempfile
 import unittest
 from io import StringIO
 import pandas
 import numpy
-from pyquickhelper.pycode import ExtTestCase, get_temp_folder, ignore_warnings
+from pandas_streaming.ext_test_case import ExtTestCase, ignore_warnings
 from pandas_streaming.data import dummy_streaming_dataframe
 from pandas_streaming.df import StreamingDataFrame
 from pandas_streaming.df.dataframe import StreamingDataFrameSchemaError
@@ -56,39 +57,39 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(st.shape, (10, 2))
 
     def test_read_csv(self):
-        temp = get_temp_folder(__file__, "temp_read_csv")
-        df = pandas.DataFrame(data=dict(a=[5, 6], b=["er", "r"]))
-        name = os.path.join(temp, "df.csv")
-        name2 = os.path.join(temp, "df2.csv")
-        name3 = os.path.join(temp, "df3.csv")
-        df.to_csv(name, index=False)
-        df.to_csv(name2, index=True)
-        sdf = StreamingDataFrame.read_csv(name)
-        text = sdf.to_csv(index=False)
-        self.assertRaise(
-            lambda: StreamingDataFrame.read_csv(name2, index_col=0, chunksize=None),
-            ValueError,
-        )
-        self.assertRaise(
-            lambda: StreamingDataFrame.read_csv(name2, index_col=0, iterator=False),
-            ValueError,
-        )
-        sdf2 = StreamingDataFrame.read_csv(name2, index_col=0)
-        text2 = sdf2.to_csv(index=True)
-        sdf2.to_csv(name3, index=True)
-        with open(name, "r", encoding="utf-8") as f:
-            exp = f.read()
-        with open(name2, "r", encoding="utf-8") as f:
-            exp2 = f.read()
-        with open(name3, "r", encoding="utf-8") as f:
-            text3 = f.read()
-        self.assertEqual(text.replace("\r", ""), exp)
-        sdf2 = StreamingDataFrame.read_df(df)
-        self.assertEqualDataFrame(sdf.to_dataframe(), sdf2.to_dataframe())
-        self.assertEqual(text2.replace("\r", ""), exp2)
-        self.assertEqual(
-            text3.replace("\r", "").replace("\n\n", "\n"), exp2.replace("\r", "")
-        )
+        with tempfile.TemporaryDirectory() as temp:
+            df = pandas.DataFrame(data=dict(a=[5, 6], b=["er", "r"]))
+            name = os.path.join(temp, "df.csv")
+            name2 = os.path.join(temp, "df2.csv")
+            name3 = os.path.join(temp, "df3.csv")
+            df.to_csv(name, index=False)
+            df.to_csv(name2, index=True)
+            sdf = StreamingDataFrame.read_csv(name)
+            text = sdf.to_csv(index=False)
+            self.assertRaise(
+                lambda: StreamingDataFrame.read_csv(name2, index_col=0, chunksize=None),
+                ValueError,
+            )
+            self.assertRaise(
+                lambda: StreamingDataFrame.read_csv(name2, index_col=0, iterator=False),
+                ValueError,
+            )
+            sdf2 = StreamingDataFrame.read_csv(name2, index_col=0)
+            text2 = sdf2.to_csv(index=True)
+            sdf2.to_csv(name3, index=True)
+            with open(name, "r", encoding="utf-8") as f:
+                exp = f.read()
+            with open(name2, "r", encoding="utf-8") as f:
+                exp2 = f.read()
+            with open(name3, "r", encoding="utf-8") as f:
+                text3 = f.read()
+            self.assertEqual(text.replace("\r", ""), exp)
+            sdf2 = StreamingDataFrame.read_df(df)
+            self.assertEqualDataFrame(sdf.to_dataframe(), sdf2.to_dataframe())
+            self.assertEqual(text2.replace("\r", ""), exp2)
+            self.assertEqual(
+                text3.replace("\r", "").replace("\n\n", "\n"), exp2.replace("\r", "")
+            )
 
     def test_where(self):
         sdf = dummy_streaming_dataframe(100)
@@ -248,43 +249,43 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertGreater(gr["cfloat"].min(), 4)
 
     def test_train_test_split_file(self):
-        temp = get_temp_folder(__file__, "temp_train_test_split_file")
-        names = [os.path.join(temp, "train.txt"), os.path.join(temp, "test.txt")]
-        sdf = dummy_streaming_dataframe(100)
-        sdf.train_test_split(names, index=False, streaming=False)
-        trsdf = StreamingDataFrame.read_csv(names[0])
-        tesdf = StreamingDataFrame.read_csv(names[1])
-        self.assertGreater(trsdf.shape[0], 20)
-        self.assertGreater(tesdf.shape[0], 20)
-        trdf = trsdf.to_dataframe()
-        tedf = tesdf.to_dataframe()
-        self.assertGreater(trdf.shape[0], 20)
-        self.assertGreater(tedf.shape[0], 20)
-        df_exp = sdf.to_dataframe()
-        df_val = pandas.concat([trdf, tedf])
-        self.assertEqual(df_exp.shape, df_val.shape)
-        df_val = df_val.sort_values("cint").reset_index(drop=True)
-        self.assertEqualDataFrame(df_val, df_exp)
+        with tempfile.TemporaryDirectory() as temp:
+            names = [os.path.join(temp, "train.txt"), os.path.join(temp, "test.txt")]
+            sdf = dummy_streaming_dataframe(100)
+            sdf.train_test_split(names, index=False, streaming=False)
+            trsdf = StreamingDataFrame.read_csv(names[0])
+            tesdf = StreamingDataFrame.read_csv(names[1])
+            self.assertGreater(trsdf.shape[0], 20)
+            self.assertGreater(tesdf.shape[0], 20)
+            trdf = trsdf.to_dataframe()
+            tedf = tesdf.to_dataframe()
+            self.assertGreater(trdf.shape[0], 20)
+            self.assertGreater(tedf.shape[0], 20)
+            df_exp = sdf.to_dataframe()
+            df_val = pandas.concat([trdf, tedf])
+            self.assertEqual(df_exp.shape, df_val.shape)
+            df_val = df_val.sort_values("cint").reset_index(drop=True)
+            self.assertEqualDataFrame(df_val, df_exp)
 
     def test_train_test_split_file_pattern(self):
-        temp = get_temp_folder(__file__, "temp_train_test_split_file_pattern")
-        sdf = dummy_streaming_dataframe(100)
-        names = os.path.join(temp, "spl_{0}.txt")
-        self.assertRaise(
-            lambda: sdf.train_test_split(names, index=False, streaming=False),
-            ValueError,
-        )
-        names = os.path.join(temp, "spl_{}.txt")
-        tr, te = sdf.train_test_split(names, index=False, streaming=False)
-        trsdf = StreamingDataFrame.read_csv(tr)
-        tesdf = StreamingDataFrame.read_csv(te)
-        trdf = trsdf.to_dataframe()
-        tedf = tesdf.to_dataframe()
-        df_exp = sdf.to_dataframe()
-        df_val = pandas.concat([trdf, tedf])
-        self.assertEqual(df_exp.shape, df_val.shape)
-        df_val = df_val.sort_values("cint").reset_index(drop=True)
-        self.assertEqualDataFrame(df_val, df_exp)
+        with tempfile.TemporaryDirectory() as temp:
+            sdf = dummy_streaming_dataframe(100)
+            names = os.path.join(temp, "spl_{0}.txt")
+            self.assertRaise(
+                lambda: sdf.train_test_split(names, index=False, streaming=False),
+                ValueError,
+            )
+            names = os.path.join(temp, "spl_{}.txt")
+            tr, te = sdf.train_test_split(names, index=False, streaming=False)
+            trsdf = StreamingDataFrame.read_csv(tr)
+            tesdf = StreamingDataFrame.read_csv(te)
+            trdf = trsdf.to_dataframe()
+            tedf = tesdf.to_dataframe()
+            df_exp = sdf.to_dataframe()
+            df_val = pandas.concat([trdf, tedf])
+            self.assertEqual(df_exp.shape, df_val.shape)
+            df_val = df_val.sort_values("cint").reset_index(drop=True)
+            self.assertEqualDataFrame(df_val, df_exp)
 
     def test_merge(self):
         def compares(a, b, how):
@@ -328,17 +329,17 @@ class TestStreamingDataFrame(ExtTestCase):
         m1 = sdf20.concat(map(lambda x: x, [df30]), axis=0)
         self.assertEqualDataFrame(m1.to_dataframe(), df)
 
-        df30["g"] = 4
-        self.assertRaise(
-            lambda: sdf20.concat(df30).to_dataframe(),
-            ValueError,
-            "Frame others[0] do not have the same column names",
-        )
         df20["cint"] = df20["cint"].astype(float)
         self.assertRaise(
             lambda: sdf20.concat(df20).to_dataframe(),
             ValueError,
             "Frame others[0] do not have the same column types",
+        )
+        df30["g"] = 4
+        self.assertRaise(
+            lambda: sdf20.concat(df30).to_dataframe(),
+            ValueError,
+            "Frame others[0] do not have the same column names",
         )
 
     def test_concath(self):
@@ -453,18 +454,18 @@ class TestStreamingDataFrame(ExtTestCase):
                 dict(cf=3, cint=3, cstr="3"),
             ]
         )
-        temp = get_temp_folder(__file__, "temp_schema_consistant")
-        name = os.path.join(temp, "df.csv")
-        stio = StringIO()
-        df.to_csv(stio, index=False)
-        self.assertNotEmpty(stio.getvalue())
-        df.to_csv(name, index=False)
-        self.assertEqual(df.shape, (4, 3))
-        sdf = StreamingDataFrame.read_csv(name, chunksize=2)
-        self.assertRaise(lambda: list(sdf), StreamingDataFrameSchemaError)
-        sdf = StreamingDataFrame.read_csv(name, chunksize=2, check_schema=False)
-        pieces = list(sdf)
-        self.assertEqual(len(pieces), 2)
+        with tempfile.TemporaryDirectory() as temp:
+            name = os.path.join(temp, "df.csv")
+            stio = StringIO()
+            df.to_csv(stio, index=False)
+            self.assertNotEmpty(stio.getvalue())
+            df.to_csv(name, index=False)
+            self.assertEqual(df.shape, (4, 3))
+            sdf = StreamingDataFrame.read_csv(name, chunksize=2)
+            self.assertRaise(lambda: list(sdf), StreamingDataFrameSchemaError)
+            sdf = StreamingDataFrame.read_csv(name, chunksize=2, check_schema=False)
+            pieces = list(sdf)
+            self.assertEqual(len(pieces), 2)
 
     def test_getitem(self):
         sdf = dummy_streaming_dataframe(100)
@@ -513,12 +514,12 @@ class TestStreamingDataFrame(ExtTestCase):
         df2 = pandas.DataFrame(data=dict(X=[4.5, 10.0, 7], Y=["a", "b", "NAN"]))
         na = sdf.fillna(value=dict(X=10.0, Y="NAN"))
         ndf = na.to_df()
-        self.assertEqual(ndf, df2)
+        self.assertEqualDataFrame(ndf, df2)
 
         df3 = pandas.DataFrame(data=dict(X=[4.5, 10.0, 7], Y=["a", "b", numpy.nan]))
         na = sdf.fillna(value=dict(X=10.0))
         ndf = na.to_df()
-        self.assertEqual(ndf, df3)
+        self.assertEqualDataFrame(ndf, df3)
 
     def test_describe(self):
         x = numpy.arange(100001).astype(numpy.float64) / 100000 - 0.5
@@ -531,12 +532,14 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqual(["X", "Y"], list(desc.columns))
         self.assertEqual(desc.loc["min", :].tolist(), [-0.5, 0])
         self.assertEqual(desc.loc["max", :].tolist(), [0.5, 100000])
-        self.assertEqualArray(desc.loc["mean", :], numpy.array([0, 50000]), atol=1e-8)
+        self.assertEqualArray(
+            desc.loc["mean", :], numpy.array([0, 50000], dtype=numpy.float64), atol=1e-8
+        )
         self.assertEqualArray(desc.loc["25%", :], numpy.array([-0.25, 25000]))
         self.assertEqualArray(desc.loc["50%", :], numpy.array([0.0, 50000]))
         self.assertEqualArray(desc.loc["75%", :], numpy.array([0.25, 75000]))
         self.assertEqualArray(
-            desc.loc["std", :], numpy.array([2.886795e-01, 28867.946472]), decimal=4
+            desc.loc["std", :], numpy.array([2.886795e-01, 28867.946472]), atol=1e-4
         )
 
     def test_set_item(self):

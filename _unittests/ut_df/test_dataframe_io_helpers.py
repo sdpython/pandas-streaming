@@ -2,7 +2,7 @@ import unittest
 from io import StringIO, BytesIO
 from json import loads
 import pandas
-from pyquickhelper.pycode import ExtTestCase
+from pandas_streaming.ext_test_case import ExtTestCase
 from pandas_streaming.df.dataframe_io_helpers import (
     enumerate_json_items,
     JsonPerRowsStream,

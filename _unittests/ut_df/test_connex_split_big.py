@@ -3,7 +3,7 @@ import os
 import unittest
 from collections import Counter
 import pandas
-from pyquickhelper.pycode import ExtTestCase
+from pandas_streaming.ext_test_case import ExtTestCase
 from pandas_streaming.df import train_test_connex_split
 
 
