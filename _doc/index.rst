@@ -52,11 +52,17 @@ and implements other functionalities for machine learning.
 
 .. toctree::
     :maxdepth: 1
+    :caption: Contents
 
     tutorial/index
     auto_examples/index
     api/index
     i_ex
+
+.. toctree::
+    :maxdepth: 1
+    :caption: More
+
     CHANGELOGS
     license
 
