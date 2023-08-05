@@ -3,6 +3,8 @@
 *.dylib
 *.so
 *.whl
+*.csv
+*.zip
 coverage.html/*
 _cache/*
 .coverage
