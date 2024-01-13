@@ -66,7 +66,4 @@ and implements other functionalities for machine learning.
     CHANGELOGS
     license
 
-**Links:**
-
-* `GitHub/pandas_streaming <https://github.com/sdpython/pandas_streaming/>`_
-* `documentation <https://sdpython.github.io/doc/pandas-streaming/dev/>`_
+Source are available at `sdpython/pandas_streaming <https://github.com/sdpython/pandas_streaming/>`_.

@@ -1,10 +1,15 @@
 
-===========
 Change Logs
 ===========
 
-current - 2021-10-26 - 0.00Mb
-=============================
+0.5.0
++++++
+
+* :pr:`33`: removes pyquickhelper dependency
+* :pr:`30`: fix compatiblity with pandas 2.0
+
+0.3.239
++++++++
 
 * :pr:`27`: Fixes json parser when input is a stream (2021-10-26)
 * :pr:`26`: Fixes bug while reading json (iterator failed to be created twice) (2021-10-26)
@@ -15,8 +20,8 @@ current - 2021-10-26 - 0.00Mb
 * :pr:`21`: Fixes grouping by nan values after update pandas to 1.3.0 (2021-07-10)
 * :pr:`17`: Implements method describe (2021-04-08)
 
-0.2.175 - 2020-08-06 - 0.03Mb
-=============================
+0.2.175
++++++++
 
 * :pr:`16`: Unit tests failing with pandas 1.1.0. (2020-08-06)
 * :pr:`15`: implements parameter lines, flatten for read_json (2018-11-21)
