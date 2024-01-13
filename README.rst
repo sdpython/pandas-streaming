@@ -41,13 +41,13 @@ pandas-streaming: streaming API over pandas
     :target: https://github.com/sdpython/pandas_streaming/
     :alt: size
 
-**pandas_streaming**
-aims at processing big files with `pandas <http://pandas.pydata.org/>`_,
+`pandas-streaming <https://sdpython.github.io/doc/pandas-streaming/dev/>`_
+aims at processing big files with `pandas <https://pandas.pydata.org/>`_,
 too big to hold in memory, too small to be parallelized with a significant gain.
-The module replicates a subset of `pandas <http://pandas.pydata.org/>`_ API
+The module replicates a subset of *pandas* API
 and implements other functionalities for machine learning.
 
-::
+.. code-block:: python
 
     from pandas_streaming.df import StreamingDataFrame
     sdf = StreamingDataFrame.read_csv("filename", sep="\t", encoding="utf-8")
@@ -59,7 +59,7 @@ and implements other functionalities for machine learning.
 
 The module can also stream an existing dataframe.
 
-::
+.. code-block:: python
 
     import pandas
     df = pandas.DataFrame([dict(cf=0, cint=0, cstr="0"),
@@ -76,5 +76,3 @@ The module can also stream an existing dataframe.
 
 It contains other helpers to split datasets into
 train and test with some weird constraints.
-
-* `documentation <https://sdpython.github.io/doc/pandas-streaming/dev/>`_
