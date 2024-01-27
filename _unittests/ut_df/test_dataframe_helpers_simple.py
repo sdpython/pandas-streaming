@@ -23,9 +23,11 @@ class TestDataFrameHelpersSimple(ExtTestCase):
 
         # fold
         folded = df2.groupby("a").apply(
-            lambda row: ",".join(row["b_unfold"].dropna())
-            if len(row["b_unfold"].dropna()) > 0
-            else numpy.nan
+            lambda row: (
+                ",".join(row["b_unfold"].dropna())
+                if len(row["b_unfold"].dropna()) > 0
+                else numpy.nan
+            )
         )
         bf = folded.reset_index(drop=False)
         bf.columns = ["a", "b"]

@@ -475,9 +475,9 @@ def pandas_groupby_nan(
                                 ):  # pylint: disable=C0200
                                     if new_index[i] == key:
                                         new_index[i] = numpy.nan
-                                res.grouper.groupings[0]._cache[
-                                    "result_index"
-                                ] = index.__class__(new_index)
+                                res.grouper.groupings[0]._cache["result_index"] = (
+                                    index.__class__(new_index)
+                                )
                             else:
                                 raise NotImplementedError(  # pragma: no cover
                                     "NaN values not implemented for multiindex."
