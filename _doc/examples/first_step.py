@@ -7,6 +7,7 @@ A few difference between :epkg:`pandas` and *pandas_streaming*.
 pandas to pandas_streaming
 ++++++++++++++++++++++++++
 """
+
 import glob
 from pandas import DataFrame
 from pandas_streaming.df import StreamingDataFrame
