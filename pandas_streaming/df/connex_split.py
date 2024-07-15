@@ -61,6 +61,7 @@ def train_test_split_weights(
                 f"test_size={test_size} or train_size={train_size} cannot be null (1)."
             )
         from sklearn.model_selection import train_test_split
+
         return train_test_split(
             df, test_size=test_size, train_size=train_size, random_state=random_state
         )
