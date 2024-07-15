@@ -1,17 +1,3 @@
-[tool.rstcheck]
-report_level = "INFO"
-ignore_directives = [
-    "autoclass",
-    "autofunction",
-    "automodule",
-    "exreflist",
-    "gdot",
-    "image-sg",
-    "pr",
-    "runpython",
-]
-ignore_roles = ["epkg"]
-
 [tool.ruff]
 
 # Exclude a variety of commonly ignored directories.

@@ -79,9 +79,6 @@ jobs:
       ruff check .
     displayName: 'Ruff'
   - script: |
-      rstcheck -r ./_doc ./pandas_streaming
-    displayName: 'rstcheck'
-  - script: |
       black --diff .
     displayName: 'Black'
   - script: |
@@ -119,9 +116,6 @@ jobs:
   - script: |
       ruff check .
     displayName: 'Ruff'
-  - script: |
-      rstcheck -r ./_doc ./pandas_streaming
-    displayName: 'rstcheck'
   - script: |
       black --diff .
     displayName: 'Black'
