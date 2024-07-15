@@ -28,7 +28,6 @@ def numpy_types():
         numpy.float16,
         numpy.float32,
         numpy.float64,
-        numpy.complex_,
         numpy.complex64,
         numpy.complex128,
     ]
