@@ -25,7 +25,6 @@ def numpy_types():
         numpy.uint16,
         numpy.uint32,
         numpy.uint64,
-        numpy.float_,
         numpy.float16,
         numpy.float32,
         numpy.float64,
