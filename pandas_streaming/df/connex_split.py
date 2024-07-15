@@ -2,7 +2,6 @@ from collections import Counter
 from logging import getLogger
 import pandas
 import numpy
-from sklearn.model_selection import train_test_split
 from .dataframe_helpers import dataframe_shuffle
 
 logger = getLogger("pandas-streaming")
@@ -61,6 +60,7 @@ def train_test_split_weights(
             raise ValueError(
                 f"test_size={test_size} or train_size={train_size} cannot be null (1)."
             )
+        from sklearn.model_selection import train_test_split
         return train_test_split(
             df, test_size=test_size, train_size=train_size, random_state=random_state
         )

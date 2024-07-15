@@ -45,7 +45,7 @@ def sklearn_train_test_split(
         )
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=ImportWarning)
-        from sklearn.model_selection import train_test_split  # pylint: disable=C0415
+        from sklearn.model_selection import train_test_split
 
     opts = ["test_size", "train_size", "random_state", "shuffle", "stratify"]
     split_ops = {}

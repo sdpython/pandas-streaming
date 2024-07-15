@@ -155,13 +155,13 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
     }  # pylint: disable=R1721
     for c in cols:
         t = coltype[c]
-        if t == int:
+        if t == int: # noqa: E721
             df[c] = df[c].apply(hash_intl)
         elif t == numpy.int64:
             df[c] = df[c].apply(lambda x: numpy.int64(hash_intl(x)))
-        elif t == float:
+        elif t == float: # noqa: E721
             df[c] = df[c].apply(hash_floatl)
-        elif t == object:
+        elif t == object: # noqa: E721
             df[c] = df[c].apply(hash_strl)
         else:
             raise NotImplementedError(  # pragma: no cover
