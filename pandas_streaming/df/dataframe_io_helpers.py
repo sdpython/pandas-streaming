@@ -5,7 +5,6 @@ try:
     from ujson import dumps
 except ImportError:  # pragma: no cover
     from json import dumps
-import ijson
 
 
 class JsonPerRowsStream:
@@ -257,6 +256,8 @@ def enumerate_json_items(
     else:
         if hasattr(filename, "seek"):
             filename.seek(0)
+        import ijson
+
         parser = ijson.parse(filename)
         current = None
         curkey = None

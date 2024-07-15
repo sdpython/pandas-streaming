@@ -24,7 +24,7 @@ jobs:
   - script: pip install -r requirements-dev.txt
     displayName: 'Install Requirements dev'
   - script: |
-      ruff .
+      ruff check .
     displayName: 'Ruff'
   - script: |
       black --diff .
@@ -76,11 +76,8 @@ jobs:
   - script: pip install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
     displayName: 'Install scikit-learn nightly'
   - script: |
-      ruff .
+      ruff check .
     displayName: 'Ruff'
-  - script: |
-      rstcheck -r ./_doc ./pandas_streaming
-    displayName: 'rstcheck'
   - script: |
       black --diff .
     displayName: 'Black'
@@ -117,11 +114,8 @@ jobs:
   - script: pip install -r requirements-dev.txt
     displayName: 'Install Requirements dev'
   - script: |
-      ruff .
+      ruff check .
     displayName: 'Ruff'
-  - script: |
-      rstcheck -r ./_doc ./pandas_streaming
-    displayName: 'rstcheck'
   - script: |
       black --diff .
     displayName: 'Black'

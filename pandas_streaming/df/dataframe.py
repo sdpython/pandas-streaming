@@ -640,10 +640,10 @@ class StreamingDataFrame:
                 if len(indices) < n:
                     indices.append((i, ir))
                 else:
-                    x = nrandom.random()  # pylint: disable=E1101
+                    x = nrandom.random()
                     if x * n < (seen - n):
                         k = nrandom.randint(0, len(indices) - 1)
-                        indices[k] = (i, ir)  # pylint: disable=E1126
+                        indices[k] = (i, ir)
         indices = set(indices)
 
         def reservoir_iterate(sdf, indices, chunksize):

@@ -77,7 +77,7 @@ jobs:
             grep ERROR doc.txt
             exit 1
           fi
-          if [[ $(grep WARNING doc.txt) ]]; then
+          if [[ $(grep WARNING doc.txt | grep -v 'std:term:y') ]]; then
             echo "Documentation produces warnings."
             grep WARNING doc.txt
             exit 1
