@@ -223,7 +223,7 @@ class TestStreamingDataFrame(ExtTestCase):
 
     def test_train_test_split_streaming_strat(self):
         sdf = dummy_streaming_dataframe(
-            100, asfloat=True, tify=["t1" if i % 3 else "t0" for i in range(0, 100)]
+            100, asfloat=True, tify=["t1" if i % 3 else "t0" for i in range(100)]
         )
         trsdf, tesdf = sdf.train_test_split(
             streaming=True, unique_rows=True, stratify="tify"
@@ -324,9 +324,9 @@ class TestStreamingDataFrame(ExtTestCase):
         self.assertEqualDataFrame(m1.to_dataframe(), df)
         m1 = sdf20.concat(df30, axis=0)
         self.assertEqualDataFrame(m1.to_dataframe(), df)
-        m1 = sdf20.concat(map(lambda x: x, [df30]), axis=0)
+        m1 = sdf20.concat(map(lambda x: x, [df30]), axis=0)  # noqa: C417
         self.assertEqualDataFrame(m1.to_dataframe(), df)
-        m1 = sdf20.concat(map(lambda x: x, [df30]), axis=0)
+        m1 = sdf20.concat(map(lambda x: x, [df30]), axis=0)  # noqa: C417
         self.assertEqualDataFrame(m1.to_dataframe(), df)
 
         df20["cint"] = df20["cint"].astype(float)
@@ -490,7 +490,7 @@ class TestStreamingDataFrame(ExtTestCase):
     def test_add_column(self):
         df = pandas.DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
         sdf = StreamingDataFrame.read_df(df)
-        sdf2 = sdf.add_column("d", lambda row: int(1))
+        sdf2 = sdf.add_column("d", lambda _row: 1)
         df2 = sdf2.to_dataframe()
         df["d"] = 1
         self.assertEqualDataFrame(df, df2)

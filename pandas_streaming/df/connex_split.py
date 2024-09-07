@@ -12,8 +12,6 @@ class ImbalancedSplitException(Exception):
     Raised when an imbalanced split is detected.
     """
 
-    pass
-
 
 def train_test_split_weights(
     df,
@@ -72,7 +70,7 @@ def train_test_split_weights(
         weights = list(df[weights])
     if len(weights) != df.shape[0]:
         raise ValueError(
-            "Dimension mismatch between weights and dataframe "
+            "Dimension mismatch between weights and dataframe "  # noqa: UP030
             "{0} != {1}".format(df.shape[0], len(weights))
         )
 
@@ -97,7 +95,7 @@ def train_test_split_weights(
     test_ids = []
     test_weights = 0
     train_weights = 0
-    for i in range(0, df.shape[0]):
+    for i in range(df.shape[0]):
         w = weights[i]
         if balance == 0:
             h = randint(0, 1)
@@ -116,7 +114,7 @@ def train_test_split_weights(
     r = abs(train_weights - test_weights) / (1.0 * (train_weights + test_weights))
     if r >= fail_imbalanced:
         raise ImbalancedSplitException(  # pragma: no cover
-            "Split is imbalanced: train_weights={0} test_weights={1} r={2}."
+            "Split is imbalanced: train_weights={0} test_weights={1} r={2}."  # noqa: UP030
             "".format(train_weights, test_weights, r)
         )
 

@@ -148,9 +148,7 @@ def dataframe_hash_columns(df, cols=None, hash_length=10, inplace=False):
         "hash float"
         return hash_float(c, hash_length)
 
-    coltype = {
-        n: t for n, t in zip(df.columns, df.dtypes)  # pylint: disable=R1721
-    }  # pylint: disable=R1721
+    coltype = dict(zip(df.columns, df.dtypes))
     for c in cols:
         t = coltype[c]
         if t == int:  # noqa: E721
@@ -303,7 +301,7 @@ def pandas_fillna(df, by, hasna=None, suffix=None):
                 cst = b"_"
             else:
                 raise TypeError(  # pragma: no cover
-                    "Unable to determine a constant for type='{0}' dtype='{1}'".format(
+                    "Unable to determine a constant for type='{0}' dtype='{1}'".format(  # noqa: UP030
                         val, df[c].dtype
                     )
                 )
@@ -422,12 +420,10 @@ def pandas_groupby_nan(
             if not nanback:
                 dummy = DataFrame([{"a": "a"}])
                 do = dummy.dtypes[0]
-                typ = {
-                    c: t for c, t in zip(df.columns, df.dtypes)  # pylint: disable=R1721
-                }  # pylint: disable=R1721
+                typ = dict(zip(df.columns, df.dtypes))
                 if typ[by[0]] != do:
                     warnings.warn(  # pragma: no cover
-                        f"[pandas_groupby_nan] NaN value: {rep}"
+                        f"[pandas_groupby_nan] NaN value: {rep}", stacklevel=0
                     )
                 return res
             for b in by:
@@ -435,9 +431,9 @@ def pandas_groupby_nan(
                 if fnan in res.grouper.groups:
                     res.grouper.groups[numpy.nan] = res.grouper.groups[fnan]
                     del res.grouper.groups[fnan]
-                new_val = list(
+                new_val = [
                     (numpy.nan if b == fnan else b) for b in res.grouper.result_index
-                )
+                ]
                 res.grouper.groupings[0]._group_index = Index(new_val)
                 res.grouper.groupings[0].obj[b].replace(fnan, numpy.nan, inplace=True)
                 if hasattr(res.grouper, "grouping"):
@@ -451,7 +447,7 @@ def pandas_groupby_nan(
                             del res.grouper.groupings[0]._cache["result_index"]
                     else:
                         raise NotImplementedError(
-                            "Not implemented for type: {0}".format(
+                            "Not implemented for type: {0}".format(  # noqa: UP030
                                 type(res.grouper.groupings[0].grouper)
                             )
                         )
@@ -466,11 +462,9 @@ def pandas_groupby_nan(
                         ):
                             index = res.grouper.groupings[0]._cache["result_index"]
                             if len(rep) == 1:
-                                key = list(rep.values())[0]
+                                key = list(rep.values())[0]  # noqa: RUF015
                                 new_index = numpy.array(index)
-                                for i in range(
-                                    0, len(new_index)
-                                ):  # pylint: disable=C0200
+                                for i in range(len(new_index)):
                                     if new_index[i] == key:
                                         new_index[i] = numpy.nan
                                 res.grouper.groupings[0]._cache["result_index"] = (
@@ -482,7 +476,7 @@ def pandas_groupby_nan(
                                 )
                     else:
                         raise NotImplementedError(  # pragma: no cover
-                            "Not implemented for type: {0}".format(
+                            "Not implemented for type: {0}".format(  # noqa: UP030
                                 type(res.grouper.groupings[0].grouper)
                             )
                         )
@@ -493,13 +487,11 @@ def pandas_groupby_nan(
             if not nanback:
                 dummy = DataFrame([{"a": "a"}])
                 do = dummy.dtypes[0]
-                typ = {
-                    c: t for c, t in zip(df.columns, df.dtypes)  # pylint: disable=R1721
-                }  # pylint: disable=R1721
+                typ = dict(zip(df.columns, df.dtypes))
                 for b in by:
                     if typ[b] != do:
                         warnings.warn(  # pragma: no cover
-                            f"[pandas_groupby_nan] NaN values: {rep}"
+                            f"[pandas_groupby_nan] NaN values: {rep}", stacklevel=0
                         )
                         break
                 return res

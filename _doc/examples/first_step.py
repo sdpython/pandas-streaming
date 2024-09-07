@@ -1,7 +1,7 @@
 """
 First steps with pandas_streaming
 =================================
- 
+
 A few difference between :epkg:`pandas` and *pandas_streaming*.
 
 pandas to pandas_streaming

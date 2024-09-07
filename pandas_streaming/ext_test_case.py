@@ -119,11 +119,11 @@ class ExtTestCase(unittest.TestCase):
             fct()
         except exc_type as e:
             if not isinstance(e, exc_type):
-                raise AssertionError(f"Unexpected exception {type(e)!r}.")
+                raise AssertionError(f"Unexpected exception {type(e)!r}.") from e
             if msg is None:
                 return
             if msg not in str(e):
-                raise AssertionError(f"Unexpected error message {e!r}.")
+                raise AssertionError(f"Unexpected error message {e!r}.") from e
             return
         raise AssertionError("No exception was raised.")
 
@@ -151,7 +151,7 @@ class ExtTestCase(unittest.TestCase):
         """
         if x > y or (strict and x == y):
             raise AssertionError(
-                "x >{2} y with x={0} and y={1}".format(
+                "x >{2} y with x={0} and y={1}".format(  # noqa: UP030
                     ExtTestCase._format_str(x),
                     ExtTestCase._format_str(y),
                     "" if strict else "=",
@@ -174,7 +174,7 @@ class ExtTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         for name, line, w in cls._warns:
-            warnings.warn(f"\n{name}:{line}: {type(w)}\n  {str(w)}")
+            warnings.warn(f"\n{name}:{line}: {type(w)}\n  {str(w)}", stacklevel=0)
 
     def capture(self, fct: Callable):
         """
@@ -185,7 +185,6 @@ class ExtTestCase(unittest.TestCase):
         """
         sout = StringIO()
         serr = StringIO()
-        with redirect_stdout(sout):
-            with redirect_stderr(serr):
-                res = fct()
+        with redirect_stdout(sout), redirect_stderr(serr):
+            res = fct()
         return res, sout.getvalue(), serr.getvalue()

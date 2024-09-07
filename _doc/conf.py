@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 import os
 from sphinx_runpython.github_link import make_linkcode_resolve

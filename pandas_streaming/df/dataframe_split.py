@@ -85,7 +85,7 @@ def sklearn_train_test_split(
             st = StringIO()
             cl = False
         elif isinstance(p, str):
-            st = open(p, "w", encoding=kwargs.get("encoding"))  # pylint: disable=R1732
+            st = open(p, "w", encoding=kwargs.get("encoding"))  # noqa: SIM115
             cl = True
         else:
             st = p
@@ -237,8 +237,8 @@ def sklearn_train_test_split_streaming(
             for obs, part in iterator_rows():
                 h = h11(obs)
                 if unique_rows and h in cache:
-                    raise ValueError(  # pragma: no cover
-                        "A row or at least its hash is already cached. "
+                    raise ValueError(
+                        "A row or at least its hash is already cached. "  # noqa: UP030
                         "Increase hash_size or check for duplicates "
                         "('{0}')\n{1}.".format(h, obs)
                     )
