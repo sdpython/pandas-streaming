@@ -1,5 +1,6 @@
 from collections import Counter
 from logging import getLogger
+from typing import Optional, Tuple
 import pandas
 import numpy
 from .dataframe_helpers import dataframe_shuffle
@@ -449,14 +450,15 @@ def train_test_connex_split(
 
 
 def train_test_apart_stratify(
-    df,
+    df: pandas.DataFrame,
     group,
-    test_size=0.25,
-    train_size=None,
-    stratify=None,
-    force=False,
-    random_state=None,
-):
+    test_size: Optional[float] = 0.25,
+    train_size: Optional[float] = None,
+    stratify: Optional[str] = None,
+    force: bool = False,
+    random_state: Optional[int] = None,
+    sorted_indices: bool = False,
+) -> Tuple["StreamingDataFrame", "StreamingDataFrame"]:  # noqa: F821
     """
     This split is for a specific case where data is linked
     in one way. Let's assume we have two ids as we have
@@ -474,6 +476,8 @@ def train_test_apart_stratify(
     :param force: if True, tries to get at least one example on the test side
         for each value of the column *stratify*
     :param random_state: seed for random generators
+    :param sorted_indices: sort index first,
+        see issue `41 <https://github.com/sdpython/pandas-streaming/issues/41>`
     :return: Two see :class:`StreamingDataFrame
         <pandas_streaming.df.dataframe.StreamingDataFrame>`, one
         for train, one for test.
@@ -540,10 +544,15 @@ def train_test_apart_stratify(
 
     split = {}
     for _, k in sorted_hist:
-        not_assigned = [c for c in ids[k] if c not in split]
+        indices = sorted(ids[k]) if sorted_indices else ids[k]
+        not_assigned, assigned = [], []
+        for c in indices:
+            if c in split:
+                assigned.append(c)
+            else:
+                not_assigned.append(c)
         if len(not_assigned) == 0:
             continue
-        assigned = [c for c in ids[k] if c in split]
         nb_test = sum(split[c] for c in assigned)
         expected = min(len(ids[k]), int(test_size * len(ids[k]) + 0.5)) - nb_test
         if force and expected == 0 and nb_test == 0:
