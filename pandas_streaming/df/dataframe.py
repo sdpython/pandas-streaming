@@ -23,8 +23,6 @@ class StreamingDataFrameSchemaError(Exception):
     Reveals an issue with inconsistant schemas.
     """
 
-    pass
-
 
 class StreamingDataFrame:
     """
@@ -273,9 +271,11 @@ class StreamingDataFrame:
                     **kwargs_create,
                 )
 
-            def fct1(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
+            def fct1(
+                st=st, args=args, chunksize=chunksize, kw=kwargs.copy()  # noqa: B008
+            ):
                 st.seek(0)
-                for r in pandas.read_json(
+                for r in pandas.read_json(  # noqa: UP028
                     st, *args, chunksize=chunksize, nrows=chunksize, lines=True, **kw
                 ):
                     yield r
@@ -293,8 +293,8 @@ class StreamingDataFrame:
                     **kwargs_create,
                 )
 
-            def fct2(args=args, chunksize=chunksize, kw=kwargs.copy()):
-                for r in pandas.read_json(
+            def fct2(args=args, chunksize=chunksize, kw=kwargs.copy()):  # noqa: B008
+                for r in pandas.read_json(  # noqa: UP028
                     *args, chunksize=chunksize, nrows=chunksize, **kw
                 ):
                     yield r
@@ -318,10 +318,10 @@ class StreamingDataFrame:
                 **kwargs_create,
             )
 
-        def fct3(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):
+        def fct3(st=st, args=args, chunksize=chunksize, kw=kwargs.copy()):  # noqa: B008
             if hasattr(st, "seek"):
                 st.seek(0)
-            for r in pandas.read_json(
+            for r in pandas.read_json(  # noqa: UP028
                 st, *args, chunksize=chunksize, nrows=chunksize, lines=True, **kw
             ):
                 yield r
@@ -438,7 +438,7 @@ class StreamingDataFrame:
             elif self.check_schema:
                 if list(it.columns) != sch[0]:  # pylint: disable=E1136
                     raise StreamingDataFrameSchemaError(  # pragma: no cover
-                        "Column names are different after row {0}\nFirst   chunk: {1}"
+                        "Column names are different after row {0}\nFirst   chunk: {1}"  # noqa: UP030
                         "\nCurrent chunk: {2}".format(rows, sch[0], list(it.columns))
                     )  # pylint: disable=E1136
                 if list(it.dtypes) != sch[1]:  # pylint: disable=E1136
@@ -454,7 +454,7 @@ class StreamingDataFrame:
                     errdf = errdf[errdf["diff"]]
                     errdf.to_csv(tdf, sep=",", index=False)
                     raise StreamingDataFrameSchemaError(
-                        "Column types are different after row {0}. You may use option "
+                        "Column types are different after row {0}. You may use option "  # noqa: UP030
                         'dtype={{"column_name": str}} to force the type on this column.'
                         "\n---\n{1}".format(rows, tdf.getvalue())
                     )
@@ -502,9 +502,7 @@ class StreamingDataFrame:
             st = StringIO()
             close = False
         elif isinstance(path_or_buf, str):
-            st = open(  # pylint: disable=R1732
-                path_or_buf, "w", encoding=kwargs.get("encoding")
-            )
+            st = open(path_or_buf, "w", encoding=kwargs.get("encoding"))  # noqa: SIM115
             close = True
         else:
             st = path_or_buf
@@ -537,7 +535,7 @@ class StreamingDataFrame:
         See :epkg:`pandas:DataFrame:iterrows`.
         """
         for df in self:
-            for it in df.iterrows():
+            for it in df.iterrows():  # noqa: UP028
                 yield it
 
     def head(self, n=5) -> pandas.DataFrame:
@@ -579,7 +577,8 @@ class StreamingDataFrame:
         """
         kwargs["inplace"] = False
         return StreamingDataFrame(
-            lambda: map(lambda df: df.where(*args, **kwargs), self), **self.get_kwargs()
+            lambda: map(lambda df: df.where(*args, **kwargs), self),  # noqa: C417
+            **self.get_kwargs(),
         )
 
     def sample(self, reservoir=False, cache=False, **kwargs) -> "StreamingDataFrame":
@@ -608,7 +607,7 @@ class StreamingDataFrame:
             df = sdf.to_df()
             return StreamingDataFrame.read_df(df, chunksize=df.shape[0])
         return StreamingDataFrame(
-            lambda: map(lambda df: df.sample(**kwargs), self),
+            lambda: map(lambda df: df.sample(**kwargs), self),  # noqa: C417
             **self.get_kwargs(),
             stable=False,
         )
@@ -684,7 +683,7 @@ class StreamingDataFrame:
         if inplace:
             raise NotImplementedError(f"drop is not implemented for inplace={inplace}.")
         return StreamingDataFrame(
-            lambda: map(
+            lambda: map(  # noqa: C417
                 lambda df: df.drop(
                     labels,
                     axis=axis,
@@ -706,7 +705,8 @@ class StreamingDataFrame:
         <pandas_streaming.df.dataframe.StreamingDataFrame>`.
         """
         return StreamingDataFrame(
-            lambda: map(lambda df: df.apply(*args, **kwargs), self), **self.get_kwargs()
+            lambda: map(lambda df: df.apply(*args, **kwargs), self),  # noqa: C417
+            **self.get_kwargs(),
         )
 
     def applymap(self, *args, **kwargs) -> "StreamingDataFrame":
@@ -716,7 +716,7 @@ class StreamingDataFrame:
         <pandas_streaming.df.dataframe.StreamingDataFrame>`.
         """
         return StreamingDataFrame(
-            lambda: map(lambda df: df.applymap(*args, **kwargs), self),
+            lambda: map(lambda df: df.applymap(*args, **kwargs), self),  # noqa: C417
             **self.get_kwargs(),
         )
 
@@ -773,7 +773,7 @@ class StreamingDataFrame:
             others = [others]
 
         def iterateh(self, others):
-            cols = tuple([self] + others)
+            cols = (self, *others)
             for dfs in zip(*cols):
                 nrows = [_.shape[0] for _ in dfs]
                 if min(nrows) != max(nrows):
@@ -1382,7 +1382,7 @@ class StreamingSeries(StreamingDataFrame):
         )
         if len(self.columns) != 1:
             raise RuntimeError(  # pragma: no cover
-                f"A series can contain only one column not " f"{len(self.columns)!r}."
+                f"A series can contain only one column not {len(self.columns)!r}."
             )
 
     def apply(self, *args, **kwargs) -> "StreamingDataFrame":
@@ -1391,7 +1391,8 @@ class StreamingSeries(StreamingDataFrame):
         This function returns a @see cl StreamingSeries.
         """
         return StreamingSeries(
-            lambda: map(lambda df: df.apply(*args, **kwargs), self), **self.get_kwargs()
+            lambda: map(lambda df: df.apply(*args, **kwargs), self),  # noqa: C417
+            **self.get_kwargs(),
         )
 
     def __add__(self, value):

@@ -176,7 +176,7 @@ class TestConnexSplit(ExtTestCase):
                 for k, v in sorted(stats[0].items()):
                     rows.append(f"{k}={v}")
                 raise AssertionError(
-                    "Non empty intersection {0} & {1}\n{2}\n{3}\n{4}".format(
+                    "Non empty intersection {0} & {1}\n{2}\n{3}\n{4}".format(  # noqa: UP030
                         s1, s2, train, test, "\n".join(rows)
                     )
                 )
@@ -212,7 +212,7 @@ class TestConnexSplit(ExtTestCase):
                 for k, v in sorted(stats[0].items()):
                     rows.append(f"{k}={v}")
                 raise AssertionError(
-                    "Non empty intersection {0} & {1}\n{2}\n{3}\n{4}".format(
+                    "Non empty intersection {0} & {1}\n{2}\n{3}\n{4}".format(  # noqa: UP030
                         s1, s2, train, test, "\n".join(rows)
                     )
                 )
