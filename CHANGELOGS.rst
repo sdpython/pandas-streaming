@@ -5,6 +5,7 @@ Change Logs
 0.5.0
 +++++
 
+* :pr:`43`: improves reproducibility of function train_test_apart_stratify
 * :pr:`33`: removes pyquickhelper dependency
 * :pr:`30`: fix compatiblity with pandas 2.0
 
