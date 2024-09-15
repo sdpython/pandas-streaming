@@ -64,3 +64,9 @@ and implements other functionalities for machine learning.
     license
 
 Source are available at `sdpython/pandas_streaming <https://github.com/sdpython/pandas_streaming/>`_.
+
+Older versions
+++++++++++++++
+
+* `0.5.1 <../v0.5.1/index.html>`_
+* `0.5.0 <../v0.5.0/index.html>`_
