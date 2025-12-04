@@ -5,6 +5,8 @@ Change Logs
 0.5.2
 +++++
 
+* :pr:`46`: update to CI to newer versions
+
 0.5.1
 +++++
 
