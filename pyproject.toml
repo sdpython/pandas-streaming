@@ -1,3 +1,39 @@
+[project]
+authors = [{name="Xavier Dupré", email="xavier.dupre@gmail.com"}]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: C",
+    "Programming Language :: Python",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering",
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = ["pandas"]
+description = "Streaming DataFrame: streaming over pandas."
+keywords = ["pandas", "streaming"]
+license = {file = "LICENSE.txt"}
+name = "pandas-streaming"
+readme = "README.rst"
+requires-python = ">=3.10"
+version = "0.5.2"
+
+[project.urls]
+homepage = "https://sdpython.github.io/doc/pandas-streaming/dev/"
+documentation = "https://sdpython.github.io/doc/pandas-streaming/dev/"
+repository = "https://github.com/sdpython/pandas-streaming/"
+changelog = "https://sdpython.github.io/doc/pandas-streaming/dev/CHANGELOGS.html"
+
 [tool.ruff]
 
 # Exclude a variety of commonly ignored directories.
@@ -38,7 +74,13 @@ select = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"**" = ["B905", "C401", "C408", "C413", "RUF012", "RUF100", "RUF010", "SIM108", "SIM910", "SIM110", "SIM102", "SIM114", "SIM103", "UP015", "UP027", "UP031", "UP034", "UP032", "UP006", "UP035", "UP007", "UP038"]
+"**" = [
+    "B905",
+    "C401", "C408", "C413",
+    "RUF012", "RUF100", "RUF010", "RUF051",
+    "SIM108", "SIM910", "SIM110", "SIM102", "SIM114", "SIM103",
+    "UP015", "UP027", "UP031", "UP034", "UP032", "UP045", "UP006", "UP035", "UP007", "UP038"
+]
 "**/plot*.py" = ["B018"]
 "_doc/examples/**.py" = ["E402", "F811", "B018"]
 "_unittests/ut_df/test_dataframe_io_helpers.py" = ["E501"]

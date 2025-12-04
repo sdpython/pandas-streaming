@@ -59,7 +59,7 @@ html_static_path = ["_static"]
 issues_github_path = "sdpython/pandas-streaming"
 
 # The following is used by sphinx.ext.linkcode to provide links to github
-linkcode_resolve = make_linkcode_resolve(
+_linkcode_resolve = make_linkcode_resolve(
     "pandas_streaming",
     (
         "https://github.com/sdpython/pandas-streaming/"
@@ -67,6 +67,11 @@ linkcode_resolve = make_linkcode_resolve(
         "{path}#L{lineno}"
     ),
 )
+
+
+def linkcode_resolve(domain, info):
+    return _linkcode_resolve(domain, info)
+
 
 latex_elements = {
     "papersize": "a4",
