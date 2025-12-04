@@ -301,7 +301,7 @@ class TestStreamingDataFrame(ExtTestCase):
         sdf20 = dummy_streaming_dataframe(20)
         sdf30 = dummy_streaming_dataframe(30)
         # itself
-        hows = "inner left right outer".split()
+        hows = ["inner", "left", "right", "outer"]
         for how in hows:
             compares(sdf20, sdf20, how)
             compares(sdf20, sdf20, how)
