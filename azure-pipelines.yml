@@ -5,7 +5,7 @@ jobs:
   strategy:
     matrix:
       Python311-Linux:
-        python.version: '3.11'
+        python.version: '3.12'
     maxParallel: 3
 
   steps:
@@ -49,7 +49,7 @@ jobs:
   strategy:
     matrix:
       Python311-Linux:
-        python.version: '3.11'
+        python.version: '3.12'
     maxParallel: 3
 
   steps:
@@ -91,7 +91,7 @@ jobs:
   strategy:
     matrix:
       Python311-Linux:
-        python.version: '3.11'
+        python.version: '3.12'
     maxParallel: 3
 
   steps:
@@ -139,7 +139,7 @@ jobs:
   strategy:
     matrix:
       Python311-Windows:
-        python.version: '3.11'
+        python.version: '3.12'
     maxParallel: 3
 
   steps:
@@ -170,7 +170,7 @@ jobs:
   strategy:
     matrix:
       Python311-Mac:
-        python.version: '3.11'
+        python.version: '3.12'
     maxParallel: 3
 
   steps:

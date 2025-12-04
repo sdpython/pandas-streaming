@@ -40,7 +40,7 @@ with open(os.path.join(here, "pandas_streaming/__init__.py"), "r") as f:
 setup(
     name="pandas-streaming",
     version=version_str,
-    description="Array (and numpy) API for ONNX",
+    description="Streaming DataFrame: streaming over pandas",
     long_description=long_description,
     author="Xavier Dupré",
     author_email="xavier.dupre@gmail.com",
