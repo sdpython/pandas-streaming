@@ -12,7 +12,6 @@ import glob
 from pandas import DataFrame
 from pandas_streaming.df import StreamingDataFrame
 
-
 df = DataFrame(data=dict(X=[4.5, 6, 7], Y=["a", "b", "c"]))
 df
 
